@@ -13,6 +13,10 @@ config_version=4
 config/name="webRPG"
 config/icon="res://icon.png"
 
+[autoload]
+
+GameEvents="*res://Scripts/Singletons/GameEvents.gd"
+
 [gui]
 
 common/drop_mouse_on_gui_input_disabled=true

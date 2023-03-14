@@ -1,0 +1,21 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://Scripts/Generators/TerrainGenerator.gd" type="Script" id=1]
+[ext_resource path="res://Materials/Grass.tres" type="Material" id=2]
+[ext_resource path="res://assets/simple_fpsplayer/Player.tscn" type="PackedScene" id=3]
+
+[sub_resource type="Environment" id=1]
+fog_enabled = true
+
+[node name="World" type="Spatial"]
+script = ExtResource( 1 )
+material = ExtResource( 2 )
+
+[node name="Player" parent="." instance=ExtResource( 3 )]
+transform = Transform( 1, 0, 0, 0, 0.910149, 0.41428, 0, -0.41428, 0.910149, 42.397, 37.0251, 29.6386 )
+
+[node name="DirectionalLight" type="DirectionalLight" parent="."]
+transform = Transform( 1, 0, 0, 0, 0.753081, 0.657928, 0, -0.657928, 0.753081, 0, 2.64305, 0 )
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource( 1 )
