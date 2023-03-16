@@ -4,25 +4,37 @@ extends Spatial
 var mesh_inst_scene = preload("res://Scenes/WorldChunk.tscn")
 var tree_spawner_scene = preload("res://Scenes/TreeSpawner.tscn")
 
+const OCEAN_LEVEL = 55
 
 export (int) var chunk_count_x = 10
 export (int) var chunk_count_y = 10
 export (Vector2) var chunk_size = Vector2(500, 500)
-export (Vector2) var chunk_divisions = Vector2(50, 50)
-export (Vector2) var low_lod_chunk_divisions = Vector2(10, 10)
+export (Vector2) var chunk_divisions = Vector2(30, 30)
+export (Vector2) var low_lod_chunk_divisions = Vector2(5, 5)
 export (SpatialMaterial) var material
 
-export (float) var hill_multiplyer = 100
+export (float) var hill_multiplyer = 20.0
+export (float) var hill_exponent = 2
+export (float) var hill_exponent_fudge = 1.8
 
 onready var player: KinematicBody = get_node("Player")
 
+var hill_noise := OpenSimplexNoise.new()
+var ocean_noise := OpenSimplexNoise.new()
+	
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	var hill_noise := OpenSimplexNoise.new()
+	get_node("Ocean").global_transform.origin.y = OCEAN_LEVEL
+
 	hill_noise.seed = randi()
-	hill_noise.octaves = 4
-	hill_noise.period = 800.0
-	hill_noise.persistence = 0.8
+	hill_noise.octaves = 6
+	hill_noise.period = 1800.0
+	hill_noise.persistence = 0.5
+	
+	ocean_noise.seed = randi()
+	ocean_noise.octaves = 4
+	ocean_noise.period = 3000.0
+	ocean_noise.persistence = 0.8
 
 	var biome_noise := OpenSimplexNoise.new()
 	biome_noise.seed = randi()
@@ -59,7 +71,6 @@ func _ready():
 
 			# place some trees
 			if biome_noise.get_noise_3d(x, 0, y) > 0:
-				print("things")
 				var tree_spawner = tree_spawner_scene.instance()
 				add_child(tree_spawner)
 				tree_spawner.global_transform.origin.x = x * chunk_size.x
@@ -87,16 +98,60 @@ func apply_heights_to_mesh(
 		var _a = dt.create_from_surface(array_mesh, 0)
 		for i in range(dt.get_vertex_count()):
 			var vertex = dt.get_vertex(i)
-			vertex.y = noise.get_noise_3d(
-				vertex.x + offset_x * chunk_size.x, 
-				0, 
-				vertex.z + offset_y * chunk_size.y) * multiplyer
+			var height = get_reshaped_elevation(
+				vertex.x + offset_x * chunk_size.x,
+				vertex.z + offset_y * chunk_size.y
+			)
+			
+			vertex.y = height
 				
 			dt.set_vertex(i, vertex)
 		var terrain_mesh := ArrayMesh.new()
 		var _b = dt.commit_to_surface(terrain_mesh)
 		return terrain_mesh
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
+func normalize_to_zero_one_range(num: float):
+	var max_num = 1
+	var min_num = -1
+	return (num - min_num) / (max_num - min_num)
+	
+func get_raw_land_height(x: float, y: float):
+	var val = hill_noise.get_noise_3d(x, 0, y)
+	return normalize_to_zero_one_range(val)
+	
+func get_raw_ocean_height(x: float, y: float):
+	var val = ocean_noise.get_noise_3d(x, 0, y)
+	return normalize_to_zero_one_range(val)
+	
+func get_modified_land_height(x: float, y: float):
+	var initial_height = get_raw_land_height(x, y)
+	return modify_land_height(initial_height)
+
+func modify_land_height(h: float):
+	return pow(h * hill_multiplyer * hill_exponent_fudge, hill_exponent)
+
+func euclidean_squared_distance(x: float, y: float) -> float:
+	# gets the euclidean squared distance from the vertex to the map border
+	var width = chunk_count_x * chunk_size.x
+	var height = chunk_count_y * chunk_size.y
+	
+	var nx = 2 * x/width - 1
+	var ny = 2 * y/height - 1
+	
+	var distance = min(1, (pow(nx, 2) + pow(ny, 2)) / sqrt(2))
+
+	return distance
+
+func get_reshaped_elevation(x: float, y: float) -> float:
+	var distance = euclidean_squared_distance(x, y)
+	var elevation = get_raw_land_height(x, y)
+	var ocean_elevation = elevation + (1-distance) / 2
+	#var elevation = get_ocean_height(x, y)
+
+	if distance > 0.4 and ocean_elevation < elevation:
+		return -200.0
+	#	elevation = water_level
+	#new_elevation = get_modified_land_height(x, y)
+	
+	return modify_land_height(elevation)
+	

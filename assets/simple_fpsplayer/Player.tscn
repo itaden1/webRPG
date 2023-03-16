@@ -27,9 +27,9 @@ far = 5000.0
 [node name="Flashlight" type="SpotLight" parent="rotation_helper"]
 transform = Transform( -1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0 )
 visible = false
-light_energy = 3.0
+light_energy = 6.0
 light_bake_mode = 0
-spot_range = 20.0
+spot_range = 189.971
 spot_angle = 16.079
 
 [node name="playerfeet" type="RayCast" parent="."]
