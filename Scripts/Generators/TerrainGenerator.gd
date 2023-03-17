@@ -20,26 +20,15 @@ export (float) var hill_exponent_fudge = 1.8
 onready var player: KinematicBody = get_node("Player")
 
 var hill_noise := OpenSimplexNoise.new()
-var ocean_noise := OpenSimplexNoise.new()
-var mountain_noise := OpenSimplexNoise.new()
+
 	
 # Called when the node enters the scene tree for the first time.
 func _ready():
-
-	mountain_noise.seed = randi()
-	mountain_noise.octaves = 6
-	mountain_noise.period = 35.0
-	mountain_noise.persistence = 0.5
 
 	hill_noise.seed = randi()
 	hill_noise.octaves = 6
 	hill_noise.period = 3000.0
 	hill_noise.persistence = 0.5
-	
-	ocean_noise.seed = randi()
-	ocean_noise.octaves = 4
-	ocean_noise.period = 3000.0
-	ocean_noise.persistence = 0.8
 
 	var biome_noise := OpenSimplexNoise.new()
 	biome_noise.seed = randi()
@@ -124,10 +113,6 @@ func get_raw_land_height(x: float, y: float):
 	var val = hill_noise.get_noise_3d(x, 0, y)
 	return normalize_to_zero_one_range(val)
 	
-func get_raw_ocean_height(x: float, y: float):
-	var val = ocean_noise.get_noise_3d(x, 0, y)
-	return normalize_to_zero_one_range(val)
-	
 func get_modified_land_height(x: float, y: float):
 	var initial_height = get_raw_land_height(x, y)
 	return modify_land_height(initial_height)
@@ -154,8 +139,6 @@ func get_reshaped_elevation(x: float, y: float) -> float:
 	if elevation > OCEAN_LEVEL:
 		#modify the exponent to have flatter lands above ocean level
 		var e = elevation - OCEAN_LEVEL
-		if elevation > 0.9:
-			e = e + mountain_noise.get_noise_3d(x, 0, y)
 
 		return pow(e * 25 * 1.6, 3) + modify_land_height(OCEAN_LEVEL + 0.001)
 
