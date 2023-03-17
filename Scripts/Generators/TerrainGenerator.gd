@@ -68,8 +68,8 @@ func _ready():
 			var ocean_line = modify_land_height(OCEAN_LEVEL + 0.001)
 			for i in range(3):
 				for l in range(3):
-					var position_x : float = x * chunk_size.x + i * rand_range(50, tree_spacing-50)
-					var position_y : float = y * chunk_size.y + l * rand_range(50, tree_spacing-50)
+					var position_x : float = x * chunk_size.x + i * rand_range(0, tree_spacing-50)
+					var position_y : float = y * chunk_size.y + l * rand_range(0, tree_spacing-50)
 					if biome_noise.get_noise_3d(position_x, 0, position_y) > 0.0:
 
 						var e = get_reshaped_elevation(position_x, position_y)
