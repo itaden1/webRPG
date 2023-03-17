@@ -28,13 +28,13 @@ func _ready():
 	RNG.randomize()
 	hill_noise.seed = RNG.randi()
 	hill_noise.octaves = 6
-	hill_noise.period = 2900.0
+	hill_noise.period = 3100.0
 	hill_noise.persistence = 0.5
 
 	var biome_noise := OpenSimplexNoise.new()
 	biome_noise.seed = randi()
 	biome_noise.octaves = 4
-	biome_noise.period = 1800.0
+	biome_noise.period = 500.0
 	biome_noise.persistence = 0.8
 	
 	for x in chunk_count_x:
@@ -50,8 +50,8 @@ func _ready():
 			lod_mesh.size = chunk_size
 				
 			var mesh_inst = mesh_inst_scene.instance()
-			mesh_inst.lod_1_mesh = apply_heights_to_mesh(hill_noise, plane_mesh, x, y, hill_multiplyer)
-			mesh_inst.lod_2_mesh = apply_heights_to_mesh(hill_noise, lod_mesh, x, y, hill_multiplyer)
+			mesh_inst.lod_1_mesh = apply_heights_to_mesh(plane_mesh, x, y, hill_multiplyer)
+			mesh_inst.lod_2_mesh = apply_heights_to_mesh(lod_mesh, x, y, hill_multiplyer)
 			mesh_inst.player = player
 
 			add_child(mesh_inst)
@@ -63,24 +63,28 @@ func _ready():
 			mesh_inst.material_override = material
 
 			# place some trees
-			var tree_spacing := 27
-			for i in range(10):
-				for l in range(10):
-					if biome_noise.get_noise_3d(x * chunk_size.x + i * tree_spacing, 0, y * chunk_size.y + l * tree_spacing) > 0.2:
-						var e = get_reshaped_elevation(x * chunk_size.x + i * tree_spacing, y * chunk_size.y + l * tree_spacing)
-						if e > modify_land_height(OCEAN_LEVEL + 0.001) and e < modify_land_height(TREE_LINE) :
+			var tree_spacing := 200.0
+			var tree_line = modify_land_height(TREE_LINE)
+			var ocean_line = modify_land_height(OCEAN_LEVEL + 0.001)
+			for i in range(3):
+				for l in range(3):
+					var position_x : float = x * chunk_size.x + i * rand_range(50, tree_spacing-50)
+					var position_y : float = y * chunk_size.y + l * rand_range(50, tree_spacing-50)
+					if biome_noise.get_noise_3d(position_x, 0, position_y) > 0.0:
+
+						var e = get_reshaped_elevation(position_x, position_y)
+						if e > ocean_line and e < tree_line:
 							var tree_spawner = tree_spawner_scene.instance()
 							add_child(tree_spawner)
-							tree_spawner.global_transform.origin.x = x * chunk_size.x + i * tree_spacing
-							tree_spawner.global_transform.origin.z = y * chunk_size.y + l * tree_spacing
+							tree_spawner.global_transform.origin.x = position_x
+							tree_spawner.global_transform.origin.z = position_y
 							tree_spawner.global_transform.origin.y = e
 
 	
 	GameEvents.emit_signal("terrain_generation_complete")
-	get_node("Ocean").global_transform.origin.y = modify_land_height(OCEAN_LEVEL)
+	get_node("Ocean").global_transform.origin.y = modify_land_height(OCEAN_LEVEL) -20
 
 func apply_heights_to_mesh(
-	noise: OpenSimplexNoise, 
 	mesh: PlaneMesh, 
 	offset_x: int, 
 	offset_y: int,
@@ -143,7 +147,7 @@ func get_reshaped_elevation(x: float, y: float) -> float:
 		#modify the exponent to have flatter lands above ocean level
 		var e = elevation - OCEAN_LEVEL
 
-		return pow(e * 25 * 1.2, 3) + modify_land_height(OCEAN_LEVEL + 0.001)
+		return pow(e * 25 * 1.2, 3) + modify_land_height(OCEAN_LEVEL) + 1
 	
 	return modify_land_height(elevation)
 	

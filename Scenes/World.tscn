@@ -14,6 +14,8 @@ fog_depth_end = 0.0
 
 [sub_resource type="PlaneMesh" id=2]
 size = Vector2( 20000, 20000 )
+subdivide_width = 100
+subdivide_depth = 100
 
 [sub_resource type="SpatialMaterial" id=3]
 albedo_color = Color( 0, 0.505882, 1, 1 )
