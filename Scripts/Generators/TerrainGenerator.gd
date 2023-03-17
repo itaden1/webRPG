@@ -5,6 +5,7 @@ var mesh_inst_scene = preload("res://Scenes/WorldChunk.tscn")
 var tree_spawner_scene = preload("res://Scenes/TreeSpawner.tscn")
 
 const OCEAN_LEVEL = 0.35
+const TREE_LINE = 0.45
 
 export (int) var chunk_count_x = 20
 export (int) var chunk_count_y = 20
@@ -20,14 +21,14 @@ export (float) var hill_exponent_fudge = 1.8
 onready var player: KinematicBody = get_node("Player")
 
 var hill_noise := OpenSimplexNoise.new()
-
+var RNG := RandomNumberGenerator.new()
 	
 # Called when the node enters the scene tree for the first time.
 func _ready():
-
-	hill_noise.seed = randi()
+	RNG.randomize()
+	hill_noise.seed = RNG.randi()
 	hill_noise.octaves = 6
-	hill_noise.period = 3000.0
+	hill_noise.period = 2900.0
 	hill_noise.persistence = 0.5
 
 	var biome_noise := OpenSimplexNoise.new()
@@ -61,17 +62,19 @@ func _ready():
 			)
 			mesh_inst.material_override = material
 
-
-
 			# place some trees
-			if biome_noise.get_noise_3d(x, 0, y) > 0:
-				var tree_spawner = tree_spawner_scene.instance()
-				add_child(tree_spawner)
-				tree_spawner.global_transform.origin.x = x * chunk_size.x
-				tree_spawner.global_transform.origin.z = y * chunk_size.y
-				tree_spawner.global_transform.origin.y = hill_noise.get_noise_3d(
-					x * chunk_size.x, 0, y * chunk_size.y
-				) * hill_multiplyer
+			var tree_spacing := 27
+			for i in range(10):
+				for l in range(10):
+					if biome_noise.get_noise_3d(x * chunk_size.x + i * tree_spacing, 0, y * chunk_size.y + l * tree_spacing) > 0.2:
+						var e = get_reshaped_elevation(x * chunk_size.x + i * tree_spacing, y * chunk_size.y + l * tree_spacing)
+						if e > modify_land_height(OCEAN_LEVEL + 0.001) and e < modify_land_height(TREE_LINE) :
+							var tree_spawner = tree_spawner_scene.instance()
+							add_child(tree_spawner)
+							tree_spawner.global_transform.origin.x = x * chunk_size.x + i * tree_spacing
+							tree_spawner.global_transform.origin.z = y * chunk_size.y + l * tree_spacing
+							tree_spawner.global_transform.origin.y = e
+
 	
 	GameEvents.emit_signal("terrain_generation_complete")
 	get_node("Ocean").global_transform.origin.y = modify_land_height(OCEAN_LEVEL)
@@ -140,12 +143,7 @@ func get_reshaped_elevation(x: float, y: float) -> float:
 		#modify the exponent to have flatter lands above ocean level
 		var e = elevation - OCEAN_LEVEL
 
-		return pow(e * 25 * 1.6, 3) + modify_land_height(OCEAN_LEVEL + 0.001)
-
-	#if distance < 0.7:
-		
-	#var elevation = get_ocean_height(x, y)
-
+		return pow(e * 25 * 1.2, 3) + modify_land_height(OCEAN_LEVEL + 0.001)
 	
 	return modify_land_height(elevation)
 	
