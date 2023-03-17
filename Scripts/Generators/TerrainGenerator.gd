@@ -6,8 +6,8 @@ var tree_spawner_scene = preload("res://Scenes/TreeSpawner.tscn")
 
 const OCEAN_LEVEL = 0.35
 
-export (int) var chunk_count_x = 15
-export (int) var chunk_count_y = 15
+export (int) var chunk_count_x = 20
+export (int) var chunk_count_y = 20
 export (Vector2) var chunk_size = Vector2(500, 500)
 export (Vector2) var chunk_divisions = Vector2(30, 30)
 export (Vector2) var low_lod_chunk_divisions = Vector2(5, 5)
@@ -21,14 +21,19 @@ onready var player: KinematicBody = get_node("Player")
 
 var hill_noise := OpenSimplexNoise.new()
 var ocean_noise := OpenSimplexNoise.new()
+var mountain_noise := OpenSimplexNoise.new()
 	
 # Called when the node enters the scene tree for the first time.
 func _ready():
 
+	mountain_noise.seed = randi()
+	mountain_noise.octaves = 6
+	mountain_noise.period = 35.0
+	mountain_noise.persistence = 0.5
 
 	hill_noise.seed = randi()
 	hill_noise.octaves = 6
-	hill_noise.period = 3500.0
+	hill_noise.period = 3000.0
 	hill_noise.persistence = 0.5
 	
 	ocean_noise.seed = randi()
@@ -149,8 +154,11 @@ func get_reshaped_elevation(x: float, y: float) -> float:
 	if elevation > OCEAN_LEVEL:
 		#modify the exponent to have flatter lands above ocean level
 		var e = elevation - OCEAN_LEVEL
-		#return modify_land_height(e) + modify_land_height(OCEAN_LEVEL + 0.001)
+		if elevation > 0.9:
+			e = e + mountain_noise.get_noise_3d(x, 0, y)
+
 		return pow(e * 25 * 1.6, 3) + modify_land_height(OCEAN_LEVEL + 0.001)
+
 	#if distance < 0.7:
 		
 	#var elevation = get_ocean_height(x, y)
