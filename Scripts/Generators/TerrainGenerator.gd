@@ -4,17 +4,17 @@ extends Spatial
 var mesh_inst_scene = preload("res://Scenes/WorldChunk.tscn")
 var tree_spawner_scene = preload("res://Scenes/TreeSpawner.tscn")
 
-const OCEAN_LEVEL = 55
+const OCEAN_LEVEL = 0.35
 
-export (int) var chunk_count_x = 10
-export (int) var chunk_count_y = 10
+export (int) var chunk_count_x = 15
+export (int) var chunk_count_y = 15
 export (Vector2) var chunk_size = Vector2(500, 500)
 export (Vector2) var chunk_divisions = Vector2(30, 30)
 export (Vector2) var low_lod_chunk_divisions = Vector2(5, 5)
 export (SpatialMaterial) var material
 
 export (float) var hill_multiplyer = 20.0
-export (float) var hill_exponent = 2
+export (float) var hill_exponent = 3
 export (float) var hill_exponent_fudge = 1.8
 
 onready var player: KinematicBody = get_node("Player")
@@ -24,11 +24,11 @@ var ocean_noise := OpenSimplexNoise.new()
 	
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	get_node("Ocean").global_transform.origin.y = OCEAN_LEVEL
+
 
 	hill_noise.seed = randi()
 	hill_noise.octaves = 6
-	hill_noise.period = 1800.0
+	hill_noise.period = 3500.0
 	hill_noise.persistence = 0.5
 	
 	ocean_noise.seed = randi()
@@ -80,7 +80,7 @@ func _ready():
 				) * hill_multiplyer
 	
 	GameEvents.emit_signal("terrain_generation_complete")
-
+	get_node("Ocean").global_transform.origin.y = modify_land_height(OCEAN_LEVEL)
 
 func apply_heights_to_mesh(
 	noise: OpenSimplexNoise, 
@@ -145,13 +145,16 @@ func euclidean_squared_distance(x: float, y: float) -> float:
 func get_reshaped_elevation(x: float, y: float) -> float:
 	var distance = euclidean_squared_distance(x, y)
 	var elevation = get_raw_land_height(x, y)
-	var ocean_elevation = elevation + (1-distance) / 2
+	elevation = elevation + (0-distance) / 2
+	if elevation > OCEAN_LEVEL:
+		#modify the exponent to have flatter lands above ocean level
+		var e = elevation - OCEAN_LEVEL
+		#return modify_land_height(e) + modify_land_height(OCEAN_LEVEL + 0.001)
+		return pow(e * 25 * 1.6, 3) + modify_land_height(OCEAN_LEVEL + 0.001)
+	#if distance < 0.7:
+		
 	#var elevation = get_ocean_height(x, y)
 
-	if distance > 0.4 and ocean_elevation < elevation:
-		return -200.0
-	#	elevation = water_level
-	#new_elevation = get_modified_land_height(x, y)
 	
 	return modify_land_height(elevation)
 	
