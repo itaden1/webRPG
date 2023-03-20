@@ -2,7 +2,7 @@ extends Spatial
 
 
 var mesh_inst_scene = preload("res://Scenes/WorldChunk.tscn")
-var tree_spawner_scene = preload("res://Scenes/TreeSpawner.tscn")
+var tree_scene = preload("res://Scenes/Tree01.tscn")
 
 const OCEAN_LEVEL = 0.35
 const TREE_LINE = 0.45
@@ -21,18 +21,24 @@ export (float) var hill_exponent_fudge = 1.8
 onready var player: KinematicBody = get_node("Player")
 
 var hill_noise := OpenSimplexNoise.new()
-var RNG := RandomNumberGenerator.new()
+
+var generation_thread: Thread
+
+var instanced_tiles = {}
+
+func generation_thread_method():
 	
-# Called when the node enters the scene tree for the first time.
+	pass
+	
 func _ready():
-	RNG.randomize()
-	hill_noise.seed = RNG.randi()
+
+	hill_noise.seed = Rng.get_random_int()
 	hill_noise.octaves = 6
 	hill_noise.period = 3100.0
 	hill_noise.persistence = 0.5
 
 	var biome_noise := OpenSimplexNoise.new()
-	biome_noise.seed = randi()
+	biome_noise.seed = Rng.get_random_int()
 	biome_noise.octaves = 4
 	biome_noise.period = 500.0
 	biome_noise.persistence = 0.8
@@ -63,22 +69,23 @@ func _ready():
 			mesh_inst.material_override = material
 
 			# place some trees
-			var tree_spacing := 200.0
+			var tree_spacing := 130.0
 			var tree_line = modify_land_height(TREE_LINE)
 			var ocean_line = modify_land_height(OCEAN_LEVEL + 0.001)
-			for i in range(3):
-				for l in range(3):
-					var position_x : float = x * chunk_size.x + i * rand_range(0, tree_spacing-50)
-					var position_y : float = y * chunk_size.y + l * rand_range(0, tree_spacing-50)
+			for i in range(4):
+				for l in range(4):
+					# TODO use the rng singleton and seed to reproduce results
+					var position_x : float = x * chunk_size.x + i * rand_range(tree_spacing-20, tree_spacing+20)
+					var position_y : float = y * chunk_size.y + l * rand_range(tree_spacing-20, tree_spacing+20)
 					if biome_noise.get_noise_3d(position_x, 0, position_y) > 0.0:
 
 						var e = get_reshaped_elevation(position_x, position_y)
 						if e > ocean_line and e < tree_line:
-							var tree_spawner = tree_spawner_scene.instance()
-							add_child(tree_spawner)
-							tree_spawner.global_transform.origin.x = position_x
-							tree_spawner.global_transform.origin.z = position_y
-							tree_spawner.global_transform.origin.y = e
+							var tree = tree_scene.instance()
+							add_child(tree)
+							tree.global_transform.origin.x = position_x
+							tree.global_transform.origin.z = position_y
+							tree.global_transform.origin.y = e
 
 	
 	GameEvents.emit_signal("terrain_generation_complete")
