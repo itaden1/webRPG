@@ -2,10 +2,43 @@ extends Spatial
 
 
 var mesh_inst_scene = preload("res://Scenes/WorldChunk.tscn")
-var tree_scene = preload("res://Scenes/Tree01.tscn")
+
+enum biomes {
+	TEMPERATE_DECIDUOUS_FOREST,
+	SNOW,
+	GRASSLAND
+}
+
+var biome_objects = {
+	biomes.GRASSLAND : {
+		objects = [
+			{		
+				obj=preload("res://Scenes/GrassBushFall.tscn"),
+				chance=3
+			}
+		]
+	},
+	biomes.TEMPERATE_DECIDUOUS_FOREST : {
+		objects = [
+			{		
+				obj=preload("res://Scenes/Tree01summer.tscn"),
+				chance=9
+			}
+		]
+	},
+	biomes.SNOW : {
+		objects = [
+			{		
+				obj=preload("res://Scenes/Tree08winter.tscn"),
+				chance=6
+			}
+		]
+	},
+}
+
 
 const OCEAN_LEVEL = 0.25
-const TREE_LINE = 0.45
+const TREE_LINE = 0.6
 
 export (Vector2) var chunks_to_render = Vector2(3, 3)
 export (float) var chunk_load_time = 1.2
@@ -58,10 +91,7 @@ func render_world_chunks(start_pos: Vector2):
 	var start_y = start_pos.y - chunks_to_render.y * chunk_size.y
 	var end_y = start_pos.y + (chunks_to_render.y + 1) * chunk_size.y
 	
-	var chunks_to_add := []
-	
 	for x in range(start_x, end_x, chunk_size.x):
-		print(x)
 		for y in range(start_y, end_y, chunk_size.y):
 			if instanced_chunks.has(Vector2(
 				x,
@@ -78,50 +108,54 @@ func render_world_chunks(start_pos: Vector2):
 			lod_mesh.subdivide_width = low_lod_chunk_divisions.x
 			lod_mesh.size = chunk_size
 				
-			var mesh_inst = mesh_inst_scene.instance()
+			var mesh_inst : MeshInstance = mesh_inst_scene.instance()
 			mesh_inst.lod_1_mesh = apply_heights_to_mesh(plane_mesh, x, y)
 			mesh_inst.lod_2_mesh = apply_heights_to_mesh(lod_mesh, x, y)
 			mesh_inst.player = player
 
-			mesh_inst.transform.origin = Vector3(
-				x, 
-				0, 
-				y
-			)
+			mesh_inst.transform.origin = Vector3(x, 0, y)
 			mesh_inst.material_override = material
-			instanced_chunks[Vector2(
-				x,
-				y
-			)] = mesh_inst
+			instanced_chunks[Vector2(x,y)] = mesh_inst
 			add_child(mesh_inst)
 
-			# place some trees
-			var tree_spacing := 160.0
-			var tree_line = modify_land_height(TREE_LINE)
-			var ocean_line = modify_land_height(OCEAN_LEVEL + 0.001)
-			for i in range(int(chunk_size.x / tree_spacing)):
-				for l in range(int(chunk_size.y / tree_spacing)):
-					# TODO use the rng singleton and seed to reproduce results
-					var position_x : float = x + i * rand_range(tree_spacing-20, tree_spacing+20)
-					var position_y : float = y + l * rand_range(tree_spacing-20, tree_spacing+20)
-					if biome_noise.get_noise_3d(position_x, 0, position_y) > 0.3:
-						var e = get_reshaped_elevation(position_x, position_y)
-						if e > ocean_line and e < tree_line:
-
-							var tree = tree_scene.instance()
-							mesh_inst.add_child(tree)
-							tree.global_transform.origin.x = position_x
-							tree.global_transform.origin.z = position_y
-							tree.global_transform.origin.y = e
+			call_deferred("place_trees", x, y, mesh_inst)
 
 
-			#chunks_to_add.append(mesh_inst)
-	call_deferred("add_chunks", chunks_to_add)
+func place_trees(x: int, y: int, mesh_inst: MeshInstance):
+	# place some trees
+	var tree_spacing := 160.0
+	var tree_line = modify_land_height(TREE_LINE)
+	var ocean_line = modify_land_height(OCEAN_LEVEL + 0.001)
+	for i in range(int(chunk_size.x / tree_spacing)):
+		for l in range(int(chunk_size.y / tree_spacing)):
+			# TODO use the rng singleton and seed to reproduce results
+			var position_x : float = x + i * Rng.get_random_range(tree_spacing-20, tree_spacing+20)
+			var position_y : float = y + l * Rng.get_random_range(tree_spacing-20, tree_spacing+20)
+			var biome_objects = get_objects_for_biome(position_x, position_y)
+			
+			var e = get_reshaped_elevation(position_x, position_y)
+			if e > ocean_line and e < tree_line:
+				var tree_scene = biome_objects.objects[0].obj
+				var tree = tree_scene.instance()
+				mesh_inst.add_child(tree)
+				tree.global_transform.origin.x = position_x
+				tree.global_transform.origin.z = position_y
+				tree.global_transform.origin.y = e
 
-func add_chunks(chunks: Array):
-	print("adding chunks to world")
-	for c in chunks:
-		add_child(c)
+func get_objects_for_biome(x: float, y: float):
+	var altitude = get_reshaped_elevation(x, y)
+	var moisture = normalize_to_zero_one_range(biome_noise.get_noise_3d(x, 0, y))
+
+	if altitude > 300: 
+		print("alt: ", altitude, " moist: ", moisture)
+		if moisture > 0.6: return biome_objects[biomes.SNOW]
+		else: return biome_objects[biomes.GRASSLAND]
+	elif altitude > 0:
+		print("alt: ", altitude, " moist: ", moisture)
+		if moisture > 0.6: return biome_objects[biomes.TEMPERATE_DECIDUOUS_FOREST]
+		else: return biome_objects[biomes.GRASSLAND]
+	
+
 
 func _ready():
 
