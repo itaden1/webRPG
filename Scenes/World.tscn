@@ -1,19 +1,19 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://Scripts/Generators/TerrainGenerator.gd" type="Script" id=1]
 [ext_resource path="res://Materials/Grass.tres" type="Material" id=2]
 [ext_resource path="res://assets/simple_fpsplayer/Player.tscn" type="PackedScene" id=3]
 
+[sub_resource type="ProceduralSky" id=4]
+
 [sub_resource type="Environment" id=1]
 background_mode = 1
+background_sky = SubResource( 4 )
 background_color = Color( 0.501961, 0.6, 0.701961, 1 )
 fog_enabled = true
 fog_color = Color( 0.501961, 0.6, 0.701961, 1 )
-fog_depth_begin = 30.0
-fog_depth_end = 0.0
 
 [sub_resource type="PlaneMesh" id=2]
-size = Vector2( 20000, 20000 )
 subdivide_width = 100
 subdivide_depth = 100
 

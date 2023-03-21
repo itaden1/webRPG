@@ -4,5 +4,5 @@
 
 [node name="MeshInstance" type="MeshInstance"]
 script = ExtResource( 1 )
-lod_1_dist = 3500.0
+lod_1_dist = 4500.0
 lod_2_dist = 8000.0
