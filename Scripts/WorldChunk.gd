@@ -33,8 +33,10 @@ func check_lod():
 		if distance < lod_1_dist:
 			visible = true
 			mesh = lod_1_mesh
+			# global_transform.origin.y = 0
 		elif distance < lod_2_dist:
 			visible = true
 			mesh = lod_2_mesh
+			# global_transform.origin.y = -10
 		else:
 			visible = false

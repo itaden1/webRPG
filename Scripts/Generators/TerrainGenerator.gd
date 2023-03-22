@@ -6,34 +6,44 @@ var mesh_inst_scene = preload("res://Scenes/WorldChunk.tscn")
 enum biomes {
 	TEMPERATE_DECIDUOUS_FOREST,
 	SNOW,
-	GRASSLAND
+	GRASSLAND,
+	HIGH_ALTITUDE
 }
 
 var biome_objects = {
-	biomes.GRASSLAND : {
-		objects = [
-			{		
-				obj=preload("res://Scenes/GrassBushFall.tscn"),
-				chance=3
-			}
-		]
-	},
-	biomes.TEMPERATE_DECIDUOUS_FOREST : {
-		objects = [
-			{		
-				obj=preload("res://Scenes/Tree01summer.tscn"),
-				chance=9
-			}
-		]
-	},
-	biomes.SNOW : {
-		objects = [
-			{		
-				obj=preload("res://Scenes/Tree08winter.tscn"),
-				chance=6
-			}
-		]
-	},
+	biomes.GRASSLAND : [
+		{		
+			obj=preload("res://Scenes/NatureObjects/GrassBushFall.tscn"),
+			chance=50
+		}
+	],
+	biomes.TEMPERATE_DECIDUOUS_FOREST : [
+		{		
+			obj=preload("res://Scenes/NatureObjects/Tree01summer.tscn"),
+			chance=90
+		},
+		{		
+			obj=preload("res://Scenes/NatureObjects/GrassBushFall.tscn"),
+			chance=10
+		}
+	],
+	biomes.SNOW : [
+		{		
+			obj=preload("res://Scenes/NatureObjects/Tree08winter.tscn"),
+			chance=90
+		},
+		{		
+			obj=preload("res://Scenes/NatureObjects/Stone01Large.tscn"),
+			chance=1
+		}
+	],
+	biomes.HIGH_ALTITUDE : [
+		{		
+			obj=preload("res://Scenes/NatureObjects/Stone01Large.tscn"),
+			chance=1
+		}
+	]
+	
 }
 
 
@@ -44,7 +54,7 @@ export (Vector2) var chunks_to_render = Vector2(3, 3)
 export (float) var chunk_load_time = 1.2
 export (Vector2) var world_size = Vector2(40000, 40000)
 export (Vector2) var chunk_size = Vector2(2000, 2000)
-export (Vector2) var chunk_divisions = Vector2(30, 30)
+export (Vector2) var chunk_divisions = Vector2(60, 60)
 export (Vector2) var low_lod_chunk_divisions = Vector2(10, 10)
 export (SpatialMaterial) var material
 
@@ -128,24 +138,32 @@ func place_trees(x: int, y: int, mesh_inst: MeshInstance):
 	var ocean_line = modify_land_height(OCEAN_LEVEL + 0.001)
 	for i in range(int(chunk_size.x / tree_spacing)):
 		for l in range(int(chunk_size.y / tree_spacing)):
-			# TODO use the rng singleton and seed to reproduce results
 			var position_x : float = x + i * Rng.get_random_range(tree_spacing-20, tree_spacing+20)
 			var position_y : float = y + l * Rng.get_random_range(tree_spacing-20, tree_spacing+20)
-			var biome_objects = get_objects_for_biome(position_x, position_y)
-			
+
 			var e = get_reshaped_elevation(position_x, position_y)
-			if e > ocean_line and e < tree_line:
-				var tree_scene = biome_objects.objects[0].obj
-				var tree = tree_scene.instance()
-				mesh_inst.add_child(tree)
-				tree.global_transform.origin.x = position_x
-				tree.global_transform.origin.z = position_y
-				tree.global_transform.origin.y = e
+			if e > ocean_line:
+				var _scene: PackedScene
+				var _biome_objects = get_objects_for_biome(position_x, position_y)
+				var roll = Rng.get_random_range(0, 100)
+				for o in _biome_objects:
+					if roll <= o.chance:
+						_scene = o.obj
+				if not _scene:
+					continue
+
+				var instanced_scene = _scene.instance()
+				mesh_inst.add_child(instanced_scene)
+				instanced_scene.global_transform.origin.x = position_x
+				instanced_scene.global_transform.origin.z = position_y
+				instanced_scene.global_transform.origin.y = e
 
 func get_objects_for_biome(x: float, y: float):
 	var altitude = get_reshaped_elevation(x, y)
 	var moisture = normalize_to_zero_one_range(biome_noise.get_noise_3d(x, 0, y))
 
+	if altitude > 700:
+		return biome_objects[biomes.HIGH_ALTITUDE]
 	if altitude > 300: 
 		print("alt: ", altitude, " moist: ", moisture)
 		if moisture > 0.6: return biome_objects[biomes.SNOW]

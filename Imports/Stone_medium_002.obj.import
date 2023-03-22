@@ -1,0 +1,20 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/Stone_medium_002.obj-e61363003c18558b0bb83abb1d5bf5fa.mesh"
+
+[deps]
+
+files=[ "res://.import/Stone_medium_002.obj-e61363003c18558b0bb83abb1d5bf5fa.mesh" ]
+
+source_file="res://Imports/Stone_medium_002.obj"
+dest_files=[ "res://.import/Stone_medium_002.obj-e61363003c18558b0bb83abb1d5bf5fa.mesh", "res://.import/Stone_medium_002.obj-e61363003c18558b0bb83abb1d5bf5fa.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+octahedral_compression=true
+optimize_mesh_flags=4286
