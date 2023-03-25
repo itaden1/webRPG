@@ -2,8 +2,8 @@
 
 importer="texture"
 type="StreamTexture"
-path.s3tc="res://.import/GRASS_1A.png-fa746cad3347f15cd129f7fdfa62a7b7.s3tc.stex"
-path.etc2="res://.import/GRASS_1A.png-fa746cad3347f15cd129f7fdfa62a7b7.etc2.stex"
+path.s3tc="res://.import/tree01_summer.png-dd43dcbddfd2ab3c3b942b080ae1653e.s3tc.stex"
+path.etc2="res://.import/tree01_summer.png-dd43dcbddfd2ab3c3b942b080ae1653e.etc2.stex"
 metadata={
 "imported_formats": [ "s3tc", "etc2" ],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://Materials/GRASS_1A.png"
-dest_files=[ "res://.import/GRASS_1A.png-fa746cad3347f15cd129f7fdfa62a7b7.s3tc.stex", "res://.import/GRASS_1A.png-fa746cad3347f15cd129f7fdfa62a7b7.etc2.stex" ]
+source_file="res://Materials/Trees/tree01_summer.png"
+dest_files=[ "res://.import/tree01_summer.png-dd43dcbddfd2ab3c3b942b080ae1653e.s3tc.stex", "res://.import/tree01_summer.png-dd43dcbddfd2ab3c3b942b080ae1653e.etc2.stex" ]
 
 [params]
 

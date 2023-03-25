@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=2]
 
-[ext_resource path="res://Materials/WinterTree08.tres" type="Material" id=1]
+[ext_resource path="res://Materials/Trees/WinterTree08.tres" type="Material" id=1]
 
 [sub_resource type="ArrayMesh" id=1]
 resource_name = "tree08_tree08"

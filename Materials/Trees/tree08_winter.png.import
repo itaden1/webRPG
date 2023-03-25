@@ -2,8 +2,8 @@
 
 importer="texture"
 type="StreamTexture"
-path.s3tc="res://.import/tree_1_summer_billboard.png-7eb2ecc64a1f21e68ebf5e22c08d1835.s3tc.stex"
-path.etc2="res://.import/tree_1_summer_billboard.png-7eb2ecc64a1f21e68ebf5e22c08d1835.etc2.stex"
+path.s3tc="res://.import/tree08_winter.png-2f650bdc08414bf8053cb05191f6c4e3.s3tc.stex"
+path.etc2="res://.import/tree08_winter.png-2f650bdc08414bf8053cb05191f6c4e3.etc2.stex"
 metadata={
 "imported_formats": [ "s3tc", "etc2" ],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://tree_1_summer_billboard.png"
-dest_files=[ "res://.import/tree_1_summer_billboard.png-7eb2ecc64a1f21e68ebf5e22c08d1835.s3tc.stex", "res://.import/tree_1_summer_billboard.png-7eb2ecc64a1f21e68ebf5e22c08d1835.etc2.stex" ]
+source_file="res://Materials/Trees/tree08_winter.png"
+dest_files=[ "res://.import/tree08_winter.png-2f650bdc08414bf8053cb05191f6c4e3.s3tc.stex", "res://.import/tree08_winter.png-2f650bdc08414bf8053cb05191f6c4e3.etc2.stex" ]
 
 [params]
 

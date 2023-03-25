@@ -20,17 +20,25 @@ var biome_objects = {
 	biomes.TEMPERATE_DECIDUOUS_FOREST : [
 		{		
 			obj=preload("res://Scenes/NatureObjects/Tree01summer.tscn"),
-			chance=90
+			chance=30
 		},
 		{		
 			obj=preload("res://Scenes/NatureObjects/GrassBushFall.tscn"),
-			chance=10
+			chance=0
+		},
+		{		
+			obj=preload("res://Scenes/NatureObjects/Tree03summer.tscn"),
+			chance=70
 		}
 	],
 	biomes.SNOW : [
 		{		
 			obj=preload("res://Scenes/NatureObjects/Tree08winter.tscn"),
 			chance=90
+		},
+		{		
+			obj=preload("res://Scenes/NatureObjects/Stone01Large.tscn"),
+			chance=1
 		},
 		{		
 			obj=preload("res://Scenes/NatureObjects/Stone01Large.tscn"),
@@ -144,11 +152,17 @@ func place_trees(x: int, y: int, mesh_inst: MeshInstance):
 			var e = get_reshaped_elevation(position_x, position_y)
 			if e > ocean_line:
 				var _scene: PackedScene
-				var _biome_objects = get_objects_for_biome(position_x, position_y)
-				var roll = Rng.get_random_range(0, 100)
+				var _biome_objects: Array = get_objects_for_biome(position_x, position_y)
+				var acc = 0
+				# _biome_objects.sort_custom(self, "sort_biome_objects_smallest_to_largest")
+				var roll = Rng.get_random_range(1, 100)
 				for o in _biome_objects:
-					if roll <= o.chance:
-						_scene = o.obj
+					if not _scene:
+						if roll > 100 - o.chance - acc:
+							_scene = o.obj
+							break
+
+					acc += o.chance
 				if not _scene:
 					continue
 
@@ -158,19 +172,21 @@ func place_trees(x: int, y: int, mesh_inst: MeshInstance):
 				instanced_scene.global_transform.origin.z = position_y
 				instanced_scene.global_transform.origin.y = e
 
+func sort_biome_objects_smallest_to_largest(a, b):
+	return a.chance < b.chance
+
+
 func get_objects_for_biome(x: float, y: float):
 	var altitude = get_reshaped_elevation(x, y)
 	var moisture = normalize_to_zero_one_range(biome_noise.get_noise_3d(x, 0, y))
 
 	if altitude > 700:
 		return biome_objects[biomes.HIGH_ALTITUDE]
-	if altitude > 300: 
-		print("alt: ", altitude, " moist: ", moisture)
+	elif altitude > 300: 
 		if moisture > 0.6: return biome_objects[biomes.SNOW]
 		else: return biome_objects[biomes.GRASSLAND]
 	elif altitude > 0:
-		print("alt: ", altitude, " moist: ", moisture)
-		if moisture > 0.6: return biome_objects[biomes.TEMPERATE_DECIDUOUS_FOREST]
+		if moisture > 0.5: return biome_objects[biomes.TEMPERATE_DECIDUOUS_FOREST]
 		else: return biome_objects[biomes.GRASSLAND]
 	
 
@@ -191,7 +207,7 @@ func _ready():
 
 	biome_noise.seed = Rng.get_random_int()
 	biome_noise.octaves = 4
-	biome_noise.period = 500.0
+	biome_noise.period = 1500.0
 	biome_noise.persistence = 0.8
 	
 	_start_chunk_generation()

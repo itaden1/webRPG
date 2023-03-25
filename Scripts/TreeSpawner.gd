@@ -18,8 +18,6 @@ func place_trees():
 	var to = Vector3(from.x, -200, from.z)
 
 	var result = space_state.intersect_ray(from, to, [self])
-	print(from, " ---- ", to)
-	print(result)
 	if result.has("position"):
 		var tree_position = result.position
 		get_tree().root.get_node("World").add_child(tree_inst)

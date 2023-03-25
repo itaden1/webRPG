@@ -1,6 +1,6 @@
 [gd_resource type="SpatialMaterial" load_steps=2 format=2]
 
-[ext_resource path="res://Materials/GRASS_1A.png" type="Texture" id=1]
+[ext_resource path="res://Materials/Trees/GRASS_1A.png" type="Texture" id=1]
 
 [resource]
 albedo_texture = ExtResource( 1 )

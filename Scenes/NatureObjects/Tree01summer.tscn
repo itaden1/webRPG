@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=2]
 
-[ext_resource path="res://tree_1_summer_billboard.png" type="Texture" id=1]
-[ext_resource path="res://Materials/SummerTree01l.tres" type="Material" id=2]
+[ext_resource path="res://Materials/Trees/tree_1_summer_billboard.png" type="Texture" id=1]
+[ext_resource path="res://Materials/Trees/SummerTree01l.tres" type="Material" id=2]
 
 [sub_resource type="ArrayMesh" id=1]
 resource_name = "tree01_tree01"
@@ -48,7 +48,7 @@ mesh = SubResource( 2 )
 material/0 = ExtResource( 2 )
 
 [node name="CollisionShape" type="CollisionShape" parent="."]
-transform = Transform( 2, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0 )
+transform = Transform( 3, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0 )
 shape = SubResource( 3 )
 
 [node name="Sprite3D" type="Sprite3D" parent="."]
