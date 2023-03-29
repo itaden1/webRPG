@@ -38,12 +38,12 @@ data = PoolVector3Array( -0.1716, 0.0999, -0.0991, 0, 0.0999, -0.1981, 0, 1.0229
 transform = Transform( 20, 0, 0, 0, 40, 0, 0, 0, 20, 0, 0, 0 )
 
 [node name="tree01" type="MeshInstance" parent="."]
-transform = Transform( 3, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0 )
+transform = Transform( 3, 0, 0, 0, 1.5, 0, 0, 0, 3, 0, 0, 0 )
 mesh = SubResource( 1 )
 material/0 = ExtResource( 2 )
 
 [node name="tree01_top" type="MeshInstance" parent="tree01"]
-transform = Transform( 0.7, 0, 0, 0, 1, 0, 0, 0, 0.7, 0, 2.94846, 0.0005 )
+transform = Transform( 1.5, 0, 0, 0, 0.8, 0, 0, 0, 1.5, 0, 2.94846, 0.0005 )
 mesh = SubResource( 2 )
 material/0 = ExtResource( 2 )
 

@@ -10,11 +10,21 @@ enum biomes {
 	HIGH_ALTITUDE
 }
 
+
+var grass_2_texture: Image = preload("res://Materials/Grass_02-128x128.png")
+var grass_11_texture : Image = preload("res://Materials/Grass_11-128x128.png")
+var snow_01_texture : Image = preload("res://Materials/Snow_01-128x128.png") 
+
+
 var biome_objects = {
 	biomes.GRASSLAND : [
 		{		
 			obj=preload("res://Scenes/NatureObjects/GrassBushFall.tscn"),
-			chance=50
+			chance=70
+		},
+		{		
+			obj=preload("res://Scenes/NatureObjects/Tree03summer.tscn"),
+			chance=1
 		}
 	],
 	biomes.TEMPERATE_DECIDUOUS_FOREST : [
@@ -56,7 +66,6 @@ var biome_objects = {
 
 
 const OCEAN_LEVEL = 0.25
-const TREE_LINE = 0.6
 
 export (Vector2) var chunks_to_render = Vector2(3, 3)
 export (float) var chunk_load_time = 1.2
@@ -67,7 +76,7 @@ export (Vector2) var low_lod_chunk_divisions = Vector2(10, 10)
 export (SpatialMaterial) var material
 
 export (float) var hill_multiplyer = 20.0
-export (float) var hill_exponent = 3
+export (float) var hill_exponent = 3.0
 export (float) var hill_exponent_fudge = 1.8
 
 onready var player: KinematicBody = get_node("Player")
@@ -137,12 +146,26 @@ func render_world_chunks(start_pos: Vector2):
 			add_child(mesh_inst)
 
 			call_deferred("place_trees", x, y, mesh_inst)
+			call_deferred("make_texture", x, y, mesh_inst)
 
+func make_texture(x: int, y: int, mesh_inst: MeshInstance):
+	var texture := ImageTexture.new()
+	var image := Image.new()
+	image.create(256, 256, false, Image.FORMAT_RGBA8)
+	print(grass_2_texture.data.format)
+	print(image.data.format)
+	grass_2_texture.convert(Image.FORMAT_RGBA8)
+	image.blit_rect(grass_2_texture, Rect2(Vector2(0, 0), Vector2(28, 28)), Vector2(0,0))
+	# image.save_png("res://images/test.png")
+	texture.create_from_image(image, 0)
+	var over_material := SpatialMaterial.new()
+	over_material.albedo_texture = texture
+	over_material.flags_transparent = true
+	mesh_inst.material_overlay = over_material 
 
 func place_trees(x: int, y: int, mesh_inst: MeshInstance):
 	# place some trees
-	var tree_spacing := 160.0
-	var tree_line = modify_land_height(TREE_LINE)
+	var tree_spacing := 140.0
 	var ocean_line = modify_land_height(OCEAN_LEVEL + 0.001)
 	for i in range(int(chunk_size.x / tree_spacing)):
 		for l in range(int(chunk_size.y / tree_spacing)):
@@ -154,7 +177,6 @@ func place_trees(x: int, y: int, mesh_inst: MeshInstance):
 				var _scene: PackedScene
 				var _biome_objects: Array = get_objects_for_biome(position_x, position_y)
 				var acc = 0
-				# _biome_objects.sort_custom(self, "sort_biome_objects_smallest_to_largest")
 				var roll = Rng.get_random_range(1, 100)
 				for o in _biome_objects:
 					if not _scene:
@@ -172,9 +194,6 @@ func place_trees(x: int, y: int, mesh_inst: MeshInstance):
 				instanced_scene.global_transform.origin.z = position_y
 				instanced_scene.global_transform.origin.y = e
 
-func sort_biome_objects_smallest_to_largest(a, b):
-	return a.chance < b.chance
-
 
 func get_objects_for_biome(x: float, y: float):
 	var altitude = get_reshaped_elevation(x, y)
@@ -186,7 +205,7 @@ func get_objects_for_biome(x: float, y: float):
 		if moisture > 0.6: return biome_objects[biomes.SNOW]
 		else: return biome_objects[biomes.GRASSLAND]
 	elif altitude > 0:
-		if moisture > 0.5: return biome_objects[biomes.TEMPERATE_DECIDUOUS_FOREST]
+		if moisture > 0.58: return biome_objects[biomes.TEMPERATE_DECIDUOUS_FOREST]
 		else: return biome_objects[biomes.GRASSLAND]
 	
 
@@ -207,7 +226,7 @@ func _ready():
 
 	biome_noise.seed = Rng.get_random_int()
 	biome_noise.octaves = 4
-	biome_noise.period = 1500.0
+	biome_noise.period = 3500.0
 	biome_noise.persistence = 0.8
 	
 	_start_chunk_generation()

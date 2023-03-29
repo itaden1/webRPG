@@ -1,0 +1,13 @@
+[remap]
+
+importer="image"
+type="Image"
+path="res://.import/Snow_01-128x128.png-f07133b4280298b41304786dfcf2e014.image"
+
+[deps]
+
+source_file="res://Materials/Snow_01-128x128.png"
+dest_files=[ "res://.import/Snow_01-128x128.png-f07133b4280298b41304786dfcf2e014.image" ]
+
+[params]
+
