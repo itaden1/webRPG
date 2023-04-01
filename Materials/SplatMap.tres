@@ -1,0 +1,41 @@
+[gd_resource type="ShaderMaterial" load_steps=6 format=2]
+
+[ext_resource path="res://Materials/test_splat.png" type="Texture" id=1]
+[ext_resource path="res://Materials/Snow_01-128x128.png" type="Texture" id=2]
+[ext_resource path="res://Materials/Grass_11-128x128.png" type="Texture" id=3]
+[ext_resource path="res://Materials/Grass_02-128x128.png" type="Texture" id=4]
+
+[sub_resource type="Shader" id=1]
+code = "shader_type spatial;
+
+uniform sampler2D splatmap;
+uniform sampler2D grass;
+uniform sampler2D earth;
+uniform sampler2D rock;
+
+uniform float grassres = 1;
+uniform float earthres = 1;
+uniform float rockres = 1;
+
+void fragment() {
+	float grassval = texture(splatmap, UV).g;
+	float earthval = texture(splatmap, UV).r;
+	float rockval = texture(splatmap, UV).b;
+	vec3 earthcolor = texture(earth, UV * earthres).rgb * earthval;
+	vec3 grasscolor = texture(grass, UV * grassres).rgb * grassval;
+	vec3 rockcolor = texture(rock, UV * rockres).rgb * rockval;
+	
+	vec3 result = earthcolor + grasscolor + rockcolor;
+	
+	ALBEDO = result;
+}"
+
+[resource]
+shader = SubResource( 1 )
+shader_param/grassres = 50.0
+shader_param/earthres = 50.0
+shader_param/rockres = 50.0
+shader_param/splatmap = ExtResource( 1 )
+shader_param/grass = ExtResource( 4 )
+shader_param/earth = ExtResource( 3 )
+shader_param/rock = ExtResource( 2 )

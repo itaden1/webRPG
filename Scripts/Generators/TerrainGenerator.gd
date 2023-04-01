@@ -11,9 +11,9 @@ enum biomes {
 }
 
 
-var grass_2_texture: Image = preload("res://Materials/Grass_02-128x128.png")
-var grass_11_texture : Image = preload("res://Materials/Grass_11-128x128.png")
-var snow_01_texture : Image = preload("res://Materials/Snow_01-128x128.png") 
+# var grass_2_texture: Image = preload("res://Materials/Grass_02-128x128.png")
+# var grass_11_texture : Image = preload("res://Materials/Grass_11-128x128.png")
+# var snow_01_texture : Image = preload("res://Materials/Snow_01-128x128.png") 
 
 
 var biome_objects = {
@@ -67,13 +67,13 @@ var biome_objects = {
 
 const OCEAN_LEVEL = 0.25
 
+export (ShaderMaterial) var world_material = load("res://Materials/SplatMap.tres")
 export (Vector2) var chunks_to_render = Vector2(3, 3)
 export (float) var chunk_load_time = 1.2
 export (Vector2) var world_size = Vector2(40000, 40000)
 export (Vector2) var chunk_size = Vector2(2000, 2000)
 export (Vector2) var chunk_divisions = Vector2(60, 60)
 export (Vector2) var low_lod_chunk_divisions = Vector2(10, 10)
-export (SpatialMaterial) var material
 
 export (float) var hill_multiplyer = 20.0
 export (float) var hill_exponent = 3.0
@@ -141,7 +141,6 @@ func render_world_chunks(start_pos: Vector2):
 			mesh_inst.player = player
 
 			mesh_inst.transform.origin = Vector3(x, 0, y)
-			mesh_inst.material_override = material
 			instanced_chunks[Vector2(x,y)] = mesh_inst
 			add_child(mesh_inst)
 
@@ -149,28 +148,36 @@ func render_world_chunks(start_pos: Vector2):
 			call_deferred("make_texture", x, y, mesh_inst)
 
 func make_texture(x: int, y: int, mesh_inst: MeshInstance):
-	var texture := ImageTexture.new()
-	var image := Image.new()
-	image.create(256, 256, false, Image.FORMAT_RGBA8)
-	print(grass_2_texture.data.format)
-	print(image.data.format)
-	grass_2_texture.convert(Image.FORMAT_RGBA8)
-	image.blit_rect(grass_2_texture, Rect2(Vector2(0, 0), Vector2(28, 28)), Vector2(0,0))
-	# image.save_png("res://images/test.png")
-	texture.create_from_image(image, 0)
-	var over_material := SpatialMaterial.new()
-	over_material.albedo_texture = texture
-	over_material.flags_transparent = true
-	mesh_inst.material_overlay = over_material 
+	var splat_texture := ImageTexture.new()
+	var splat_image := Image.new()
+	splat_image.create(256, 256, false, Image.FORMAT_RGBA8)
+	for i in range(0, 256, 16):
+		for j in range(0, 256, 16):
+
+			var e = get_reshaped_elevation(i + x, j + y)
+			var moisture = normalize_to_zero_one_range(biome_noise.get_noise_3d(i + x, 0, j + y))
+			if e > 58:
+				splat_image.fill_rect(Rect2(Vector2(i, j), Vector2(16, 16)), Color(0, 256, 0))
+			if e > 100:
+				splat_image.fill_rect(Rect2(Vector2(i, j), Vector2(16, 16)), Color(256, 0, 0))
+			if e > 300:
+				splat_image.fill_rect(Rect2(Vector2(i, j), Vector2(16, 16)), Color(0, 0, 256))
+
+
+	splat_texture.create_from_image(splat_image, 0)
+	var new_material: ShaderMaterial = world_material.duplicate()
+	new_material.set_shader_param("splatmap", splat_texture)
+
+	mesh_inst.material_override = new_material
 
 func place_trees(x: int, y: int, mesh_inst: MeshInstance):
 	# place some trees
-	var tree_spacing := 140.0
+	var tree_spacing := 100.0
 	var ocean_line = modify_land_height(OCEAN_LEVEL + 0.001)
 	for i in range(int(chunk_size.x / tree_spacing)):
 		for l in range(int(chunk_size.y / tree_spacing)):
-			var position_x : float = x + i * Rng.get_random_range(tree_spacing-20, tree_spacing+20)
-			var position_y : float = y + l * Rng.get_random_range(tree_spacing-20, tree_spacing+20)
+			var position_x : float = x + i * tree_spacing#* Rng.get_random_range(tree_spacing-20, tree_spacing+20)
+			var position_y : float = y + l * tree_spacing#* Rng.get_random_range(tree_spacing-20, tree_spacing+20)
 
 			var e = get_reshaped_elevation(position_x, position_y)
 			if e > ocean_line:

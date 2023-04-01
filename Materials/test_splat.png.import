@@ -2,8 +2,8 @@
 
 importer="texture"
 type="StreamTexture"
-path.s3tc="res://.import/Snow_01-128x128.png-f07133b4280298b41304786dfcf2e014.s3tc.stex"
-path.etc2="res://.import/Snow_01-128x128.png-f07133b4280298b41304786dfcf2e014.etc2.stex"
+path.s3tc="res://.import/test_splat.png-98eb048db1e35b1dbec389613c2ebe7e.s3tc.stex"
+path.etc2="res://.import/test_splat.png-98eb048db1e35b1dbec389613c2ebe7e.etc2.stex"
 metadata={
 "imported_formats": [ "s3tc", "etc2" ],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://Materials/Snow_01-128x128.png"
-dest_files=[ "res://.import/Snow_01-128x128.png-f07133b4280298b41304786dfcf2e014.s3tc.stex", "res://.import/Snow_01-128x128.png-f07133b4280298b41304786dfcf2e014.etc2.stex" ]
+source_file="res://Materials/test_splat.png"
+dest_files=[ "res://.import/test_splat.png-98eb048db1e35b1dbec389613c2ebe7e.s3tc.stex", "res://.import/test_splat.png-98eb048db1e35b1dbec389613c2ebe7e.etc2.stex" ]
 
 [params]
 
@@ -22,7 +22,7 @@ compress/hdr_mode=0
 compress/bptc_ldr=0
 compress/normal_map=0
 flags/repeat=true
-flags/filter=false
+flags/filter=true
 flags/mipmaps=true
 flags/anisotropic=false
 flags/srgb=2

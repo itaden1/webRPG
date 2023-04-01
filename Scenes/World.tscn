@@ -1,7 +1,7 @@
 [gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://Scripts/Generators/TerrainGenerator.gd" type="Script" id=1]
-[ext_resource path="res://Materials/Grass.tres" type="Material" id=2]
+[ext_resource path="res://Materials/SplatMap.tres" type="Material" id=2]
 [ext_resource path="res://assets/simple_fpsplayer/Player.tscn" type="PackedScene" id=3]
 
 [sub_resource type="ProceduralSky" id=4]
@@ -24,7 +24,7 @@ albedo_color = Color( 0, 0.505882, 1, 1 )
 
 [node name="World" type="Spatial"]
 script = ExtResource( 1 )
-material = ExtResource( 2 )
+world_material = ExtResource( 2 )
 hill_exponent_fudge = 1.0
 
 [node name="Player" parent="." instance=ExtResource( 3 )]
