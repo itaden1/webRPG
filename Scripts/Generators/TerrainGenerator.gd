@@ -151,21 +151,26 @@ func make_texture(x: int, y: int, mesh_inst: MeshInstance):
 	var splat_texture := ImageTexture.new()
 	var splat_image := Image.new()
 	splat_image.create(256, 256, false, Image.FORMAT_RGBA8)
-	for i in range(0, 256, 16):
-		for j in range(0, 256, 16):
-
-			var e = get_reshaped_elevation(i + x, j + y)
+	# for i in range(0, 256, 16):
+	# 	for j in range(0, 256, 16):
+	for i in range(0, 16):
+		for j in range(0, 16):
+			var pos_x = (chunk_size.x / 256) * i + x
+			var pos_y = (chunk_size.y / 256) * j + x
+			var e = get_reshaped_elevation(pos_x, pos_y)
 			var moisture = normalize_to_zero_one_range(biome_noise.get_noise_3d(i + x, 0, j + y))
-			if e > 58:
-				splat_image.fill_rect(Rect2(Vector2(i, j), Vector2(16, 16)), Color(0, 256, 0))
-			if e > 100:
-				splat_image.fill_rect(Rect2(Vector2(i, j), Vector2(16, 16)), Color(256, 0, 0))
+			if e > 0:
+				splat_image.fill_rect(Rect2(Vector2(i*16, j*16), Vector2(15, 15)), Color(0, 256, 0))
 			if e > 300:
-				splat_image.fill_rect(Rect2(Vector2(i, j), Vector2(16, 16)), Color(0, 0, 256))
+				splat_image.fill_rect(Rect2(Vector2(i*16, j*16), Vector2(15, 15)), Color(256, 0, 0))
+			if e > 700:
+				splat_image.fill_rect(Rect2(Vector2(i*16, j*16), Vector2(15, 15)), Color(0, 0, 256))
 
 
 	splat_texture.create_from_image(splat_image, 0)
 	var new_material: ShaderMaterial = world_material.duplicate()
+	# var test_splat = load("res://Materials/test_splat.png")
+	# new_material.set_shader_param("splatmap", test_splat)
 	new_material.set_shader_param("splatmap", splat_texture)
 
 	mesh_inst.material_override = new_material
