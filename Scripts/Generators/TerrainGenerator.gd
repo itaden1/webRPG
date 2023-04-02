@@ -10,6 +10,9 @@ enum biomes {
 	HIGH_ALTITUDE
 }
 
+export (Image) var red_brush
+export (Image) var green_brush
+export (Image) var blue_brush
 
 # var grass_2_texture: Image = preload("res://Materials/Grass_02-128x128.png")
 # var grass_11_texture : Image = preload("res://Materials/Grass_11-128x128.png")
@@ -23,7 +26,7 @@ var biome_objects = {
 			chance=70
 		},
 		{		
-			obj=preload("res://Scenes/NatureObjects/Tree03summer.tscn"),
+			obj=preload("res://Scenes/NatureObjects/Tree03summerSmall.tscn"),
 			chance=1
 		}
 	],
@@ -34,11 +37,15 @@ var biome_objects = {
 		},
 		{		
 			obj=preload("res://Scenes/NatureObjects/GrassBushFall.tscn"),
-			chance=0
+			chance=1
 		},
 		{		
 			obj=preload("res://Scenes/NatureObjects/Tree03summer.tscn"),
-			chance=70
+			chance=34
+		},
+		{		
+			obj=preload("res://Scenes/NatureObjects/Tree03summerSmall.tscn"),
+			chance=35
 		}
 	],
 	biomes.SNOW : [
@@ -151,11 +158,11 @@ func make_texture(x: int, y: int, mesh_inst: MeshInstance):
 	var splat_texture := ImageTexture.new()
 	var splat_image := Image.new()
 
-	var image_size = 512
+	var image_size = 256
 	var paint_rect_size = 8
 	var rects_to_paint = image_size / paint_rect_size
 	splat_image.create(image_size, image_size, false, Image.FORMAT_RGBA8)
-	print(x)
+	# splat_image.fill(Color(256, 0, 0))
 	for i in range(0, rects_to_paint):
 		for j in range(0, rects_to_paint):
 			var region_size_x = (chunk_size.x / rects_to_paint)
@@ -164,12 +171,18 @@ func make_texture(x: int, y: int, mesh_inst: MeshInstance):
 			var pos_y = region_size_y * j + y -1000
 			var e = get_reshaped_elevation(pos_x, pos_y)
 			var moisture = normalize_to_zero_one_range(biome_noise.get_noise_3d(pos_x, 0, pos_y))
-			if moisture > 0.56:
-				splat_image.fill_rect(Rect2(Vector2(i * paint_rect_size, j * paint_rect_size), Vector2(paint_rect_size, paint_rect_size)), Color(0, 256, 0))
-			elif moisture > 0.0:
-				splat_image.fill_rect(Rect2(Vector2(i * paint_rect_size, j * paint_rect_size), Vector2(paint_rect_size, paint_rect_size)), Color(256, 0, 0))
 			if e > 700:
-				splat_image.fill_rect(Rect2(Vector2(i * paint_rect_size, j * paint_rect_size), Vector2(paint_rect_size, paint_rect_size)), Color(0, 0, 256))
+				splat_image.blend_rect(blue_brush, Rect2(Vector2(0, 0), Vector2(16,16)), Vector2(i * paint_rect_size, j * paint_rect_size))
+			elif e > 500:
+				if moisture > 0.56:
+					splat_image.blend_rect(blue_brush, Rect2(Vector2(0, 0), Vector2(16,16)), Vector2(i * paint_rect_size, j * paint_rect_size))
+				else:
+					splat_image.blend_rect(green_brush, Rect2(Vector2(0, 0), Vector2(16,16)), Vector2(i * paint_rect_size, j * paint_rect_size))
+			elif moisture > 0.56:
+				splat_image.blend_rect(green_brush, Rect2(Vector2(0, 0), Vector2(16,16)), Vector2(i * paint_rect_size, j * paint_rect_size))
+			elif moisture > 0.0:
+				splat_image.blend_rect(red_brush, Rect2(Vector2(0, 0), Vector2(16,16)), Vector2(i * paint_rect_size, j * paint_rect_size))
+
 
 
 	splat_texture.create_from_image(splat_image, 0)
@@ -229,6 +242,7 @@ func get_objects_for_biome(x: float, y: float):
 
 func _ready():
 
+	get_node("Player").global_transform.origin = Vector3(world_size.x/2, 1000, world_size.y/2)
 	add_child(thread_timer)
 	thread_timer.wait_time = chunk_load_time
 	thread_timer.one_shot = false
