@@ -28,7 +28,7 @@ world_material = ExtResource( 2 )
 hill_exponent_fudge = 1.0
 
 [node name="Player" parent="." instance=ExtResource( 3 )]
-transform = Transform( 1, 0, 0, 0, 0.910149, 0.41428, 0, -0.41428, 0.910149, 5000, 772.122, 5000 )
+transform = Transform( 1, 0, 0, 0, 0.910149, 0.41428, 0, -0.41428, 0.910149, 5000, 772.122, 5486.05 )
 
 [node name="DirectionalLight" type="DirectionalLight" parent="."]
 transform = Transform( 1, 0, 0, 0, 0.753081, 0.657928, 0, -0.657928, 0.753081, 0, 2.64305, 0 )

@@ -150,21 +150,26 @@ func render_world_chunks(start_pos: Vector2):
 func make_texture(x: int, y: int, mesh_inst: MeshInstance):
 	var splat_texture := ImageTexture.new()
 	var splat_image := Image.new()
-	splat_image.create(256, 256, false, Image.FORMAT_RGBA8)
-	# for i in range(0, 256, 16):
-	# 	for j in range(0, 256, 16):
-	for i in range(0, 16):
-		for j in range(0, 16):
-			var pos_x = (chunk_size.x / 256) * i + x
-			var pos_y = (chunk_size.y / 256) * j + x
+
+	var image_size = 512
+	var paint_rect_size = 8
+	var rects_to_paint = image_size / paint_rect_size
+	splat_image.create(image_size, image_size, false, Image.FORMAT_RGBA8)
+	print(x)
+	for i in range(0, rects_to_paint):
+		for j in range(0, rects_to_paint):
+			var region_size_x = (chunk_size.x / rects_to_paint)
+			var region_size_y = (chunk_size.y / rects_to_paint)
+			var pos_x = region_size_x * i + x -1000 # no idea why this magic number works but it does....
+			var pos_y = region_size_y * j + y -1000
 			var e = get_reshaped_elevation(pos_x, pos_y)
-			var moisture = normalize_to_zero_one_range(biome_noise.get_noise_3d(i + x, 0, j + y))
-			if e > 0:
-				splat_image.fill_rect(Rect2(Vector2(i*16, j*16), Vector2(15, 15)), Color(0, 256, 0))
-			if e > 300:
-				splat_image.fill_rect(Rect2(Vector2(i*16, j*16), Vector2(15, 15)), Color(256, 0, 0))
+			var moisture = normalize_to_zero_one_range(biome_noise.get_noise_3d(pos_x, 0, pos_y))
+			if moisture > 0.56:
+				splat_image.fill_rect(Rect2(Vector2(i * paint_rect_size, j * paint_rect_size), Vector2(paint_rect_size, paint_rect_size)), Color(0, 256, 0))
+			elif moisture > 0.0:
+				splat_image.fill_rect(Rect2(Vector2(i * paint_rect_size, j * paint_rect_size), Vector2(paint_rect_size, paint_rect_size)), Color(256, 0, 0))
 			if e > 700:
-				splat_image.fill_rect(Rect2(Vector2(i*16, j*16), Vector2(15, 15)), Color(0, 0, 256))
+				splat_image.fill_rect(Rect2(Vector2(i * paint_rect_size, j * paint_rect_size), Vector2(paint_rect_size, paint_rect_size)), Color(0, 0, 256))
 
 
 	splat_texture.create_from_image(splat_image, 0)
