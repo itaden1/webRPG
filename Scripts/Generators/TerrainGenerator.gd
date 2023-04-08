@@ -5,8 +5,11 @@ var mesh_inst_scene = preload("res://Scenes/WorldChunk.tscn")
 
 enum biomes {
 	TEMPERATE_DECIDUOUS_FOREST,
-	SNOW,
+	SNOW_FORRESTS,
+	SNOW_PLANES,
 	GRASSLAND,
+	WOODLANDS,
+	SWAMP_LANDS,
 	HIGH_ALTITUDE
 }
 
@@ -18,6 +21,15 @@ export (Image) var blue_brush
 # var grass_11_texture : Image = preload("res://Materials/Grass_11-128x128.png")
 # var snow_01_texture : Image = preload("res://Materials/Snow_01-128x128.png") 
 
+onready var biome_brushes = {
+	biomes.GRASSLAND : [red_brush],
+	biomes.WOODLANDS : [red_brush],
+	biomes.SWAMP_LANDS: [green_brush],
+	biomes.TEMPERATE_DECIDUOUS_FOREST : [green_brush],
+	biomes.SNOW_FORRESTS : [blue_brush],
+	biomes.SNOW_PLANES : [blue_brush],
+	biomes.HIGH_ALTITUDE : [blue_brush]
+}
 
 var biome_objects = {
 	biomes.GRASSLAND : [
@@ -28,6 +40,26 @@ var biome_objects = {
 		{		
 			obj=preload("res://Scenes/NatureObjects/Tree03summerSmall.tscn"),
 			chance=1
+		}
+	],
+	biomes.WOODLANDS : [
+		{		
+			obj=preload("res://Scenes/NatureObjects/GrassBushFall.tscn"),
+			chance=70
+		},
+		{		
+			obj=preload("res://Scenes/NatureObjects/Tree03summerSmall.tscn"),
+			chance=5
+		}
+	],
+	biomes.SWAMP_LANDS : [
+		{		
+			obj=preload("res://Scenes/NatureObjects/Tree01summer.tscn"),
+			chance=30
+		},
+		{		
+			obj=preload("res://Scenes/NatureObjects/Tree03summerSmall.tscn"),
+			chance=5
 		}
 	],
 	biomes.TEMPERATE_DECIDUOUS_FOREST : [
@@ -48,7 +80,21 @@ var biome_objects = {
 			chance=35
 		}
 	],
-	biomes.SNOW : [
+	biomes.SNOW_FORRESTS : [
+		{		
+			obj=preload("res://Scenes/NatureObjects/Tree08winter.tscn"),
+			chance=90
+		},
+		{		
+			obj=preload("res://Scenes/NatureObjects/Stone01Large.tscn"),
+			chance=1
+		},
+		{		
+			obj=preload("res://Scenes/NatureObjects/Stone01Large.tscn"),
+			chance=1
+		}
+	],
+	biomes.SNOW_PLANES : [
 		{		
 			obj=preload("res://Scenes/NatureObjects/Tree08winter.tscn"),
 			chance=90
@@ -169,26 +215,15 @@ func make_texture(x: int, y: int, mesh_inst: MeshInstance):
 			var region_size_y = (chunk_size.y / rects_to_paint)
 			var pos_x = region_size_x * i + x -1000 # no idea why this magic number works but it does....
 			var pos_y = region_size_y * j + y -1000
-			var e = get_reshaped_elevation(pos_x, pos_y)
-			var moisture = normalize_to_zero_one_range(biome_noise.get_noise_3d(pos_x, 0, pos_y))
-			if e > 700:
-				splat_image.blend_rect(blue_brush, Rect2(Vector2(0, 0), Vector2(16,16)), Vector2(i * paint_rect_size, j * paint_rect_size))
-			elif e > 500:
-				if moisture > 0.56:
-					splat_image.blend_rect(blue_brush, Rect2(Vector2(0, 0), Vector2(16,16)), Vector2(i * paint_rect_size, j * paint_rect_size))
-				else:
-					splat_image.blend_rect(green_brush, Rect2(Vector2(0, 0), Vector2(16,16)), Vector2(i * paint_rect_size, j * paint_rect_size))
-			elif moisture > 0.56:
-				splat_image.blend_rect(green_brush, Rect2(Vector2(0, 0), Vector2(16,16)), Vector2(i * paint_rect_size, j * paint_rect_size))
-			elif moisture > 0.0:
-				splat_image.blend_rect(red_brush, Rect2(Vector2(0, 0), Vector2(16,16)), Vector2(i * paint_rect_size, j * paint_rect_size))
 
+			var biome = get_biome(pos_x, pos_y)
+			var brush = biome_brushes[biome][0]
+			splat_image.blend_rect(brush, Rect2(Vector2(0, 0), Vector2(16,16)), Vector2(i * paint_rect_size, j * paint_rect_size))
 
 
 	splat_texture.create_from_image(splat_image, 0)
 	var new_material: ShaderMaterial = world_material.duplicate()
-	# var test_splat = load("res://Materials/test_splat.png")
-	# new_material.set_shader_param("splatmap", test_splat)
+
 	new_material.set_shader_param("splatmap", splat_texture)
 
 	mesh_inst.material_override = new_material
@@ -205,7 +240,8 @@ func place_trees(x: int, y: int, mesh_inst: MeshInstance):
 			var e = get_reshaped_elevation(position_x, position_y)
 			if e > ocean_line:
 				var _scene: PackedScene
-				var _biome_objects: Array = get_objects_for_biome(position_x, position_y)
+				var _biome_objects: Array = biome_objects[get_biome(position_x, position_y)]
+
 				var acc = 0
 				var roll = Rng.get_random_range(1, 100)
 				for o in _biome_objects:
@@ -224,21 +260,25 @@ func place_trees(x: int, y: int, mesh_inst: MeshInstance):
 				instanced_scene.global_transform.origin.z = position_y
 				instanced_scene.global_transform.origin.y = e
 
-
-func get_objects_for_biome(x: float, y: float):
+func get_biome(x: float, y: float):
 	var altitude = get_reshaped_elevation(x, y)
 	var moisture = normalize_to_zero_one_range(biome_noise.get_noise_3d(x, 0, y))
 
-	if altitude > 700:
-		return biome_objects[biomes.HIGH_ALTITUDE]
-	elif altitude > 300: 
-		if moisture > 0.6: return biome_objects[biomes.SNOW]
-		else: return biome_objects[biomes.GRASSLAND]
+	# TODO get latitude or use varoni to create regions (snow, autumnal forrests, desert etc.)
+	if altitude > 750:
+		return biomes.HIGH_ALTITUDE
+	elif altitude > 300:
+		if moisture > 0.6: return biomes.SNOW_FORRESTS
+		else: return biomes.SNOW_PLANES
+	elif altitude > 100:
+		if moisture > 0.6: return biomes.TEMPERATE_DECIDUOUS_FOREST
+		elif moisture > 0.4: return biomes.WOODLANDS
+		else: return biomes.GRASSLAND
 	elif altitude > 0:
-		if moisture > 0.58: return biome_objects[biomes.TEMPERATE_DECIDUOUS_FOREST]
-		else: return biome_objects[biomes.GRASSLAND]
-	
-
+		if moisture > 0.65: return biomes.SWAMP_LANDS
+		else: return biomes.GRASSLAND
+	else:
+		return biomes.GRASSLAND
 
 func _ready():
 
