@@ -17,13 +17,17 @@ export (Image) var red_brush
 export (Image) var green_brush
 export (Image) var blue_brush
 
+
+var test_town_scene = preload("res://Scenes/TestTown.tscn")
+var player_placed = false
+
 # var grass_2_texture: Image = preload("res://Materials/Grass_02-128x128.png")
 # var grass_11_texture : Image = preload("res://Materials/Grass_11-128x128.png")
 # var snow_01_texture : Image = preload("res://Materials/Snow_01-128x128.png") 
 
 onready var biome_brushes = {
 	biomes.GRASSLAND : [red_brush],
-	biomes.WOODLANDS : [red_brush],
+	biomes.WOODLANDS : [red_brush, green_brush],
 	biomes.SWAMP_LANDS: [green_brush],
 	biomes.TEMPERATE_DECIDUOUS_FOREST : [green_brush],
 	biomes.SNOW_FORRESTS : [blue_brush],
@@ -49,7 +53,7 @@ var biome_objects = {
 		},
 		{		
 			obj=preload("res://Scenes/NatureObjects/Tree03summerSmall.tscn"),
-			chance=5
+			chance=20
 		}
 	],
 	biomes.SWAMP_LANDS : [
@@ -97,16 +101,13 @@ var biome_objects = {
 	biomes.SNOW_PLANES : [
 		{		
 			obj=preload("res://Scenes/NatureObjects/Tree08winter.tscn"),
-			chance=90
+			chance=10
 		},
 		{		
 			obj=preload("res://Scenes/NatureObjects/Stone01Large.tscn"),
 			chance=1
 		},
-		{		
-			obj=preload("res://Scenes/NatureObjects/Stone01Large.tscn"),
-			chance=1
-		}
+
 	],
 	biomes.HIGH_ALTITUDE : [
 		{		
@@ -193,12 +194,32 @@ func render_world_chunks(start_pos: Vector2):
 			mesh_inst.lod_2_mesh = apply_heights_to_mesh(lod_mesh, x, y)
 			mesh_inst.player = player
 
+
 			mesh_inst.transform.origin = Vector3(x, 0, y)
 			instanced_chunks[Vector2(x,y)] = mesh_inst
+
 			add_child(mesh_inst)
+			place_towns(x, y, mesh_inst)
 
 			call_deferred("place_trees", x, y, mesh_inst)
 			call_deferred("make_texture", x, y, mesh_inst)
+			# call_deferred("place_towns", x, y, mesh_inst)
+
+
+func place_towns(x: int, y: int, mesh_inst: MeshInstance):
+	var dt = get_datatool_for_mesh(mesh_inst.lod_1_mesh)
+	var vert = dt.get_vertex(Rng.get_random_range(0, dt.get_vertex_count() -1 ))
+	var town = test_town_scene.instance()
+
+	mesh_inst.add_child(town)
+
+	town.global_transform.origin.y = vert.y
+	town.global_transform.origin.x = vert.x + x 
+	town.global_transform.origin.z = vert.z + y
+
+	if not player_placed:
+		player.global_transform.origin = town.get_node("Spawn").global_transform.origin
+		player_placed = true
 
 func make_texture(x: int, y: int, mesh_inst: MeshInstance):
 	var splat_texture := ImageTexture.new()
@@ -208,7 +229,6 @@ func make_texture(x: int, y: int, mesh_inst: MeshInstance):
 	var paint_rect_size = 8
 	var rects_to_paint = image_size / paint_rect_size
 	splat_image.create(image_size, image_size, false, Image.FORMAT_RGBA8)
-	# splat_image.fill(Color(256, 0, 0))
 	for i in range(0, rects_to_paint):
 		for j in range(0, rects_to_paint):
 			var region_size_x = (chunk_size.x / rects_to_paint)
@@ -216,8 +236,9 @@ func make_texture(x: int, y: int, mesh_inst: MeshInstance):
 			var pos_x = region_size_x * i + x -1000 # no idea why this magic number works but it does....
 			var pos_y = region_size_y * j + y -1000
 
-			var biome = get_biome(pos_x, pos_y)
-			var brush = biome_brushes[biome][0]
+			var biome: int = get_biome(pos_x, pos_y)
+			var tiles : Array = biome_brushes[biome]
+			var brush = tiles[Rng.get_random_range(0, tiles.size()-1)]
 			splat_image.blend_rect(brush, Rect2(Vector2(0, 0), Vector2(16,16)), Vector2(i * paint_rect_size, j * paint_rect_size))
 
 
@@ -230,7 +251,7 @@ func make_texture(x: int, y: int, mesh_inst: MeshInstance):
 
 func place_trees(x: int, y: int, mesh_inst: MeshInstance):
 	# place some trees
-	var tree_spacing := 100.0
+	var tree_spacing := 70.0
 	var ocean_line = modify_land_height(OCEAN_LEVEL + 0.001)
 	for i in range(int(chunk_size.x / tree_spacing)):
 		for l in range(int(chunk_size.y / tree_spacing)):
@@ -307,18 +328,22 @@ func _ready():
 	ocean.global_transform.origin.y = modify_land_height(OCEAN_LEVEL) -20
 	ocean.scale = Vector3(world_size.x, 0, world_size.y)
 
-func apply_heights_to_mesh(
-	mesh: PlaneMesh, 
-	offset_x: int, 
-	offset_y: int
-) -> ArrayMesh:
-	
+func get_datatool_for_mesh(mesh: Mesh) -> MeshDataTool:
 		var st := SurfaceTool.new()
 		st.create_from(mesh,0)
 		var array_mesh : ArrayMesh = st.commit()
 		
 		var dt := MeshDataTool.new()
 		var _a = dt.create_from_surface(array_mesh, 0)
+		return dt
+
+func apply_heights_to_mesh(
+	mesh: PlaneMesh, 
+	offset_x: int, 
+	offset_y: int
+) -> ArrayMesh:
+
+		var dt : MeshDataTool = get_datatool_for_mesh(mesh)
 		for i in range(dt.get_vertex_count()):
 			var vertex = dt.get_vertex(i)
 			var height = get_reshaped_elevation(
