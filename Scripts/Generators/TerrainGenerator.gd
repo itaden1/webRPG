@@ -17,8 +17,7 @@ export (Image) var red_brush
 export (Image) var green_brush
 export (Image) var blue_brush
 
-
-var test_town_scene = preload("res://Scenes/TestTown.tscn")
+onready var location_generator = load("res://Scripts/Generators/LocationGenerator.gd").new()
 var player_placed = false
 
 # var grass_2_texture: Image = preload("res://Materials/Grass_02-128x128.png")
@@ -143,6 +142,7 @@ var thread: Thread
 var instanced_chunks = {}
 
 var chunk_data := {}
+var tree_free_zone := []
 var thread_timer := Timer.new()
 
 class ChunkData:
@@ -170,7 +170,6 @@ func _start_chunk_generation():
 func _generation_thread_method(player_position):
 	var player_chunk_x = get_closest_multiple(int(player_position.x), chunk_size.x)
 	var player_chunk_z = get_closest_multiple(int(player_position.z), chunk_size.y)
-	print("player is at chunk ", player_chunk_x, "-", player_chunk_z)
 	render_world_chunks(Vector2(player_chunk_x, player_chunk_z))
 
 func render_world_chunks(start_pos: Vector2):
@@ -208,7 +207,7 @@ func render_world_chunks(start_pos: Vector2):
 			chunk_data[Vector2(x,y)] = ChunkData.new(mesh_inst)
 
 			add_child(mesh_inst)
-			place_towns(x, y, mesh_inst)
+			place_locations(x, y, mesh_inst)
 
 
 			call_deferred("place_trees", x, y, mesh_inst)
@@ -218,35 +217,75 @@ func render_world_chunks(start_pos: Vector2):
 			# call_deferred("place_towns", x, y, mesh_inst)
 
 
-func place_towns(x: int, y: int, mesh_inst: MeshInstance):
+func place_locations(x: int, y: int, mesh_inst: MeshInstance):
 	var dt: MeshDataTool = get_datatool_for_mesh(mesh_inst.lod_1_mesh)
-	var vert_idx = Rng.get_random_range(0, dt.get_vertex_count() -1 )
-	var vert = dt.get_vertex(vert_idx)
-	
-	# TODO replace with town generation script
-	var town = test_town_scene.instance()
-	var town_padding = 100
-	
-	for i in range(dt.get_vertex_count()):
-		var vertex: Vector3 = dt.get_vertex(i)
-		print(Vector2(vertex.x, vertex.z).distance_to(Vector2(vert.x, vert.z)))
-		if Vector2(vertex.x, vertex.z).distance_to(Vector2(vert.x, vert.z)) < town_padding and abs(vertex.y - vert.y) > 2:
-			vertex.y = vert.y
-			dt.set_vertex(i, vertex)
-	
-	var terrain_mesh := ArrayMesh.new()
-	dt.commit_to_surface(terrain_mesh)
-	mesh_inst.lod_1_mesh = terrain_mesh
+	var max_locations := 3
+	var location_count := 0
+	var max_attempts := 30
+	var attempts := 0
+	var locations : Dictionary = {}
+	while location_count < max_locations:
+		attempts += 1
+		if attempts >= max_attempts:
+			break
 
-	mesh_inst.add_child(town)
+		var vert_idx = Rng.get_random_range(0, dt.get_vertex_count() -1 )
 
-	town.global_transform.origin.y = vert.y
-	town.global_transform.origin.x = vert.x + x 
-	town.global_transform.origin.z = vert.z + y
+		var vert = dt.get_vertex(vert_idx)
+		
+		# allow some padding on chunk borders. make sure placement is within a certain distance from center of chunk
+		var distance_from_center: float = Vector2(vert.x, vert.z).distance_to(Vector2(0, 0))
+		if distance_from_center > chunk_size.x/3:
+			continue
 
-	if not player_placed:
-		player.global_transform.origin = town.get_node("Spawn").global_transform.origin
-		player_placed = true
+		# check for duplicate placement
+		if locations.has(vert_idx):
+			continue
+
+		# check for too cloes placement
+		var skip = false
+		for e in locations.values():
+			if e.distance_to(vert) < chunk_size.x/3:
+				skip = true
+		if skip:
+			continue
+		# check if underwater
+		if vert.y <= modify_land_height(OCEAN_LEVEL + 0.001):
+			continue
+
+		var location_data = location_generator.generate_town()
+		var location: Node = location_data.location_node
+		var location_padding = location_data.location_padding
+		
+		for i in range(dt.get_vertex_count()):
+			var vertex: Vector3 = dt.get_vertex(i)
+			if Vector2(vertex.x, vertex.z).distance_to(Vector2(vert.x, vert.z)) < location_padding:
+				vertex.y = vert.y
+				dt.set_vertex(i, vertex)
+		
+		var terrain_mesh := ArrayMesh.new()
+		var _a = dt.commit_to_surface(terrain_mesh)
+		mesh_inst.lod_1_mesh = terrain_mesh
+
+		mesh_inst.add_child(location)
+
+		location.global_transform.origin.y = vert.y
+		location.global_transform.origin.x = vert.x + x 
+		location.global_transform.origin.z = vert.z + y
+
+		locations[vert_idx] = vert
+		location_count += 1
+
+		tree_free_zone.append(
+			Rect2(
+				Vector2((vert.x + x) - location_padding, (vert.y + y) - location_padding), 
+				Vector2(location_padding*3, location_padding*3)
+			)
+		)
+
+		if not player_placed:
+			player.global_transform.origin = location.get_node("Spawn").global_transform.origin
+			player_placed = true
 
 func make_texture(x: int, y: int, mesh_inst: MeshInstance):
 	var splat_texture := ImageTexture.new()
@@ -256,8 +295,8 @@ func make_texture(x: int, y: int, mesh_inst: MeshInstance):
 	var paint_rect_size = 8
 	var rects_to_paint = image_size / paint_rect_size
 	splat_image.create(image_size, image_size, false, Image.FORMAT_RGBA8)
-	for i in range(0, rects_to_paint):
-		for j in range(0, rects_to_paint):
+	for i in range(1, rects_to_paint):
+		for j in range(1, rects_to_paint):
 			var region_size_x = (chunk_size.x / rects_to_paint)
 			var region_size_y = (chunk_size.y / rects_to_paint)
 			var pos_x = region_size_x * i + x -1000 # no idea why this magic number works but it does....
@@ -280,11 +319,19 @@ func place_trees(x: int, y: int, mesh_inst: MeshInstance):
 	# place some trees
 	var tree_spacing := 70.0
 	var ocean_line = modify_land_height(OCEAN_LEVEL + 0.001)
-	for i in range(int(chunk_size.x / tree_spacing)):
-		for l in range(int(chunk_size.y / tree_spacing)):
+	for i in range(int(chunk_size.x / tree_spacing )):
+		for l in range(int(chunk_size.y / tree_spacing )):
 			var position_x : float = x + i * tree_spacing#* Rng.get_random_range(tree_spacing-20, tree_spacing+20)
 			var position_y : float = y + l * tree_spacing#* Rng.get_random_range(tree_spacing-20, tree_spacing+20)
 
+			# skip if there is a town or other location around here
+			var skip := false
+			for z in tree_free_zone:
+				if z.intersects(Rect2(Vector2(position_x, position_y) , Vector2(30,30))):
+					skip = true
+			if skip:
+				continue
+			
 			var e = get_reshaped_elevation(position_x, position_y)
 			if e > ocean_line:
 				var _scene: PackedScene
