@@ -141,8 +141,15 @@ var biome_noise := OpenSimplexNoise.new()
 var thread: Thread
 
 var instanced_chunks = {}
+
+var chunk_data := {}
 var thread_timer := Timer.new()
 
+class ChunkData:
+	var mesh_instance: MeshInstance
+	
+	func _init(mesh_inst: MeshInstance):
+		mesh_instance = mesh_inst
 
 func get_closest_multiple(n: int, x: int):
 	if x > n:
@@ -198,18 +205,38 @@ func render_world_chunks(start_pos: Vector2):
 			mesh_inst.transform.origin = Vector3(x, 0, y)
 			instanced_chunks[Vector2(x,y)] = mesh_inst
 
+			chunk_data[Vector2(x,y)] = ChunkData.new(mesh_inst)
+
 			add_child(mesh_inst)
 			place_towns(x, y, mesh_inst)
 
+
 			call_deferred("place_trees", x, y, mesh_inst)
 			call_deferred("make_texture", x, y, mesh_inst)
+			
+			mesh_inst.finalize()
 			# call_deferred("place_towns", x, y, mesh_inst)
 
 
 func place_towns(x: int, y: int, mesh_inst: MeshInstance):
-	var dt = get_datatool_for_mesh(mesh_inst.lod_1_mesh)
-	var vert = dt.get_vertex(Rng.get_random_range(0, dt.get_vertex_count() -1 ))
+	var dt: MeshDataTool = get_datatool_for_mesh(mesh_inst.lod_1_mesh)
+	var vert_idx = Rng.get_random_range(0, dt.get_vertex_count() -1 )
+	var vert = dt.get_vertex(vert_idx)
+	
+	# TODO replace with town generation script
 	var town = test_town_scene.instance()
+	var town_padding = 100
+	
+	for i in range(dt.get_vertex_count()):
+		var vertex: Vector3 = dt.get_vertex(i)
+		print(Vector2(vertex.x, vertex.z).distance_to(Vector2(vert.x, vert.z)))
+		if Vector2(vertex.x, vertex.z).distance_to(Vector2(vert.x, vert.z)) < town_padding and abs(vertex.y - vert.y) > 2:
+			vertex.y = vert.y
+			dt.set_vertex(i, vertex)
+	
+	var terrain_mesh := ArrayMesh.new()
+	dt.commit_to_surface(terrain_mesh)
+	mesh_inst.lod_1_mesh = terrain_mesh
 
 	mesh_inst.add_child(town)
 

@@ -11,11 +11,6 @@ var timer := Timer.new()
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	mesh = lod_1_mesh
-	create_trimesh_collision()
-	mesh = lod_2_mesh
-
-	check_lod()
 
 	timer.wait_time = 1
 	var _a = timer.connect("timeout", self, "check_lod")
@@ -25,6 +20,12 @@ func _ready():
 func ready_for_lod():
 	return lod_1_mesh != null and lod_2_mesh != null and player != null 
 
+func finalize():
+	mesh = lod_1_mesh
+	create_trimesh_collision()
+	mesh = lod_2_mesh
+
+	check_lod()
 
 func check_lod():
 	if ready_for_lod():
