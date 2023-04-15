@@ -1,6 +1,11 @@
 extends Node
 
-var test_town_scene = preload("res://Scenes/TestTown.tscn")
+
+var test_town_scene = preload("res://Scenes/Towns/TestTown.tscn")
+
+
+func generate_location():
+	return generate_town()
 
 
 func generate_town():

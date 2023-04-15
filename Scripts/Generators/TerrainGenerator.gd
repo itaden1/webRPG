@@ -253,7 +253,7 @@ func place_locations(x: int, y: int, mesh_inst: MeshInstance):
 		if vert.y <= modify_land_height(OCEAN_LEVEL + 0.001):
 			continue
 
-		var location_data = location_generator.generate_town()
+		var location_data = location_generator.generate_location()
 		var location: Node = location_data.location_node
 		var location_padding = location_data.location_padding
 		
@@ -278,8 +278,8 @@ func place_locations(x: int, y: int, mesh_inst: MeshInstance):
 
 		tree_free_zone.append(
 			Rect2(
-				Vector2((vert.x + x) - location_padding, (vert.y + y) - location_padding), 
-				Vector2(location_padding*3, location_padding*3)
+				Vector2(x + vert.x - location_padding, y + vert.z - location_padding), 
+				Vector2(location_padding*2, location_padding*2)
 			)
 		)
 
@@ -295,12 +295,12 @@ func make_texture(x: int, y: int, mesh_inst: MeshInstance):
 	var paint_rect_size = 8
 	var rects_to_paint = image_size / paint_rect_size
 	splat_image.create(image_size, image_size, false, Image.FORMAT_RGBA8)
-	for i in range(1, rects_to_paint):
-		for j in range(1, rects_to_paint):
+	for i in range(rects_to_paint):
+		for j in range(rects_to_paint):
 			var region_size_x = (chunk_size.x / rects_to_paint)
 			var region_size_y = (chunk_size.y / rects_to_paint)
-			var pos_x = region_size_x * i + x -1000 # no idea why this magic number works but it does....
-			var pos_y = region_size_y * j + y -1000
+			var pos_x = region_size_x * i + x - (chunk_size.x / 2) 
+			var pos_y = region_size_y * j + y - (chunk_size.y / 2) 
 
 			var biome: int = get_biome(pos_x, pos_y)
 			var tiles : Array = biome_brushes[biome]
@@ -327,7 +327,7 @@ func place_trees(x: int, y: int, mesh_inst: MeshInstance):
 			# skip if there is a town or other location around here
 			var skip := false
 			for z in tree_free_zone:
-				if z.intersects(Rect2(Vector2(position_x, position_y) , Vector2(30,30))):
+				if z.intersects(Rect2(Vector2(position_x, position_y) , Vector2(1,1))):
 					skip = true
 			if skip:
 				continue
@@ -381,7 +381,7 @@ func _ready():
 	add_child(thread_timer)
 	thread_timer.wait_time = chunk_load_time
 	thread_timer.one_shot = false
-	thread_timer.connect("timeout", self, "_start_chunk_generation")
+	var _a = thread_timer.connect("timeout", self, "_start_chunk_generation")
 	thread_timer.start()
 
 	hill_noise.seed = Rng.get_random_int()

@@ -17,6 +17,8 @@ ambient_light_color = Color( 1, 1, 1, 1 )
 ambient_light_energy = 0.5
 fog_enabled = true
 fog_color = Color( 0.501961, 0.6, 0.701961, 1 )
+fog_depth_begin = 5.0
+fog_depth_end = 1500.0
 
 [sub_resource type="PlaneMesh" id=2]
 subdivide_width = 100
