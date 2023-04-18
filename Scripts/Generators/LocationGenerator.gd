@@ -13,7 +13,7 @@ func generate_town():
 	town_node.generate_town({})
 
 	return {
-		location_node = test_town_scene.instance(),
+		location_node = town_node,
 		location_padding = 100
 	}
 

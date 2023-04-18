@@ -284,7 +284,8 @@ func place_locations(x: int, y: int, mesh_inst: MeshInstance):
 		)
 
 		if not player_placed:
-			player.global_transform.origin = location.get_node("Spawn").global_transform.origin
+			player.global_transform.origin = location.global_transform.origin
+			player.global_transform.origin.y = 300
 			player_placed = true
 
 func make_texture(x: int, y: int, mesh_inst: MeshInstance):
