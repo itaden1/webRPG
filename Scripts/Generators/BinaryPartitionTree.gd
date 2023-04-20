@@ -9,7 +9,7 @@ func partition_rect(
 	max_partitions: int, 
 	max_room_size: int,
 	min_room_size: int,
-	padding: Array = [],
+	padding: Array = [0],
 	current_partition: int = 0
 ):
 
@@ -20,7 +20,7 @@ func partition_rect(
 		return
 
 	var partition_directions = ["v", "h"]
-	var padd = 1
+	var padd = padding[padding.size()-1] # Default to the last value
 	if current_partition <= padding.size() - 1:
 		padd = padding[current_partition]
 	

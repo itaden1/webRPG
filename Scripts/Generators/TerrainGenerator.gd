@@ -118,7 +118,7 @@ var biome_objects = {
 }
 
 
-const OCEAN_LEVEL = 0.25
+const OCEAN_LEVEL = 0.12
 
 export (ShaderMaterial) var world_material = load("res://Materials/SplatMap.tres")
 export (Vector2) var chunks_to_render = Vector2(3, 3)
@@ -285,7 +285,7 @@ func place_locations(x: int, y: int, mesh_inst: MeshInstance):
 
 		if not player_placed:
 			player.global_transform.origin = location.global_transform.origin
-			player.global_transform.origin.y = 300
+			player.global_transform.origin.y = location.global_transform.origin.y + 20
 			player_placed = true
 
 func make_texture(x: int, y: int, mesh_inst: MeshInstance):
@@ -467,8 +467,9 @@ func get_reshaped_elevation(x: float, y: float) -> float:
 		#modify the exponent to have flatter lands above ocean level
 		var e = elevation - OCEAN_LEVEL
 
-		return pow(e * 25 * 1.2, 3) + modify_land_height(OCEAN_LEVEL) + 1
-	
+		#return pow(e * 25 * 1.2, 3) + modify_land_height(OCEAN_LEVEL) + 1
+		#return pow(e * hill_multiplyer, hill_exponent) + modify_land_height(OCEAN_LEVEL) + 1
+		return modify_land_height(e) + modify_land_height(OCEAN_LEVEL) + 1
 	return modify_land_height(elevation)
 	
 func _exit_tree():

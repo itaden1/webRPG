@@ -33,8 +33,9 @@ red_brush = ExtResource( 4 )
 green_brush = ExtResource( 5 )
 blue_brush = ExtResource( 6 )
 world_material = ExtResource( 2 )
-world_size = Vector2( 10000, 10000 )
-hill_exponent_fudge = 1.0
+world_size = Vector2( 20000, 20000 )
+hill_multiplyer = 25.0
+hill_exponent_fudge = 1.2
 
 [node name="Player" parent="." instance=ExtResource( 3 )]
 transform = Transform( 1, 0, 0, 0, 0.999678, 0.0253394, 0, -0.0253394, 0.999678, 5000, 772.122, 3060.56 )
