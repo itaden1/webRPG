@@ -1,7 +1,7 @@
 extends Spatial
 
 const bpt_generator = preload("res://Scripts/Generators/BinaryPartitionTree.gd")
-const basic_block = preload("res://Scenes/Towns/BuildingBlocks/Generic/Block.tscn")
+const basic_block = preload("res://Scenes/Towns/BuildingBlocks/Generic/Generic2.tscn")
 
 const offset := 14
 
