@@ -2,6 +2,9 @@ extends Spatial
 
 const bpt_generator = preload("res://Scripts/Generators/BinaryPartitionTree.gd")
 const basic_block = preload("res://Scenes/Towns/BuildingBlocks/Generic/Generic2.tscn")
+const utilities = preload("res://Scripts/Utilities.gd")
+
+var Utilities
 
 const offset := 14
 
@@ -9,6 +12,7 @@ var width: float
 var height: float
 
 func generate_town(params: Dictionary):
+	Utilities = utilities.new()
 	width = params.width
 	height = params.height
 	var bpt = bpt_generator.new()
@@ -40,6 +44,10 @@ func build_house(rect: Rect2):
 	for y in range(floors):
 		for x in range(start_x, start_x + rect.size.x):
 			for z in range(start_y, start_y + rect.size.y):
+				var mask = Utilities.get_four_bit_bitmask(rect, Vector2(x + width/2, z + height/2))
+				# print(rect, "::", Vector2(x, z))
+				if mask < 15:
+					print(mask)
 				var block = basic_block.instance()
 
 				# block.material_override = material
