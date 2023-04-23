@@ -2,14 +2,41 @@ extends Spatial
 
 const bpt_generator = preload("res://Scripts/Generators/BinaryPartitionTree.gd")
 const basic_block = preload("res://Scenes/Towns/BuildingBlocks/Generic/Generic2.tscn")
+const corner_block = preload("res://Scenes/Towns/BuildingBlocks/Generic/Corner.tscn")
+const wall_block = preload("res://Scenes/Towns/BuildingBlocks/Generic/Wall.tscn")
+
+const blank_block = preload("res://Scenes/Towns/BuildingBlocks/Generic/Blank.tscn")
+
+
 const utilities = preload("res://Scripts/Utilities.gd")
 
 var Utilities
 
-const offset := 14
+const offset := 8.5
 
 var width: float
 var height: float
+
+var themes = {
+	standard = {
+		0 : {},
+		1 : {scene=wall_block, rotation=180},
+		2 : {scene=wall_block, rotation=270},
+		3 : {scene=corner_block, rotation=0},
+		4 : {scene=wall_block, rotation=90},
+		5 : {scene=corner_block, rotation=270},
+		6 : {},
+		7 : {},
+		8 : {scene=wall_block, rotation=0},
+		9 : {},
+		10 : {scene=corner_block, rotation=90},
+		11 : {},
+		12 : {scene=corner_block, rotation=180},
+		13 : {},
+		14 : {},
+		15 : {}
+	}
+}
 
 func generate_town(params: Dictionary):
 	Utilities = utilities.new()
@@ -23,20 +50,21 @@ func generate_town(params: Dictionary):
 		2,
 		[3, 2, 1, 0]
 	)
+	var padding = 0.0
 	for b in tree.keys():
 		if tree[b].size() <= 0:
-			build_house(b)
+			padding += 0.1
+			build_house(b, padding)
+
+func get_block(mask: int) -> Dictionary:
+	var block = themes.standard[mask]
+	if block.keys().size() <= 0:
+		block = {scene=blank_block, rotation=0}
+	return block
+	
 
 
-func build_house(rect: Rect2):
-
-	# debug colours
-	# var colours = [
-	# 	Color(255, 0, 0), Color(0, 255, 0), Color(0, 0, 255),
-	# 	Color(200, 100, 0), Color(0, 200, 100), Color(100, 0, 200)
-	# ]
-	# var material = SpatialMaterial.new()
-	# material.albedo_color = colours[rand_range(0, colours.size())]
+func build_house(rect: Rect2, padding: float = 0):
 
 	var floors = Rng.get_random_range(1,2)
 	var start_x = rect.position.x - width/2
@@ -45,18 +73,15 @@ func build_house(rect: Rect2):
 		for x in range(start_x, start_x + rect.size.x):
 			for z in range(start_y, start_y + rect.size.y):
 				var mask = Utilities.get_four_bit_bitmask(rect, Vector2(x + width/2, z + height/2))
-				# print(rect, "::", Vector2(x, z))
-				if mask < 15:
-					print(mask)
-				var block = basic_block.instance()
 
-				# block.material_override = material
+				var block = get_block(mask)
+				var inst: Spatial = block.scene.instance()
+				inst.rotate(Vector3.UP, deg2rad(block.rotation))
 
-				add_child(block)
-				block.transform.origin.x = x * offset #+ rand_range(0, 0.4)
-				block.transform.origin.z = z * offset #+ rand_range(0, 0.4)
-				block.transform.origin.y += y * offset#+ rand_range(0, 0.4)
+				add_child(inst)
+				inst.transform.origin.x = x * offset
+				inst.transform.origin.z = z * offset
+				inst.transform.origin.y += y * offset
 
 			
 	
-

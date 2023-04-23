@@ -45,3 +45,8 @@ func _test_four_bit_mask():
 	var result4 = get_four_bit_bitmask(rect4, Vector2(1, 1))
 	var message4 = "Expected 15, got %s"
 	assert(result4 == 15, message4 % result4)
+
+	var rect5 = Rect2(Vector2(1, 1), Vector2(3, 3))
+	var result5 = get_four_bit_bitmask(rect5, Vector2(2, 3))
+	var message5 = "Expected 8, got %s"
+	assert(result5 == 8, message5 % result5)
