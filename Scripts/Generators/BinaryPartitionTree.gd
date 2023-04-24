@@ -26,12 +26,12 @@ func partition_rect(
 	
 	# check if further split possible
 	var direction = partition_directions[Rng.get_random_range(0,1)]
-	if rect.size.x/2 - padd <= min_room_size and rect.size.y/2 - padd <= min_room_size:
+	if int(ceil(rect.size.x/2 - padd)) < min_room_size and int(ceil(rect.size.y/2 - padd)) < min_room_size:
 		rects.append(rect)
 		return
-	elif rect.size.x/2 - padd <= min_room_size:
+	elif int(ceil(rect.size.x/2 - padd)) < min_room_size:
 		direction = "h"
-	elif rect.size.y/2 - padd <= min_room_size:
+	elif int(ceil(rect.size.y/2 - padd)) < min_room_size:
 		direction = "v"
 
 	if direction == "v":

@@ -45,16 +45,15 @@ func generate_town(params: Dictionary):
 	var bpt = bpt_generator.new()
 	var tree = bpt.partition_rect(
 		Rect2(Vector2(0, 0), Vector2(width, height)),
-		8,
+		params.partitions,
 		6,
 		2,
-		[3, 2, 1, 0]
+		params.padding
 	)
-	var padding = 0.0
+
 	for b in tree.keys():
 		if tree[b].size() <= 0:
-			padding += 0.1
-			build_house(b, padding)
+			build_house(b)
 
 func get_block(mask: int) -> Dictionary:
 	var block = themes.standard[mask]
@@ -64,7 +63,7 @@ func get_block(mask: int) -> Dictionary:
 	
 
 
-func build_house(rect: Rect2, padding: float = 0):
+func build_house(rect: Rect2):
 
 	var floors = Rng.get_random_range(1,2)
 	var start_x = rect.position.x - width/2
