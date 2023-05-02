@@ -1,10 +1,11 @@
 extends Spatial
 
 const bpt_generator = preload("res://Scripts/Generators/BinaryPartitionTree.gd")
-const basic_block = preload("res://Scenes/Towns/BuildingBlocks/Generic/Generic2.tscn")
-const corner_block = preload("res://Scenes/Towns/BuildingBlocks/Generic/Corner.tscn")
-const wall_block = preload("res://Scenes/Towns/BuildingBlocks/Generic/Wall.tscn")
+const door_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/WallDoor001.tscn")
+const corner_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/GroundfloorCornerWindow001.tscn")
+const wall_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/GroundFloorWall001.tscn")
 
+const ground_floor = preload("res://Scenes/Towns/BuildingBlocks/Tudor/Floor001.tscn")
 const blank_block = preload("res://Scenes/Towns/BuildingBlocks/Generic/Blank.tscn")
 
 

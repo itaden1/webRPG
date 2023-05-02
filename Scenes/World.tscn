@@ -17,8 +17,6 @@ ambient_light_color = Color( 1, 1, 1, 1 )
 ambient_light_energy = 0.5
 fog_enabled = true
 fog_color = Color( 0.501961, 0.6, 0.701961, 1 )
-fog_depth_begin = 5.0
-fog_depth_end = 1500.0
 
 [sub_resource type="PlaneMesh" id=2]
 subdivide_width = 100
@@ -34,7 +32,7 @@ green_brush = ExtResource( 5 )
 blue_brush = ExtResource( 6 )
 world_material = ExtResource( 2 )
 chunks_to_render = Vector2( 2, 2 )
-world_size = Vector2( 20000, 20000 )
+world_size = Vector2( 50000, 50000 )
 hill_exponent_fudge = 1.0
 
 [node name="Player" parent="." instance=ExtResource( 3 )]
