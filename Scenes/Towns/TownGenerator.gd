@@ -19,6 +19,13 @@ var Utilities
 
 const offset := 8.5
 
+var offsets := {
+	tudor = {
+		0: 8.25,
+		1: 9.8
+	}
+}
+
 var width: float
 var height: float
 
@@ -46,16 +53,16 @@ var themes = {
 			0 : {},
 			1 : {scene=first_floor_wall_block, rotation=180},
 			2 : {scene=first_floor_wall_block, rotation=270},
-			3 : {scene=first_floor_corner_block, rotation=0},
+			3 : {scene=first_floor_corner_block, rotation=270},
 			4 : {scene=first_floor_wall_block, rotation=90},
-			5 : {scene=first_floor_corner_block, rotation=270},
+			5 : {scene=first_floor_corner_block, rotation=180},
 			6 : {},
 			7 : {},
 			8 : {scene=first_floor_wall_block, rotation=0},
 			9 : {},
-			10 : {scene=first_floor_corner_block, rotation=90},
+			10 : {scene=first_floor_corner_block, rotation=0},
 			11 : {},
-			12 : {scene=first_floor_corner_block, rotation=180},
+			12 : {scene=first_floor_corner_block, rotation=90},
 			13 : {},
 			14 : {},
 			15 : {}
@@ -98,9 +105,9 @@ func build_house(rect: Rect2):
 	var floors = Rng.get_random_range(1,2)
 	# var start_x = rect.position.x - width/2
 	# var start_y = rect.position.y - height/2
-	build_floor(rect, 0)
+	build_floor(rect, "tudor", 0)
 	if floors == 2:
-		build_floor(rect, 1)
+		build_floor(rect, "tudor", 1)
 	# for x in range(start_x, start_x + rect.size.x):
 	# 	for z in range(start_y, start_y + rect.size.y):
 	# 		var mask = Utilities.get_four_bit_bitmask(rect, Vector2(x + width/2, z + height/2))
@@ -114,10 +121,11 @@ func build_house(rect: Rect2):
 	# 		inst.transform.origin.z = z * offset
 
 			
-func build_floor(rect: Rect2, level: int):
+func build_floor(rect: Rect2, style: String, level: int):
 	var start_x = rect.position.x - width/2
 	var start_y = rect.position.y - height/2
 	var floor_block = get_floor_block(level)
+	var offset = offsets[style][level]
 	for x in range(start_x, start_x + rect.size.x):
 		for z in range(start_y, start_y + rect.size.y):
 			var floor_inst: Spatial = floor_block.instance()
@@ -130,7 +138,7 @@ func build_floor(rect: Rect2, level: int):
 
 			var mask = Utilities.get_four_bit_bitmask(rect, Vector2(x + width/2, z + height/2))
 
-			var block = get_block(mask, "tudor", level)
+			var block = get_block(mask, style, level)
 			var inst: Spatial = block.scene.instance()
 			inst.rotate(Vector3.UP, deg2rad(block.rotation))
 

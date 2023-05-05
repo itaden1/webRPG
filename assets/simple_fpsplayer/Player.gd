@@ -4,8 +4,8 @@ var global = "root/global"
 
 const GRAVITY = -32.8
 var vel = Vector3()
-const MAX_SPEED = 250
-const JUMP_SPEED = 100
+const MAX_SPEED = 50
+const JUMP_SPEED = 30
 const ACCEL = 50.5
 
 var dir = Vector3()
