@@ -366,7 +366,7 @@ func get_biome(x: float, y: float):
 	elif altitude > 300:
 		if moisture > 0.6: return biomes.SNOW_FORRESTS
 		else: return biomes.SNOW_PLANES
-	elif altitude > 100:
+	elif altitude > 50:
 		if moisture > 0.6: return biomes.TEMPERATE_DECIDUOUS_FOREST
 		elif moisture > 0.4: return biomes.WOODLANDS
 		else: return biomes.GRASSLAND

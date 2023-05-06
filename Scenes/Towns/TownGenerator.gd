@@ -15,14 +15,14 @@ const blank_block = preload("res://Scenes/Towns/BuildingBlocks/Generic/Blank.tsc
 
 const utilities = preload("res://Scripts/Utilities.gd")
 
+# const test_placement_scene = preload("res://Scenes/Towns/BuildingBlocks/Generic/TestPlacement.tscn")
+
 var Utilities
 
-const offset := 8.5
-
-var offsets := {
+var level_offsets := {
 	tudor = {
-		0: 8.25,
-		1: 9.8
+		0: {horizontal = 8.25, vertical = 0},
+		1: {horizontal = 9.8, vertical = 9}
 	}
 }
 
@@ -103,46 +103,50 @@ func get_floor_block(key: int) -> PackedScene:
 func build_house(rect: Rect2):
 
 	var floors = Rng.get_random_range(1,2)
-	# var start_x = rect.position.x - width/2
-	# var start_y = rect.position.y - height/2
-	build_floor(rect, "tudor", 0)
+
+	var first_floor: Spatial = build_floor(rect, "tudor", 0)
+	add_child(first_floor)
 	if floors == 2:
-		build_floor(rect, "tudor", 1)
-	# for x in range(start_x, start_x + rect.size.x):
-	# 	for z in range(start_y, start_y + rect.size.y):
-	# 		var mask = Utilities.get_four_bit_bitmask(rect, Vector2(x + width/2, z + height/2))
-
-	# 		var block = get_block(mask)
-	# 		var inst: Spatial = block.scene.instance()
-	# 		inst.rotate(Vector3.UP, deg2rad(block.rotation))
-
-	# 		add_child(inst)
-	# 		inst.transform.origin.x = x * offset
-	# 		inst.transform.origin.z = z * offset
+		var second_floor: Spatial = build_floor(rect, "tudor", 1)
+		## Attempt to keep both floors inline even if size is different
+		var level_offset_difference = level_offsets["tudor"][1].horizontal - level_offsets["tudor"][0].horizontal
+		second_floor.transform.origin.x = first_floor.transform.origin.x - level_offset_difference
+		second_floor.transform.origin.z = first_floor.transform.origin.z - level_offset_difference
+		add_child(second_floor)
+	
 
 			
-func build_floor(rect: Rect2, style: String, level: int):
-	var start_x = rect.position.x - width/2
-	var start_y = rect.position.y - height/2
+func build_floor(rect: Rect2, style: String, level: int) -> Spatial:
+	var offsets = level_offsets[style][level]
+
+	var base_node = Spatial.new()
+	var rect_center = rect.get_center()
+
+	var start_x = rect_center.x - width/2
+	var start_y = rect_center.y - height/2
+
+	base_node.transform.origin.x = start_x * offsets.horizontal
+	base_node.transform.origin.z = start_y * offsets.horizontal
+	base_node.transform.origin.y = level * offsets.vertical
+
 	var floor_block = get_floor_block(level)
-	var offset = offsets[style][level]
-	for x in range(start_x, start_x + rect.size.x):
-		for z in range(start_y, start_y + rect.size.y):
+	for x in range(0, rect.size.x):
+		for z in range(0, rect.size.y):
 			var floor_inst: Spatial = floor_block.instance()
 
-			add_child(floor_inst)
-			floor_inst.transform.origin.x = x * offset
-			floor_inst.transform.origin.z = z * offset
-			floor_inst.transform.origin.y = level * offset
+			base_node.add_child(floor_inst)
+			floor_inst.transform.origin.x = x * offsets.horizontal
+			floor_inst.transform.origin.z = z * offsets.horizontal
 
 
-			var mask = Utilities.get_four_bit_bitmask(rect, Vector2(x + width/2, z + height/2))
+			var mask = Utilities.get_four_bit_bitmask(rect, Vector2(rect.position.x+x, rect.position.y+z))
 
 			var block = get_block(mask, style, level)
 			var inst: Spatial = block.scene.instance()
 			inst.rotate(Vector3.UP, deg2rad(block.rotation))
 
-			add_child(inst)
-			inst.transform.origin.x = x * offset
-			inst.transform.origin.z = z * offset
-			inst.transform.origin.y = level * offset
+			base_node.add_child(inst)
+			inst.transform.origin.x = x * offsets.horizontal
+			inst.transform.origin.z = z * offsets.horizontal
+	
+	return base_node
