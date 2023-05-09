@@ -10,7 +10,7 @@ func generate_location():
 
 func generate_town():
 	var town_node = town_scene.instance()
-	town_node.generate_town({width=12, height=12, partitions=10, padding=[3,2,1,1]})
+	town_node.generate_town({width=10, height=10, partitions=10, padding=[3,2,1]})
 
 	return {
 		location_node = town_node,

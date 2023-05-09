@@ -12,6 +12,7 @@ const ground_floor = preload("res://Scenes/Towns/BuildingBlocks/Tudor/Floor001.t
 const first_floor = preload("res://Scenes/Towns/BuildingBlocks/Tudor/FloorUpper001.tscn")
 const blank_block = preload("res://Scenes/Towns/BuildingBlocks/Generic/Blank.tscn")
 
+const roof_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/RoofEdge001.tscn")
 
 const utilities = preload("res://Scripts/Utilities.gd")
 
@@ -22,9 +23,15 @@ var Utilities
 var level_offsets := {
 	tudor = {
 		0: {horizontal = 8.25, vertical = 0},
-		1: {horizontal = 9.8, vertical = 9}
+		1: {horizontal = 9.8, vertical = 9},
+		"default": {horizontal = 9.8, vertical = 9}
 	}
 }
+func get_level_offset(key: String, level: int) -> Dictionary:
+	if level_offsets.has(key):
+		if level_offsets[key].has(level):
+			return level_offsets[key][level]
+	return level_offsets["tudor"]["default"]
 
 var width: float
 var height: float
@@ -66,6 +73,24 @@ var themes = {
 			13 : {},
 			14 : {},
 			15 : {}
+		},
+		"roof" : {# Roof
+			0 : {},
+			1 : {scene=roof_block, rotation=90},#
+			2 : {scene=roof_block, rotation=90},
+			3 : {scene=roof_block, rotation=90},
+			4 : {scene=roof_block, rotation=90},
+			5 : {scene=roof_block, rotation=90},
+			6 : {},
+			7 : {},
+			8 : {scene=roof_block, rotation=180},#
+			9 : {},
+			10 : {scene=roof_block, rotation=270},
+			11 : {},
+			12 : {scene=roof_block, rotation=270},#
+			13 : {},
+			14 : {},
+			15 : {}
 		}
 	}
 }
@@ -92,7 +117,14 @@ func generate_town(params: Dictionary):
 			build_house(b)
 
 func get_block(mask: int, style: String, level: int) -> Dictionary:
-	var block = themes[style][level][mask]
+	var level_style = themes[style]
+	var block: Dictionary
+	if level_style.has(level):
+		block = themes[style][level][mask]
+	else:
+		block = themes[style]["roof"][mask]
+
+
 	if block.keys().size() <= 0:
 		block = {scene=blank_block, rotation=0}
 	return block
@@ -117,13 +149,46 @@ func build_house(rect: Rect2):
 			rect.grow(level_offsets["tudor"][1].horizontal),
 			rect.grow(level_offsets["tudor"][0].horizontal)
 		)
-		print(rect_diff)
 		second_floor.transform.origin.x = first_floor.transform.origin.x - rect_diff.x/2
 		second_floor.transform.origin.z = first_floor.transform.origin.z - rect_diff.y/2
 		add_child(second_floor)
 	
+	var roof = build_roof(rect, "tudor", floors)
+	var rect_diff = Utilities.get_rect_difference(
+			rect.grow(get_level_offset("tudor", 1).horizontal),
+			rect.grow(get_level_offset("tudor", 0).horizontal)
+	)
+	roof.transform.origin.x = first_floor.transform.origin.x - rect_diff.x/2
+	roof.transform.origin.z = first_floor.transform.origin.z - rect_diff.y/2
+	add_child(roof)
 
-			
+func build_roof(rect: Rect2, style: String, level: int):
+	var offsets = get_level_offset(style, level)
+	var base_node = Spatial.new()
+	var rect_center = rect.get_center()
+
+	var start_x = rect_center.x - width/2
+	var start_y = rect_center.y - height/2
+
+	base_node.transform.origin.x = start_x * offsets.horizontal
+	base_node.transform.origin.z = start_y * offsets.horizontal
+	base_node.transform.origin.y = level * offsets.vertical
+	for x in range(0, rect.size.x):
+		for z in range(0, rect.size.y):
+
+			var mask = Utilities.get_four_bit_bitmask(rect, Vector2(rect.position.x+x, rect.position.y+z))
+
+			var block = get_block(mask, style, 10)
+			var inst: Spatial = block.scene.instance()
+			inst.rotate(Vector3.UP, deg2rad(block.rotation))
+
+			base_node.add_child(inst)
+			inst.transform.origin.x = x * offsets.horizontal
+			inst.transform.origin.z = z * offsets.horizontal
+	
+	return base_node
+
+
 func build_floor(rect: Rect2, style: String, level: int) -> Spatial:
 	var offsets = level_offsets[style][level]
 

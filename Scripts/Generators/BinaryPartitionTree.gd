@@ -23,7 +23,7 @@ func partition_rect(
 	var padd = padding[padding.size()-1] # Default to the last value
 	if current_partition <= padding.size() - 1:
 		padd = padding[current_partition]
-	
+
 	# check if further split possible
 	var direction = partition_directions[Rng.get_random_range(0,1)]
 	if int(ceil(rect.size.x/2 - padd)) < min_room_size and int(ceil(rect.size.y/2 - padd)) < min_room_size:
