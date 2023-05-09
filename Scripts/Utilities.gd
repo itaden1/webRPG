@@ -4,7 +4,7 @@ extends Node
 func _init():
 	._init()
 	if not OS.has_feature("standalone") or OS.is_debug_build():
-		_test_four_bit_mask()
+		_run_tests()
 
 func get_four_bit_bitmask(rect: Rect2, tile: Vector2) -> int:
 	var values = {
@@ -24,6 +24,8 @@ func get_bitmask(rect: Rect2, tile: Vector2, values: Dictionary) -> int:
 			accumulation += values[v]
 	return accumulation
 
+func _run_tests():
+	_test_four_bit_mask()
 
 func _test_four_bit_mask():
 	var rect = Rect2(Vector2(1, 1), Vector2(6, 6))
@@ -50,3 +52,12 @@ func _test_four_bit_mask():
 	var result5 = get_four_bit_bitmask(rect5, Vector2(2, 3))
 	var message5 = "Expected 8, got %s"
 	assert(result5 == 8, message5 % result5)
+
+
+
+func get_rect_difference(first_rect: Rect2, second_rect: Rect2) -> Vector2:
+	# get the difference in size between 2 Rect2's.
+	return Vector2(
+		abs(first_rect.size.x - second_rect.size.x),
+		abs(first_rect.size.y - second_rect.size.y)
+	)

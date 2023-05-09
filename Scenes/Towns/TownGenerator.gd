@@ -70,8 +70,12 @@ var themes = {
 	}
 }
 
-func generate_town(params: Dictionary):
+func _init():
+	._init()
 	Utilities = utilities.new()
+
+
+func generate_town(params: Dictionary):
 	width = params.width
 	height = params.height
 	var bpt = bpt_generator.new()
@@ -109,9 +113,13 @@ func build_house(rect: Rect2):
 	if floors == 2:
 		var second_floor: Spatial = build_floor(rect, "tudor", 1)
 		## Attempt to keep both floors inline even if size is different
-		var level_offset_difference = level_offsets["tudor"][1].horizontal - level_offsets["tudor"][0].horizontal
-		second_floor.transform.origin.x = first_floor.transform.origin.x - level_offset_difference
-		second_floor.transform.origin.z = first_floor.transform.origin.z - level_offset_difference
+		var rect_diff = Utilities.get_rect_difference(
+			rect.grow(level_offsets["tudor"][1].horizontal),
+			rect.grow(level_offsets["tudor"][0].horizontal)
+		)
+		print(rect_diff)
+		second_floor.transform.origin.x = first_floor.transform.origin.x - rect_diff.x/2
+		second_floor.transform.origin.z = first_floor.transform.origin.z - rect_diff.y/2
 		add_child(second_floor)
 	
 
