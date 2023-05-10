@@ -12,7 +12,13 @@ const ground_floor = preload("res://Scenes/Towns/BuildingBlocks/Tudor/Floor001.t
 const first_floor = preload("res://Scenes/Towns/BuildingBlocks/Tudor/FloorUpper001.tscn")
 const blank_block = preload("res://Scenes/Towns/BuildingBlocks/Generic/Blank.tscn")
 
-const roof_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/RoofEdge001.tscn")
+const roof_edge_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/RoofEdge001.tscn")
+const roof_corner_block_1 = preload("res://Scenes/Towns/BuildingBlocks/Tudor/RoofCornerNE001.tscn")
+const roof_corner_block_2 = preload("res://Scenes/Towns/BuildingBlocks/Tudor/RoofCornerSE001.tscn")
+
+const roof_peak = preload("res://Scenes/Towns/BuildingBlocks/Tudor/RoofPeak001.tscn")
+const roof_peak_wall = preload("res://Scenes/Towns/BuildingBlocks/Tudor/RoofPeakWall001.tscn")
+
 
 const utilities = preload("res://Scripts/Utilities.gd")
 
@@ -75,19 +81,19 @@ var themes = {
 			15 : {}
 		},
 		"roof" : {# Roof
-			0 : {},
-			1 : {scene=roof_block, rotation=90},#
-			2 : {scene=roof_block, rotation=90},
-			3 : {scene=roof_block, rotation=90},
-			4 : {scene=roof_block, rotation=90},
-			5 : {scene=roof_block, rotation=90},
+			0 : {scene=roof_peak, rotation=0},
+			1 : {scene=roof_peak_wall, rotation=0},#
+			2 : {scene=roof_edge_block, rotation=180},
+			3 : {scene=roof_corner_block_2, rotation=180},
+			4 : {scene=roof_edge_block, rotation=0},
+			5 : {scene=roof_corner_block_1, rotation=0},
 			6 : {},
 			7 : {},
-			8 : {scene=roof_block, rotation=180},#
+			8 : {scene=roof_peak_wall, rotation=180},#
 			9 : {},
-			10 : {scene=roof_block, rotation=270},
+			10 : {scene=roof_corner_block_1, rotation=180},
 			11 : {},
-			12 : {scene=roof_block, rotation=270},#
+			12 : {scene=roof_corner_block_2, rotation=0},#
 			13 : {},
 			14 : {},
 			15 : {}

@@ -8,15 +8,17 @@
 [ext_resource path="res://Materials/blue_brush_1.png" type="Image" id=6]
 
 [sub_resource type="ProceduralSky" id=4]
+sky_top_color = Color( 0.533333, 0.588235, 0.615686, 1 )
+sky_horizon_color = Color( 0.321569, 0.341176, 0.356863, 1 )
+ground_horizon_color = Color( 0.141176, 0.207843, 0.52549, 1 )
 
 [sub_resource type="Environment" id=1]
-background_mode = 1
+background_mode = 2
 background_sky = SubResource( 4 )
 background_color = Color( 0.501961, 0.6, 0.701961, 1 )
 ambient_light_color = Color( 1, 1, 1, 1 )
-ambient_light_energy = 0.5
 fog_enabled = true
-fog_color = Color( 0.501961, 0.6, 0.701961, 1 )
+fog_color = Color( 0.211765, 0.235294, 0.258824, 1 )
 
 [sub_resource type="PlaneMesh" id=2]
 subdivide_width = 100
@@ -40,6 +42,7 @@ transform = Transform( 1, 0, 0, 0, 0.999678, 0.0253394, 0, -0.0253394, 0.999678,
 
 [node name="DirectionalLight" type="DirectionalLight" parent="."]
 transform = Transform( 1, 0, 0, 0, 0.753081, 0.657928, 0, -0.657928, 0.753081, 0, 2.64305, 0 )
+visible = false
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource( 1 )
