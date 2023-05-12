@@ -1,7 +1,7 @@
 extends Node
 
 var random_number_generator = RandomNumberGenerator.new()
-var _seed: String = 'try to catch the bandersnatch!'
+var _seed: String = 'the meaning of everything!'
 var intialised: bool = false
 
 func _ready():

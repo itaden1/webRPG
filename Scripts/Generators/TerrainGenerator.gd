@@ -185,6 +185,8 @@ func render_world_chunks(start_pos: Vector2):
 				y
 			)):
 				continue
+			if abs(x) > world_size.x or abs(y) > world_size.y:
+				continue
 			var plane_mesh := PlaneMesh.new()
 			plane_mesh.subdivide_depth = chunk_divisions.y
 			plane_mesh.subdivide_width = chunk_divisions.x
@@ -214,7 +216,6 @@ func render_world_chunks(start_pos: Vector2):
 			call_deferred("make_texture", x, y, mesh_inst)
 			
 			mesh_inst.finalize()
-			# call_deferred("place_towns", x, y, mesh_inst)
 
 
 func place_locations(x: int, y: int, mesh_inst: MeshInstance):
@@ -401,7 +402,7 @@ func _ready():
 	GameEvents.emit_signal("terrain_generation_complete")
 	var ocean = get_node("Ocean")
 	ocean.global_transform.origin.y = modify_land_height(OCEAN_LEVEL) -20
-	ocean.scale = Vector3(world_size.x, 0, world_size.y)
+	ocean.scale = Vector3(world_size.x*2, 0, world_size.y*2)
 
 func get_datatool_for_mesh(mesh: Mesh) -> MeshDataTool:
 		var st := SurfaceTool.new()

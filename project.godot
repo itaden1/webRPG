@@ -11,6 +11,7 @@ config_version=4
 [application]
 
 config/name="webRPG"
+run/main_scene="res://Scenes/World.tscn"
 config/icon="res://icon.png"
 
 [autoload]
@@ -18,9 +19,21 @@ config/icon="res://icon.png"
 GameEvents="*res://Scripts/Singletons/GameEvents.gd"
 Rng="*res://Scripts/Singletons/RNG.gd"
 
+[display]
+
+window/size/fullscreen=true
+
 [gui]
 
 common/drop_mouse_on_gui_input_disabled=true
+
+[input]
+
+ToggleMouse={
+"deadzone": 0.5,
+"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":0,"physical_scancode":16777218,"unicode":0,"echo":false,"script":null)
+ ]
+}
 
 [physics]
 

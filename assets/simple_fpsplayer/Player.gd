@@ -4,9 +4,9 @@ var global = "root/global"
 
 const GRAVITY = -32.8
 var vel = Vector3()
-const MAX_SPEED = 50
-const JUMP_SPEED = 30
-const ACCEL = 50.5
+const MAX_SPEED = 15
+const JUMP_SPEED = 20
+const ACCEL = 8.5
 
 var dir = Vector3()
 
@@ -62,19 +62,12 @@ func process_input(delta):
 
 	# ----------------------------------
 	# Jumping
-	# if is_on_floor():
-	if Input.is_key_pressed(KEY_SPACE):
-		vel.y = JUMP_SPEED
+	if is_on_floor():
+		if Input.is_key_pressed(KEY_SPACE):
+			vel.y = JUMP_SPEED
 	# ----------------------------------
 
-	# ----------------------------------
-	# Capturing/Freeing the cursor
-	if Input.is_action_just_pressed("ui_cancel"):
-		if Input.get_mouse_mode() == Input.MOUSE_MODE_VISIBLE:
-			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-		else:
-			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-	# ----------------------------------
+
 
 func process_movement(delta):
 	dir.y = 0
@@ -107,7 +100,14 @@ func _input(event):
 		var camera_rot = rotation_helper.rotation_degrees
 		camera_rot.x = clamp(camera_rot.x, -80, 80)
 		rotation_helper.rotation_degrees = camera_rot
-
+	# ----------------------------------
+	# Capturing/Freeing the cursor
+	if event.is_action_pressed("ToggleMouse"):
+		if Input.get_mouse_mode() == Input.MOUSE_MODE_VISIBLE:
+			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+		else:
+			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	# ----------------------------------
 # ----------------------------------
 # Turning the flashlight on/off
 	if Input.is_key_pressed(KEY_F):
