@@ -1,7 +1,7 @@
 extends Node
 
 var random_number_generator = RandomNumberGenerator.new()
-var _seed: String = 'the meaning of everything!'
+var _seed: String = ""
 var intialised: bool = false
 
 func _ready():
@@ -9,7 +9,7 @@ func _ready():
 
 func get_random_int() -> int:
 	if not intialised:
-		if _seed == '0':
+		if _seed == "":
 			random_number_generator.randomize()
 			print(random_number_generator.seed, "<<<<")
 		else:
