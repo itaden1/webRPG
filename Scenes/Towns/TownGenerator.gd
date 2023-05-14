@@ -26,6 +26,8 @@ const utilities = preload("res://Scripts/Utilities.gd")
 
 var Utilities
 
+var spawn_point: Spatial
+
 var level_offsets := {
 	tudor = {
 		0: {horizontal = 8.25, vertical = 0},
@@ -121,6 +123,14 @@ func generate_town(params: Dictionary):
 	for b in tree.keys():
 		if tree[b].size() <= 0:
 			build_house(b)
+
+	# Place player spawn point at center of main street (or edge of the first partition)
+	var partition_1: Rect2 = tree.keys()[0]
+	spawn_point = Spatial.new()
+	spawn_point.transform.origin = Vector3(
+		partition_1.end.x, 1, partition_1.end.y
+	)
+	add_child(spawn_point)
 
 func get_block(mask: int, style: String, level: int) -> Dictionary:
 	var level_style = themes[style]
