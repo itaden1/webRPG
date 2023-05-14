@@ -11,17 +11,13 @@ config_version=4
 [application]
 
 config/name="webRPG"
-run/main_scene="res://Scenes/World.tscn"
+run/main_scene="res://Scenes/GUI/TitleScreen.tscn"
 config/icon="res://icon.png"
 
 [autoload]
 
 GameEvents="*res://Scripts/Singletons/GameEvents.gd"
 Rng="*res://Scripts/Singletons/RNG.gd"
-
-[display]
-
-window/size/fullscreen=true
 
 [gui]
 
