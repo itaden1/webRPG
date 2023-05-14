@@ -121,7 +121,7 @@ var biome_objects = {
 const OCEAN_LEVEL = 0.18
 
 export (ShaderMaterial) var world_material = load("res://Materials/SplatMap.tres")
-export (Vector2) var chunks_to_render = Vector2(3, 3)
+export (Vector2) var chunks_to_render = Vector2(2, 2)
 export (float) var chunk_load_time = 1.2
 export (Vector2) var world_size = Vector2(40000, 40000)
 export (Vector2) var chunk_size = Vector2(2000, 2000)
@@ -285,8 +285,9 @@ func place_locations(x: int, y: int, mesh_inst: MeshInstance):
 		)
 
 		if not player_placed:
-			player.global_transform.origin = location.global_transform.origin
-			player.global_transform.origin.y = location.global_transform.origin.y + 20
+			player.global_transform.origin = location.spawn_point.global_transform.origin
+			# player.global_transform.origin = location.global_transform.origin
+			# player.global_transform.origin.y = location.global_transform.origin.y + 20
 			player_placed = true
 
 func make_texture(x: int, y: int, mesh_inst: MeshInstance):

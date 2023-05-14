@@ -86,8 +86,8 @@ red_brush = ExtResource( 4 )
 green_brush = ExtResource( 5 )
 blue_brush = ExtResource( 6 )
 world_material = ExtResource( 2 )
-chunks_to_render = Vector2( 2, 2 )
-world_size = Vector2( 6000, 6000 )
+chunks_to_render = Vector2( 1, 1 )
+world_size = Vector2( 10000, 10000 )
 hill_exponent_fudge = 1.0
 
 [node name="Player" parent="." instance=ExtResource( 3 )]
