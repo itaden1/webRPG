@@ -20,6 +20,8 @@ const roof_peak = preload("res://Scenes/Towns/BuildingBlocks/Tudor/RoofPeak001.t
 const roof_peak_wall = preload("res://Scenes/Towns/BuildingBlocks/Tudor/RoofPeakWall001.tscn")
 
 
+const npc_placeholder = preload("res://Scenes/NPC/MaleNPC.tscn")
+
 const utilities = preload("res://Scripts/Utilities.gd")
 
 # const test_placement_scene = preload("res://Scenes/Towns/BuildingBlocks/Generic/TestPlacement.tscn")
@@ -121,9 +123,26 @@ func generate_town(params: Dictionary):
 		params.padding
 	)
 
+	var houses: Array = []
+
 	for b in tree.keys():
 		if tree[b].size() <= 0:
 			build_house(b)
+			houses.append(b)
+			# add npc spawn
+
+	for i in params.number_of_npcs:
+		var house = houses[Rng.get_random_range(0, houses.size()-1)]
+		var npc = npc_placeholder.instance()
+		var npc_offset_pos_x = house.end.x - width/2 + 1
+		var npc_offset_pos_y = house.end.y - height/2 + 1
+		npc.transform.origin = Vector3(
+			npc_offset_pos_x * 8,
+			0.1,
+			npc_offset_pos_y * 8
+		)
+		add_child(npc)
+
 
 	# Place player spawn point at center of main street (or edge of the first partition)
 	var first_partition: Rect2 = tree[tree.keys()[0]][0]

@@ -27,7 +27,6 @@ var flashlight
 func _ready():
 	camera = $rotation_helper/Camera
 	rotation_helper = $rotation_helper
-	flashlight = $rotation_helper/Flashlight
 	
 	Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
@@ -108,11 +107,4 @@ func _input(event):
 		else:
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	# ----------------------------------
-# ----------------------------------
-# Turning the flashlight on/off
-	if Input.is_key_pressed(KEY_F):
-		if flashlight.is_visible_in_tree():
-			flashlight.hide()
-		else:
-			flashlight.show()
-# ----------------------------------
+
