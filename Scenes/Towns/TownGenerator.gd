@@ -111,9 +111,10 @@ func _init():
 func generate_town(params: Dictionary):
 	width = params.width
 	height = params.height
+	var town_rect: Rect2 = Rect2(Vector2(0, 0), Vector2(width, height))
 	var bpt = bpt_generator.new()
 	var tree = bpt.partition_rect(
-		Rect2(Vector2(0, 0), Vector2(width, height)),
+		town_rect,
 		params.partitions,
 		6,
 		2,
@@ -125,11 +126,12 @@ func generate_town(params: Dictionary):
 			build_house(b)
 
 	# Place player spawn point at center of main street (or edge of the first partition)
-	var partition_1: Rect2 = tree.keys()[0]
+	var first_partition: Rect2 = tree[tree.keys()[0]][0]
 	spawn_point = Spatial.new()
-	spawn_point.transform.origin = Vector3(
-		partition_1.end.x, 1, partition_1.end.y
-	)
+
+	var offset_rect_pos_x = first_partition.end.x + 2 - width/2
+	var offset_rect_pos_y = (first_partition.end.y - first_partition.size.y/2) - height/2
+	spawn_point.transform.origin = Vector3(offset_rect_pos_x * 8, 1, offset_rect_pos_y * 8)
 	add_child(spawn_point)
 
 func get_block(mask: int, style: String, level: int) -> Dictionary:
