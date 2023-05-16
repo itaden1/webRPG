@@ -2,6 +2,9 @@ extends KinematicBody
 #Variables
 var global = "root/global"
 
+
+var weapon_drawn: bool setget , _get_is_weapon_drawn 
+
 const GRAVITY = -32.8
 var vel = Vector3()
 const MAX_SPEED = 15
@@ -108,3 +111,5 @@ func _input(event):
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	# ----------------------------------
 
+func _get_is_weapon_drawn():
+	return get_node("%Weapon").drawn

@@ -29,6 +29,7 @@ flags_transparent = true
 albedo_color = Color( 1, 0.894118, 0.737255, 1 )
 albedo_texture = ExtResource( 7 )
 uv1_scale = Vector3( 1200, 1200, 1200 )
+uv1_offset = Vector3( 0.0988374, 0.0988374, 0.0988374 )
 
 [sub_resource type="Animation" id=5]
 length = 4.0
