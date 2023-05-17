@@ -220,7 +220,7 @@ func render_world_chunks(start_pos: Vector2):
 
 func place_locations(x: int, y: int, mesh_inst: MeshInstance):
 	var dt: MeshDataTool = get_datatool_for_mesh(mesh_inst.lod_1_mesh)
-	var max_locations := 3
+	var max_locations := 5
 	var location_count := 0
 	var max_attempts := 30
 	var attempts := 0
@@ -285,10 +285,11 @@ func place_locations(x: int, y: int, mesh_inst: MeshInstance):
 		)
 
 		if not player_placed:
-			player.global_transform.origin = location.spawn_point.global_transform.origin
-			# player.global_transform.origin = location.global_transform.origin
-			# player.global_transform.origin.y = location.global_transform.origin.y + 20
-			player_placed = true
+			if location.get("spawn_point"):
+				player.global_transform.origin = location.spawn_point.global_transform.origin
+				# player.global_transform.origin = location.global_transform.origin
+				# player.global_transform.origin.y = location.global_transform.origin.y + 20
+				player_placed = true
 
 func make_texture(x: int, y: int, mesh_inst: MeshInstance):
 	var splat_texture := ImageTexture.new()

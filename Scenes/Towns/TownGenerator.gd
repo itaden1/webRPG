@@ -110,7 +110,7 @@ func _init():
 	Utilities = utilities.new()
 
 
-func generate_town(params: Dictionary):
+func generate(params: Dictionary):
 	width = params.width
 	height = params.height
 	var town_rect: Rect2 = Rect2(Vector2(0, 0), Vector2(width, height))
@@ -129,8 +129,8 @@ func generate_town(params: Dictionary):
 		if tree[b].size() <= 0:
 			build_house(b)
 			houses.append(b)
-			# add npc spawn
-
+	
+	# add npc spawn
 	for i in params.number_of_npcs:
 		var house = houses[Rng.get_random_range(0, houses.size()-1)]
 		var npc = npc_placeholder.instance()
