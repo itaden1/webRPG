@@ -85,7 +85,7 @@ far = 1500.0
 
 [node name="Weapon" type="Spatial" parent="rotation_helper/Camera"]
 unique_name_in_owner = true
-transform = Transform( -0.504798, 0, 0.863237, 0, 1, 0, -0.863237, 0, -0.504798, 1.05458, -0.723338, -2.20883 )
+transform = Transform( -0.504799, 0, 0.863237, 0, 1, 0, -0.863237, 0, -0.504799, 1.05458, -0.723338, -2.20883 )
 script = ExtResource( 4 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="rotation_helper/Camera/Weapon"]
