@@ -26,5 +26,5 @@ func generate_dungeon():
 	dungeon_node.generate({width=15, height=15, partitions=15, padding=[1], max_room_size=6, min_room_size=3})
 	return {
 		location_node = dungeon_node,
-		location_padding = 90
+		location_padding = 60
 	}	
