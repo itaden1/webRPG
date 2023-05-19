@@ -1,8 +1,7 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://Scenes/Dungeons/Test/DungeonEntrance.gd" type="Script" id=1]
 [ext_resource path="res://Scenes/Dungeons/Test/DungeonGenerator.gd" type="Script" id=2]
-[ext_resource path="res://assets/simple_fpsplayer/Player.tscn" type="PackedScene" id=3]
 
 [sub_resource type="BoxShape" id=2]
 
@@ -31,5 +30,5 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.980732, 0 )
 mesh = SubResource( 1 )
 material/0 = SubResource( 3 )
 
-[node name="Player" parent="." instance=ExtResource( 3 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 74.2443, 0 )
+[node name="SpawnPoint" type="Spatial" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.58188, 25.1512 )

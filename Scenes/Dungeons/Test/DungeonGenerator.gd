@@ -2,77 +2,132 @@ extends Spatial
 
 
 const bpt_generator = preload("res://Scripts/Generators/BinaryPartitionTree.gd")
+var bpt = bpt_generator.new()
 
 var dungeon_world_location_y := -2000
-var spawn_point: Spatial
+
+# spawn point for testing
+onready var spawn_point: Spatial = get_node("SpawnPoint")
 
 var test_dungeon_interior = preload("res://Scenes/Dungeons/Test/TestDungeonInterior.tscn")
 
 var dungeon_interior_node: Spatial
 
+
 func _ready():
-	generate({width=20, height=20, partitions=15, padding=[2]})
+	pass
+	#generate({width=20, height=20, partitions=5, padding=[3], max_room_size=6, min_room_size=3})
 # 	dungeon_interior_node.global_transform.origin.y = dungeon_world_location_y
 
 
 func generate(params: Dictionary):
-	var bpt = bpt_generator.new()
+	#var bpt = bpt_generator.new()
 	var dungeon_rect: Rect2 = Rect2(Vector2(0, 0), Vector2(params.width, params.height))
 	var tree = bpt.partition_rect(
 		dungeon_rect,
 		params.partitions,
-		6,
-		2,
+		params.max_room_size,
+		params.min_room_size,
 		params.padding
 	)
+
+	var dungeon_interior_node = Spatial.new()
+
+	var spawn_vec: Vector2
+	var offset = 20
 
 	var grid: Dictionary = {}
 	for x in range(0, params.width):
 		for y in range(0, params.height):
-			grid[Vector2(x,y)] = 0
+			grid[_as_key(Vector2(x,y))] = 0
 
 	var all_leaves = bpt.get_leaf_nodes(tree, tree.keys()[0])
 	for l in all_leaves:
 		for x in range(l.position.x, l.end.x):
 			for y in range(l.position.y, l.end.y):
-				grid[Vector2(x,y)] = 1
+				grid[_as_key(Vector2(x,y))] = 1
+				if !spawn_vec:
+					spawn_vec = Vector2(x,y)
+	#print(grid)
+	for l in all_leaves:
+		var corridor_grid = make_corridors(tree, l, {}, params.padding)
 
-		# make connecting corridoors
-		var sibling = bpt.get_sibling(tree, l)
-		var sibling_center = sibling.get_center()
-		var leaf_center = l.get_center()
-		if sibling.position.x >= l.end.x:
-			# sibling is to the right
-			for x in range(leaf_center.x, sibling_center.x):
-				grid[Vector2(x,sibling_center.y)] = 1
-		elif sibling.end.x <= l.position.x:
-			# sibling is to the left
-			for x in range(sibling_center.x, leaf_center.x):
-				grid[Vector2(x,leaf_center.y)] = 1
-		elif sibling.end.y <= l.position.y:
-			# sibling is above leaf
-			for y in range(sibling_center.y, leaf_center.y):
-				grid[Vector2(sibling_center.x, y)] = 1
-		else:
-			# sibling is below leaf
-			for y in range(leaf_center.y, sibling_center.y):
-				grid[Vector2(sibling_center.x, y)] = 1
-	
+		for k in corridor_grid.keys():
+			if grid[k] == 0:
+				grid[k] = corridor_grid[k]
+
 	for r in grid.keys():
 		if grid[r] == 1:
+			var vec = _key_as_vec(r)
 			var block = test_dungeon_interior.instance()
-			block.transform.origin.x = r.x * 20
-			block.transform.origin.z = r.y * 20
-			add_child(block)
+			block.transform.origin.x = vec.x * offset
+			block.transform.origin.z = vec.y * offset
+			dungeon_interior_node.add_child(block)
 
-	spawn_point = Spatial.new()
+	# for testing only! should not begin game at dungeon entrance
+#	spawn_point = Spatial.new()
+#	spawn_point
+	
+	
+	var dungeon_interior_spawn = Position3D.new()
+	dungeon_interior_spawn.transform.origin = Vector3(spawn_vec.x * offset, 15, spawn_vec.y * offset)
 
-	spawn_point.transform.origin = Vector3(5, 10, 5)
-	add_child(spawn_point)
+	dungeon_interior_node.transform.origin.y = dungeon_world_location_y
+	dungeon_interior_node.add_child(dungeon_interior_spawn)
+	
+	add_child(dungeon_interior_node)
+	get_node("DungeonEntrance").exit = dungeon_interior_spawn
 
-	# dungeon_interior_node = test_dungeon_interior.instance()
-	# dungeon_interior_node.transform.origin.y = -5#dungeon_world_location_y
 
-	# add_child(dungeon_interior_node)
-	get_node("DungeonEntrance").exit = get_node("DungeonInterior/SpawnPoint")
+func make_corridors(tree: Dictionary, branch: Rect2, grid: Dictionary, seen=[]):
+	var parent = bpt.get_parent_node(tree, branch)
+	if !parent:
+		return grid
+	var branch_leaves = bpt.get_leaf_nodes(tree, branch)
+	var sibling = bpt.get_sibling(tree, branch)
+	var sibling_leaves = bpt.get_leaf_nodes(tree, sibling)
 
+	for s in sibling_leaves:
+		var s_center = s.get_center()
+		var corridor_built = false
+		for l in branch_leaves:
+			var l_center = l.get_center()
+			if s.position.x == l.position.x:
+				# above/below eachother
+				if s.position.y == l.end.y:
+					# s is below l
+					for y in range(l_center.y, s_center.y):
+						grid[_as_key(Vector2(s_center.x, y))] = 1
+					corridor_built = true
+					break
+				else:
+					# s is above l
+					for y in range(s_center.y, l_center.y):
+						grid[_as_key(Vector2(s_center.x, y))] = 1
+					corridor_built = true
+					break
+			elif s.position.y == l.position.y:
+				# next to eachother
+				if s.position.x == l.end.x:
+					# s is to the right of l
+					for x in range(l_center.x, s_center.x):
+						grid[_as_key(Vector2(x, s_center.y))] = 1
+					corridor_built = true
+					break
+				else:
+					# s is to the left of  l
+					for x in range(s_center.x, l_center.x):
+						grid[_as_key(Vector2(x, s_center.y))] = 1
+					corridor_built = true
+					break
+		if corridor_built:
+			break
+	return make_corridors(tree, parent, grid)
+
+
+func _as_key(vector: Vector2):
+	return str(int(vector.x), ",", int(vector.y))
+
+func _key_as_vec(key: String):
+	var parts = key.split(",")
+	return Vector2(parts[0], parts[1])
