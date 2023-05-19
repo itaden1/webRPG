@@ -23,7 +23,7 @@ func generate_town():
 
 func generate_dungeon():
 	var dungeon_node = test_dungeon_scene.instance()
-	dungeon_node.generate({width=20, height=20, partitions=15, padding=[1], max_room_size=6, min_room_size=3})
+	dungeon_node.generate({width=15, height=15, partitions=15, padding=[1], max_room_size=6, min_room_size=3})
 	return {
 		location_node = dungeon_node,
 		location_padding = 90

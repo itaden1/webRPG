@@ -103,5 +103,5 @@ cast_to = Vector3( 0, -2.2, 0 )
 [node name="InteractionRay" type="RayCast" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.70064, 0 )
 enabled = true
-cast_to = Vector3( 0, 0, 4 )
+cast_to = Vector3( 0, 0, 6 )
 script = ExtResource( 2 )
