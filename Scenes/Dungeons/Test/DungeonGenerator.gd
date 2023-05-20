@@ -6,19 +6,55 @@ var bpt = bpt_generator.new()
 
 var dungeon_world_location_y := -2000
 
+const utilities = preload("res://Scripts/Utilities.gd")
+var Utilities
+
 # spawn point for testing
 onready var spawn_point: Spatial = get_node("SpawnPoint")
 
-var test_dungeon_interior = preload("res://Scenes/Dungeons/Test/TestDungeonInterior.tscn")
+var wall_block = preload("res://Scenes/Dungeons/Test/DungeonWall.tscn")
+var corner_block = preload("res://Scenes/Dungeons/Test/DungeonWallCorner.tscn")
+var corridor_block = preload("res://Scenes/Dungeons/Test/DungeonCorridor.tscn")
+var floor_block = preload("res://Scenes/Dungeons/Test/DungeonFloor.tscn")
+
+const blank_block = preload("res://Scenes/Towns/BuildingBlocks/Generic/Blank.tscn")
+
+
 var dungeon_portal = preload("res://Scenes/Dungeons/DungeonPortal.tscn")
 
 var dungeon_interior_node: Spatial
 
+var themes = {
+	green_halls = {
+		0 : {
+			0 : {},
+			1 : {scene=wall_block, rotation=270},
+			2 : {scene=wall_block, rotation=0},
+			3 : {scene=corner_block, rotation=270},
+			4 : {scene=wall_block, rotation=180},
+			5 : {scene=corner_block, rotation=180},
+			6 : {scene=corridor_block, rotation=180},
+			7 : {},
+			8 : {scene=wall_block, rotation=90},
+			9 : {scene=corridor_block, rotation=90},
+			10 : {scene=corner_block, rotation=0},
+			11 : {},
+			12 : {scene=corner_block, rotation=90},
+			13 : {},
+			14 : {},
+			15 : {}
+		}
+	}
+}
+
+func _init():
+	._init()
+	Utilities = utilities.new()
 
 func _ready():
 	pass
-	#generate({width=20, height=20, partitions=5, padding=[3], max_room_size=6, min_room_size=3})
-# 	dungeon_interior_node.global_transform.origin.y = dungeon_world_location_y
+	# generate({width=20, height=20, partitions=5, padding=[3], max_room_size=6, min_room_size=3})
+	# dungeon_interior_node.global_transform.origin.y = 0 # dungeon_world_location_y
 
 
 func generate(params: Dictionary):
@@ -32,10 +68,9 @@ func generate(params: Dictionary):
 		params.padding
 	)
 
-	dungeon_interior_node = Spatial.new()
+	var offset = 9.5
 
 	var dungeon_exit_vec: Vector2
-	var offset = 18
 
 	var grid: Dictionary = {}
 	for x in range(0, params.width):
@@ -57,13 +92,7 @@ func generate(params: Dictionary):
 			if grid[k] == 0:
 				grid[k] = corridor_grid[k]
 
-	for r in grid.keys():
-		if grid[r] == 1:
-			var vec = _key_as_vec(r)
-			var block = test_dungeon_interior.instance()
-			block.transform.origin.x = vec.x * offset
-			block.transform.origin.z = vec.y * offset
-			dungeon_interior_node.add_child(block)
+	dungeon_interior_node = build_dungeon(grid, offset)
 	
 	dungeon_interior_node.transform.origin.y = dungeon_world_location_y
 	
@@ -77,6 +106,7 @@ func generate(params: Dictionary):
 	dungeon_entrance.exit = dungeon_exit.get_node("ExitPosition")
 	dungeon_exit.exit = dungeon_entrance.get_node("ExitPosition")
 	dungeon_exit.transform.origin = Vector3(dungeon_exit_vec.x * offset, 0, dungeon_exit_vec.y * offset)
+
 
 
 func make_corridors(tree: Dictionary, branch: Rect2, grid: Dictionary):
@@ -133,3 +163,48 @@ func _as_key(vector: Vector2):
 func _key_as_vec(key: String):
 	var parts = key.split(",")
 	return Vector2(parts[0], parts[1])
+
+func get_block(mask: int, style: String, level: int) -> Dictionary:
+	var level_style = themes[style]
+	var block: Dictionary
+	if level_style.has(level):
+		block = themes[style][level][mask]
+	else:
+		block = themes[style]["roof"][mask]
+
+
+	if block.keys().size() <= 0:
+		block = {scene=blank_block, rotation=0}
+	return block
+
+
+func build_dungeon(grid: Dictionary, offset: float) -> Spatial:
+	var base_node = Spatial.new()
+
+	for r in grid.keys():
+		if grid[r] == 1:
+			var vec = _key_as_vec(r)
+			var f_block = floor_block.instance()
+			f_block.transform.origin.x = vec.x * offset
+			f_block.transform.origin.z = vec.y * offset
+			base_node.add_child(f_block)
+
+			var mask = Utilities.get_four_bit_bitmask_from_grid(grid, vec)
+
+			var block = get_block(mask, "green_halls", 0)
+			var inst: Spatial = block.scene.instance()
+			inst.rotate(Vector3.UP, deg2rad(block.rotation))
+
+
+			base_node.add_child(inst)
+			inst.transform.origin.x = vec.x * offset
+			inst.transform.origin.z = vec.y * offset
+
+			# roof
+			var r_block = floor_block.instance()
+			r_block.transform.origin.x = vec.x * offset
+			r_block.transform.origin.z = vec.y * offset
+			r_block.transform.origin.y = 10
+			base_node.add_child(r_block)
+
+	return base_node

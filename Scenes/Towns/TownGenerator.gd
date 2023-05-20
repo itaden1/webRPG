@@ -213,7 +213,7 @@ func build_roof(rect: Rect2, style: String, level: int):
 	for x in range(0, rect.size.x):
 		for z in range(0, rect.size.y):
 
-			var mask = Utilities.get_four_bit_bitmask(rect, Vector2(rect.position.x+x, rect.position.y+z))
+			var mask = Utilities.get_four_bit_bitmask_from_rect(rect, Vector2(rect.position.x+x, rect.position.y+z))
 
 			var block = get_block(mask, style, 10)
 			var inst: Spatial = block.scene.instance()
@@ -249,7 +249,7 @@ func build_floor(rect: Rect2, style: String, level: int) -> Spatial:
 			floor_inst.transform.origin.z = z * offsets.horizontal
 
 
-			var mask = Utilities.get_four_bit_bitmask(rect, Vector2(rect.position.x+x, rect.position.y+z))
+			var mask = Utilities.get_four_bit_bitmask_from_rect(rect, Vector2(rect.position.x+x, rect.position.y+z))
 
 			var block = get_block(mask, style, level)
 			var inst: Spatial = block.scene.instance()
