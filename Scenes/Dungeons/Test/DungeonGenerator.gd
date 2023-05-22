@@ -22,6 +22,9 @@ const blank_block = preload("res://Scenes/Towns/BuildingBlocks/Generic/Blank.tsc
 
 var dungeon_portal = preload("res://Scenes/Dungeons/DungeonPortal.tscn")
 
+var outdoor_environment = preload("res://Environments/World.tres")
+var indoor_environment = preload("res://Environments/Dungeon.tres")
+
 var dungeon_interior_node: Spatial
 
 var themes = {
@@ -53,7 +56,7 @@ func _init():
 
 func _ready():
 	pass
-	# generate({width=20, height=20, partitions=5, padding=[3], max_room_size=6, min_room_size=3})
+	# generate({width=25, height=25, partitions=10, padding=[3], max_room_size=6, min_room_size=3})
 	# dungeon_interior_node.global_transform.origin.y = 0 # dungeon_world_location_y
 
 
@@ -104,8 +107,10 @@ func generate(params: Dictionary):
 	dungeon_interior_node.add_child(dungeon_exit)
 
 	dungeon_entrance.exit = dungeon_exit.get_node("ExitPosition")
+	dungeon_entrance.exit_environment = indoor_environment
+	dungeon_exit.exit_environment = outdoor_environment
 	dungeon_exit.exit = dungeon_entrance.get_node("ExitPosition")
-	dungeon_exit.transform.origin = Vector3(dungeon_exit_vec.x * offset, 0, dungeon_exit_vec.y * offset)
+	dungeon_exit.transform.origin = Vector3(dungeon_exit_vec.x * offset + 4, 0, dungeon_exit_vec.y * offset + 8)
 
 
 

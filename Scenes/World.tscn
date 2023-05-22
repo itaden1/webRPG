@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://Scripts/Generators/TerrainGenerator.gd" type="Script" id=1]
 [ext_resource path="res://Materials/SplatMap.tres" type="Material" id=2]
@@ -7,18 +7,7 @@
 [ext_resource path="res://Materials/green_brush_1.png" type="Image" id=5]
 [ext_resource path="res://Materials/blue_brush_1.png" type="Image" id=6]
 [ext_resource path="res://Scenes/NatureObjects/shoals_shallow_water_0.png" type="Texture" id=7]
-[ext_resource path="res://Materials/SkyBox/overcast_lo_res.png" type="Texture" id=8]
-
-[sub_resource type="PanoramaSky" id=7]
-panorama = ExtResource( 8 )
-
-[sub_resource type="Environment" id=1]
-background_mode = 2
-background_sky = SubResource( 7 )
-background_color = Color( 0.501961, 0.6, 0.701961, 1 )
-ambient_light_color = Color( 1, 1, 1, 1 )
-fog_enabled = true
-fog_color = Color( 0.701961, 0.603922, 0.501961, 1 )
+[ext_resource path="res://Environments/World.tres" type="Environment" id=8]
 
 [sub_resource type="PlaneMesh" id=2]
 subdivide_width = 100
@@ -87,7 +76,8 @@ green_brush = ExtResource( 5 )
 blue_brush = ExtResource( 6 )
 world_material = ExtResource( 2 )
 chunks_to_render = Vector2( 1, 1 )
-world_size = Vector2( 10000, 10000 )
+world_size = Vector2( 3000, 3000 )
+chunk_size = Vector2( 1000, 1000 )
 hill_exponent_fudge = 1.0
 
 [node name="Player" parent="." instance=ExtResource( 3 )]
@@ -98,7 +88,7 @@ transform = Transform( 1, 0, 0, 0, 0.753081, 0.657928, 0, -0.657928, 0.753081, 0
 visible = false
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource( 1 )
+environment = ExtResource( 8 )
 
 [node name="Ocean" type="MeshInstance" parent="."]
 transform = Transform( 100, 0, 0, 0, 1, 0, 0, 0, 100, 0, 3.20033, 0 )
