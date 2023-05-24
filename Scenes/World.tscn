@@ -76,7 +76,7 @@ green_brush = ExtResource( 5 )
 blue_brush = ExtResource( 6 )
 world_material = ExtResource( 2 )
 chunks_to_render = Vector2( 1, 1 )
-world_size = Vector2( 3000, 3000 )
+world_size = Vector2( 4000, 4000 )
 chunk_size = Vector2( 1000, 1000 )
 hill_exponent_fudge = 1.0
 

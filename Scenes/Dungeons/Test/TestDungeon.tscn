@@ -1,13 +1,19 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://Scenes/Dungeons/Test/DungeonGenerator.gd" type="Script" id=2]
 [ext_resource path="res://Scenes/Dungeons/Test/Entrance.tscn" type="PackedScene" id=4]
 
-[node name="Dungeon" type="Spatial"]
+[sub_resource type="NavigationMesh" id=1]
+
+[node name="NavigationMeshInstance" type="NavigationMeshInstance"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 20.9395 )
+navmesh = SubResource( 1 )
+
+[node name="Dungeon" type="Spatial" parent="."]
 script = ExtResource( 2 )
 
-[node name="SpawnPoint" type="Spatial" parent="."]
+[node name="SpawnPoint" type="Spatial" parent="Dungeon"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.58188, 25.1512 )
 
-[node name="Entrance" parent="." instance=ExtResource( 4 )]
+[node name="Entrance" parent="Dungeon" instance=ExtResource( 4 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.157636, 0, -6.3306 )

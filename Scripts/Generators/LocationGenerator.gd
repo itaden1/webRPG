@@ -22,9 +22,10 @@ func generate_town():
 
 
 func generate_dungeon():
-	var dungeon_node = test_dungeon_scene.instance()
+	var dungeon_node_root = test_dungeon_scene.instance()
+	var dungeon_node = dungeon_node_root.get_node("Dungeon")
 	dungeon_node.generate({width=15, height=15, partitions=15, padding=[1], max_room_size=6, min_room_size=3})
 	return {
-		location_node = dungeon_node,
+		location_node = dungeon_node_root,
 		location_padding = 60
 	}	

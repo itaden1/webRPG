@@ -19,7 +19,7 @@ export (Image) var blue_brush
 
 onready var location_generator = load("res://Scripts/Generators/LocationGenerator.gd").new()
 var player_placed = false
-
+var player_spawn_point = null
 # var grass_2_texture: Image = preload("res://Materials/Grass_02-128x128.png")
 # var grass_11_texture : Image = preload("res://Materials/Grass_11-128x128.png")
 # var snow_01_texture : Image = preload("res://Materials/Snow_01-128x128.png") 
@@ -178,6 +178,7 @@ func render_world_chunks(start_pos: Vector2):
 	var start_y = start_pos.y - chunks_to_render.y * chunk_size.y
 	var end_y = start_pos.y + (chunks_to_render.y + 1) * chunk_size.y
 	
+	var rendered_count = 0
 	for x in range(start_x, end_x, chunk_size.x):
 		for y in range(start_y, end_y, chunk_size.y):
 			if instanced_chunks.has(Vector2(
@@ -197,7 +198,8 @@ func render_world_chunks(start_pos: Vector2):
 			lod_mesh.subdivide_width = low_lod_chunk_divisions.x
 			lod_mesh.size = chunk_size
 				
-			var mesh_inst : MeshInstance = mesh_inst_scene.instance()
+			var mesh_inst_nav : NavigationMeshInstance = mesh_inst_scene.instance()
+			var mesh_inst: MeshInstance = mesh_inst_nav.get_node("MeshInstance")
 			mesh_inst.lod_1_mesh = apply_heights_to_mesh(plane_mesh, x, y)
 			mesh_inst.lod_2_mesh = apply_heights_to_mesh(lod_mesh, x, y)
 			mesh_inst.player = player
@@ -208,14 +210,17 @@ func render_world_chunks(start_pos: Vector2):
 
 			chunk_data[Vector2(x,y)] = ChunkData.new(mesh_inst)
 
-			add_child(mesh_inst)
+			add_child(mesh_inst_nav)
 			place_locations(x, y, mesh_inst)
 
 
-			call_deferred("place_trees", x, y, mesh_inst)
+			place_trees(x, y, mesh_inst)
 			call_deferred("make_texture", x, y, mesh_inst)
-			
+
 			mesh_inst.finalize()
+			rendered_count += 1
+	if rendered_count > 0:
+		GameEvents.emit_signal("terrain_generation_complete")
 
 
 func place_locations(x: int, y: int, mesh_inst: MeshInstance):
@@ -243,7 +248,7 @@ func place_locations(x: int, y: int, mesh_inst: MeshInstance):
 		if locations.has(vert_idx):
 			continue
 
-		# check for too cloes placement
+		# check for too close placement
 		var skip = false
 		for e in locations.values():
 			if e.distance_to(vert) < chunk_size.x/3:
@@ -269,7 +274,8 @@ func place_locations(x: int, y: int, mesh_inst: MeshInstance):
 		mesh_inst.lod_1_mesh = terrain_mesh
 
 		mesh_inst.add_child(location)
-
+		# if location.has_method("bake_navigation_mesh"):
+		# 	location.bake_navigation_mesh()
 		location.global_transform.origin.y = vert.y
 		location.global_transform.origin.x = vert.x + x 
 		location.global_transform.origin.z = vert.z + y
@@ -284,12 +290,18 @@ func place_locations(x: int, y: int, mesh_inst: MeshInstance):
 			)
 		)
 
-		if not player_placed:
+		if player_spawn_point == null:
 			if location.get("spawn_point"):
-				player.global_transform.origin = location.spawn_point.global_transform.origin
+				player_spawn_point = location.get("spawn_point")
+				# player.global_transform.origin = location.spawn_point.global_transform.origin
 				# player.global_transform.origin = location.global_transform.origin
 				# player.global_transform.origin.y = location.global_transform.origin.y + 20
-				player_placed = true
+
+func place_player():
+	if not player_placed:
+		player.global_transform.origin = player_spawn_point.global_transform.origin
+		player_placed = true
+
 
 func make_texture(x: int, y: int, mesh_inst: MeshInstance):
 	var splat_texture := ImageTexture.new()
@@ -386,6 +398,7 @@ func _ready():
 	thread_timer.wait_time = chunk_load_time
 	thread_timer.one_shot = false
 	var _a = thread_timer.connect("timeout", self, "_start_chunk_generation")
+	var _b: int = GameEvents.connect("terrain_generation_complete", self, "place_player")
 	thread_timer.start()
 
 	hill_noise.seed = Rng.get_random_int()
