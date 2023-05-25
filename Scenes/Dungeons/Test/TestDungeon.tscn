@@ -4,16 +4,24 @@
 [ext_resource path="res://Scenes/Dungeons/Test/Entrance.tscn" type="PackedScene" id=4]
 
 [sub_resource type="NavigationMesh" id=1]
+cell_height = 1.0
+agent_height = 1.0
+agent_radius = 0.3
 
-[node name="NavigationMeshInstance" type="NavigationMeshInstance"]
+[node name="Navigation" type="Navigation"]
+
+[node name="NavigationMeshInstance" type="NavigationMeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 20.9395 )
 navmesh = SubResource( 1 )
 
-[node name="Dungeon" type="Spatial" parent="."]
+[node name="Dungeon" type="Spatial" parent="NavigationMeshInstance"]
 script = ExtResource( 2 )
 
-[node name="SpawnPoint" type="Spatial" parent="Dungeon"]
+[node name="SpawnPoint" type="Spatial" parent="NavigationMeshInstance/Dungeon"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.58188, 25.1512 )
 
-[node name="Entrance" parent="Dungeon" instance=ExtResource( 4 )]
+[node name="Entrance" parent="NavigationMeshInstance/Dungeon" instance=ExtResource( 4 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.157636, 0, -6.3306 )
+
+[node name="Spawn" type="Spatial" parent="NavigationMeshInstance"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.76863, 0 )

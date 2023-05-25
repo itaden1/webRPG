@@ -63,7 +63,7 @@ tracks/1/keys = {
 "values": [ Vector3( 1.05458, -0.723338, -2.20883 ), Vector3( 1.05458, -0.240949, -1.30367 ), Vector3( 1.05458, -0.240949, -1.30367 ), Vector3( -0.0803278, -1.04545, -1.70047 ), Vector3( 1.05458, -0.723338, -2.20883 ) ]
 }
 
-[node name="Player" type="KinematicBody"]
+[node name="Player" type="KinematicBody" groups=["Player"]]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.07593, 0 )
 input_ray_pickable = false
 script = ExtResource( 1 )

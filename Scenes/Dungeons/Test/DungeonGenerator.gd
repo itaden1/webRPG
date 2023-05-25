@@ -27,6 +27,8 @@ var indoor_environment = preload("res://Environments/Dungeon.tres")
 
 var dungeon_interior_node: Spatial
 
+var spawn_scene = preload("res://Scenes/Enemies/Spawner.tscn")
+
 var themes = {
 	green_halls = {
 		0 : {
@@ -61,7 +63,6 @@ func _ready():
 
 
 func generate(params: Dictionary):
-	#var bpt = bpt_generator.new()
 	var dungeon_rect: Rect2 = Rect2(Vector2(0, 0), Vector2(params.width, params.height))
 	var tree = bpt.partition_rect(
 		dungeon_rect,
@@ -112,6 +113,18 @@ func generate(params: Dictionary):
 	dungeon_exit.exit = dungeon_entrance.get_node("ExitPosition")
 	dungeon_exit.transform.origin = Vector3(dungeon_exit_vec.x * offset + 4, 0, dungeon_exit_vec.y * offset + 8)
 
+
+	add_enemy_spawn_points(dungeon_interior_node, grid, offset)
+
+func add_enemy_spawn_points(parent_node: Node, grid: Dictionary, offset: float):
+	var grid_keys: Array = grid.keys()
+	grid_keys.shuffle()
+	for i in range(15):
+		var enemy_spawn_point = spawn_scene.instance()
+		enemy_spawn_point.transform.origin.x = _key_as_vec(grid_keys[i]).x * offset
+		enemy_spawn_point.transform.origin.z = _key_as_vec(grid_keys[i]).y * offset
+		enemy_spawn_point.navigation_node = get_parent().get_parent() # todo: clean this up 
+		parent_node.add_child(enemy_spawn_point)
 
 
 func make_corridors(tree: Dictionary, branch: Rect2, grid: Dictionary):
