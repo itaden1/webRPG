@@ -2,6 +2,7 @@ extends RayCast
 
 
 func _ready():
+	GameEvents.emit_signal("player_spawned", get_parent())
 	pass # Replace with function body.
 
 

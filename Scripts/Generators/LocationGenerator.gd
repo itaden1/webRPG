@@ -5,10 +5,11 @@ var test_dungeon_scene = preload("res://Scenes/Dungeons/Test/TestDungeon.tscn")
 var town_scene = preload("res://Scenes/Towns/Town.tscn")
 
 func generate_location():
-	if Rng.get_random_range(0,3) == 0: 
-		return generate_town()
-	else:
-		return generate_dungeon()
+	return generate_dungeon()
+	# if Rng.get_random_range(0,3) == 0: 
+	# 	return generate_town()
+	# else:
+	# 	return generate_dungeon()
 
 
 func generate_town():

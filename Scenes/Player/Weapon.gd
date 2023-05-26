@@ -3,6 +3,7 @@ extends Spatial
 
 var drawn: bool = false
 var attacking: bool = false
+var collided: bool = false
 onready var animation_player: AnimationPlayer = get_node("AnimationPlayer")
 onready var weapon_area: Area = get_node("Sword")
 
@@ -27,9 +28,12 @@ func _input(event):
 
 func _on_animation_finished(animation_name: String):
 	match animation_name:
-		"SwingSword": attacking = false
+		"SwingSword": 
+			attacking = false
+			collided = false
 		_: return
 
 func _on_weapon_hit_body(body: KinematicBody):
-	if body and body.has_method("do_damage") and attacking == true:
+	if body and body.has_method("do_damage") and attacking == true and !collided:
 		body.do_damage(20)
+		collided = true

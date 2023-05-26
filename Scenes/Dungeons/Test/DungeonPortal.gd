@@ -11,4 +11,6 @@ func interact(interactor: Spatial):
 	get_tree().root.get_node("World/WorldEnvironment").environment = exit_environment
 	
 	if root_dungeon_node.has_method("bake_navigation_mesh"):
-		get_parent().get_parent().bake_navigation_mesh(false)
+		root_dungeon_node.navmesh = NavigationMesh.new()
+		root_dungeon_node.bake_navigation_mesh(false)
+		GameEvents.emit_signal("player_entered_dungeon", interactor)

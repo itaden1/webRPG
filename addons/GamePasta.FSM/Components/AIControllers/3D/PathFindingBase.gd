@@ -62,7 +62,7 @@ func get_next_location():
 
 
 func physics_process(delta: float):
-	var location: Vector3 = context.actor.transform.origin
+	var location: Vector3 = context.actor.global_transform.origin
 	var next_location = get_next_location()
 	var direction = location.direction_to(next_location)
 	navigation_agent.set_velocity(direction * speed)
@@ -77,6 +77,7 @@ func set_up(context: StateContext):
 	.set_up(context)
 	
 	navigation_agent = context.actor.get_node("NavigationAgent")
+	navigation_agent.avoidance_enabled = true
 	navigation_agent.set_navigation(context.get("navigation"))
 	if !navigation_agent.is_connected("velocity_computed", self, "_on_velocity_computed"):
 		navigation_agent.connect("velocity_computed", self, "_on_velocity_computed")

@@ -28,6 +28,8 @@ var is_sprinting = false
 
 var flashlight
 
+var health := 100
+
 func _ready():
 	camera = $rotation_helper/Camera
 	rotation_helper = $rotation_helper
@@ -44,14 +46,14 @@ func process_input(delta):
 	# ----------------------------------
 	# Walking
 	dir = Vector3()
-	var cam_xform = camera.get_global_transform()
+	#var cam_xform = camera.get_global_transform()
 
 	var input_movement_vector = Vector2()
 
 	if Input.is_key_pressed(KEY_W):
-		input_movement_vector.y += 1
-	if Input.is_key_pressed(KEY_S):
 		input_movement_vector.y -= 1
+	if Input.is_key_pressed(KEY_S):
+		input_movement_vector.y += 1
 	if Input.is_key_pressed(KEY_A):
 		input_movement_vector.x -= 1
 	if Input.is_key_pressed(KEY_D):
@@ -59,8 +61,10 @@ func process_input(delta):
 
 	input_movement_vector = input_movement_vector.normalized()
 
-	dir += -cam_xform.basis.z.normalized() * input_movement_vector.y
-	dir += cam_xform.basis.x.normalized() * input_movement_vector.x
+	#dir += cam_xform.basis.z.normalized() * input_movement_vector.y
+	#dir += cam_xform.basis.x.normalized() * input_movement_vector.x
+	dir += global_transform.basis.z.normalized() * input_movement_vector.y
+	dir += global_transform.basis.x.normalized() * input_movement_vector.x
 	# ----------------------------------
 
 	# ----------------------------------
@@ -97,7 +101,7 @@ func process_movement(delta):
 
 func _input(event):
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		rotation_helper.rotate_x(deg2rad(event.relative.y * MOUSE_SENSITIVITY))
+		rotation_helper.rotate_x(deg2rad(-event.relative.y * MOUSE_SENSITIVITY))
 		self.rotate_y(deg2rad(event.relative.x * MOUSE_SENSITIVITY * -1))
 
 		var camera_rot = rotation_helper.rotation_degrees
@@ -114,3 +118,8 @@ func _input(event):
 
 func _get_is_weapon_drawn():
 	return get_node("%Weapon").drawn
+
+func do_damage(damage: int):
+	health -= damage
+	if health <= 0:
+		print("DEAD")

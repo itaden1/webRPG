@@ -73,7 +73,7 @@ transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 0, 0, 0
 shape = SubResource( 1 )
 
 [node name="rotation_helper" type="Spatial" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0 )
+transform = Transform( -1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1, 0 )
 
 [node name="Camera" type="Camera" parent="rotation_helper"]
 transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 1.00219, 0 )
@@ -103,5 +103,5 @@ cast_to = Vector3( 0, -2.2, 0 )
 [node name="InteractionRay" type="RayCast" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.70064, 0 )
 enabled = true
-cast_to = Vector3( 0, 0, 6 )
+cast_to = Vector3( 0, 0, -9 )
 script = ExtResource( 2 )

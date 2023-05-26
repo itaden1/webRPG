@@ -60,6 +60,9 @@ func _ready():
 	pass
 	# generate({width=25, height=25, partitions=10, padding=[3], max_room_size=6, min_room_size=3})
 	# dungeon_interior_node.global_transform.origin.y = 0 # dungeon_world_location_y
+	# yield(get_tree(), "idle_frame")
+	# get_parent().navmesh = NavigationMesh.new()
+	# get_parent().bake_navigation_mesh(false)
 
 
 func generate(params: Dictionary):
