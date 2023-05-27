@@ -14,4 +14,5 @@ func _ready():
 func do_damage(damage: int):
 	health -= damage
 	if health <= 0:
+		GameEvents.emit_signal("enemy_slain")
 		queue_free()

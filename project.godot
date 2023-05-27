@@ -244,6 +244,7 @@ config/icon="res://icon.png"
 
 GameEvents="*res://Scripts/Singletons/GameEvents.gd"
 Rng="*res://Scripts/Singletons/RNG.gd"
+GameState="*res://Scripts/Singletons/GameState.gd"
 
 [editor_plugins]
 

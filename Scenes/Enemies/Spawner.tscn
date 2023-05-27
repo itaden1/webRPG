@@ -5,5 +5,5 @@
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
-spawn_time = 5.0
+spawn_time = 100.0
 enemy_scene = ExtResource( 2 )

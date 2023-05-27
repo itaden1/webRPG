@@ -32,3 +32,7 @@ func _on_weapon_hit_body(body: KinematicBody):
 	if body and body.has_method("do_damage") and attacking:# == true and !collided:
 		body.do_damage(20)
 		collided = true
+
+
+func toggle_weapon_collisions(state: bool):
+	get_children()[0].monitoring = state

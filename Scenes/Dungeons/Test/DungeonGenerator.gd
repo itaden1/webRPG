@@ -122,7 +122,8 @@ func generate(params: Dictionary):
 func add_enemy_spawn_points(parent_node: Node, grid: Dictionary, offset: float):
 	var grid_keys: Array = grid.keys()
 	grid_keys.shuffle()
-	for i in range(15):
+	var amount_of_enemies = Rng.get_random_range(7, 20)
+	for i in range(amount_of_enemies):
 		var enemy_spawn_point = spawn_scene.instance()
 		enemy_spawn_point.transform.origin.x = _key_as_vec(grid_keys[i]).x * offset
 		enemy_spawn_point.transform.origin.z = _key_as_vec(grid_keys[i]).y * offset

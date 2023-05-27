@@ -19,8 +19,10 @@ func _ready():
 
 	var _b = GameEvents.connect("player_entered_dungeon", self, "set_player_instance")
 
+
 func set_player_instance(player_inst: KinematicBody):
 	player = player_inst
+	spawn()
 
 func spawn():
 	if can_spawn():

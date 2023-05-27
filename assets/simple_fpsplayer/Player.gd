@@ -27,6 +27,7 @@ const SPRINT_ACCEL = 18
 var is_sprinting = false
 
 var flashlight
+var dead = false
 
 var health := 100
 
@@ -121,5 +122,8 @@ func _get_is_weapon_drawn():
 
 func do_damage(damage: int):
 	health -= damage
+	GameEvents.emit_signal("player_took_damage", 1)
 	if health <= 0:
-		print("DEAD")
+		if !dead:
+			GameEvents.emit_signal("player_died")
+			dead = true
