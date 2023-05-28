@@ -47,7 +47,6 @@ func find_backup_position():
 			navigation_agent.set_target_location(l)
 			if navigation_agent.is_target_reachable():
 				path_history.push_front(l)
-				print(path_history)
 				break
 			emergency -= 1
 			if emergency <= 0:

@@ -225,7 +225,7 @@ func render_world_chunks(start_pos: Vector2):
 
 func place_locations(x: int, y: int, mesh_inst: MeshInstance):
 	var dt: MeshDataTool = get_datatool_for_mesh(mesh_inst.lod_1_mesh)
-	var max_locations := 5
+	var max_locations := 3
 	var location_count := 0
 	var max_attempts := 30
 	var attempts := 0

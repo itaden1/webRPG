@@ -3,13 +3,13 @@ class_name Player
 #Variables
 var global = "root/global"
 
-
+onready var vocal_sound_player = get_node("AudioStreamPlayer3D")
 var weapon_drawn: bool setget , _get_is_weapon_drawn 
 
 const GRAVITY =-32.8
 var vel = Vector3()
-const MAX_SPEED = 20
-const JUMP_SPEED = 15
+const MAX_SPEED = 12
+const JUMP_SPEED = 8
 const ACCEL = 8.5
 
 var dir = Vector3()
@@ -123,6 +123,7 @@ func _get_is_weapon_drawn():
 func do_damage(damage: int):
 	health -= damage
 	GameEvents.emit_signal("player_took_damage", 1)
+	vocal_sound_player.play()
 	if health <= 0:
 		if !dead:
 			GameEvents.emit_signal("player_died")

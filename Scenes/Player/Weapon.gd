@@ -6,8 +6,8 @@ var attacking: bool = false
 var collided: bool = false
 onready var animation_player: AnimationPlayer = get_node("AnimationPlayer")
 onready var weapon_area: Area = get_node("Sword")
-onready var weapon_sound: AudioStreamPlayer3D = get_node("AudioStreamPlayer3D")
-
+onready var weapon_sound: AudioStreamPlayer3D = get_node("SwordAudioStreamPlayer3D")
+onready var impact_sound: AudioStreamPlayer3D = get_node("ImpactAudioStreamPlayer3D")
 
 func _ready():
 	visible = drawn
@@ -38,4 +38,5 @@ func _on_animation_finished(animation_name: String):
 func _on_weapon_hit_body(body: KinematicBody):
 	if body and body.has_method("do_damage") and attacking == true and !collided:
 		body.do_damage(20)
+		impact_sound.play()
 		collided = true

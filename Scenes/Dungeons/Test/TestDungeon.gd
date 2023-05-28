@@ -1,6 +1,6 @@
 extends Navigation
 
-onready var spawn_point: Spatial = get_node("NavigationMeshInstance/Dungeon/SpawnPoint")
+onready var spawn_point: Spatial = get_node_or_null("NavigationMeshInstance/Dungeon/SpawnPoint")
 
 
 

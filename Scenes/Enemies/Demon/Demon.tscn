@@ -1521,7 +1521,7 @@ mesh = SubResource( 1 )
 skin = SubResource( 2 )
 
 [node name="WeaponAttachment" type="BoneAttachment" parent="Skeleton"]
-transform = Transform( 0.646841, -0.129518, 0.751546, 0.451952, 0.858879, -0.240971, -0.614277, 0.495533, 0.614094, -0.217548, 0.472499, -0.714708 )
+transform = Transform( -0.0898564, -0.995384, 0.0336896, 0.974211, -0.094874, -0.204728, 0.20698, 0.0144245, 0.978239, -0.9619, 0.0870139, -1.60354 )
 bone_name = "mixamorig_RightHand"
 script = ExtResource( 12 )
 animation_player = NodePath("../../AnimationPlayer")
@@ -1553,7 +1553,6 @@ shape = SubResource( 5 )
 
 [node name="FiniteStateMachine" type="Node" parent="."]
 script = ExtResource( 5 )
-DEBUG = true
 
 [node name="Idle" type="Node" parent="FiniteStateMachine"]
 script = ExtResource( 9 )
@@ -1563,7 +1562,7 @@ script = ExtResource( 4 )
 change_to_path = NodePath("../../Chase")
 group_to_check = "Player"
 spatial_of_interest = "Player"
-distance = 15.0
+distance = 40.0
 
 [node name="PlayAnimationComponent" type="Node" parent="FiniteStateMachine/Idle"]
 script = ExtResource( 10 )
@@ -1609,6 +1608,12 @@ group_to_check = "Player"
 spatial_of_interest = "Player"
 distance = 8.0
 condition = 1
+
+[node name="FollowActor" type="Node" parent="FiniteStateMachine/Attack"]
+script = ExtResource( 6 )
+nav_update_time = 1.0
+speed = 5.0
+target_key = "player"
 
 [node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
 stream = ExtResource( 8 )

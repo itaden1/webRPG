@@ -6,7 +6,7 @@ var town_scene = preload("res://Scenes/Towns/Town.tscn")
 
 func generate_location():
 	# return generate_dungeon()
-	if Rng.get_random_range(0,3) <= 2: 
+	if Rng.get_random_range(0,10) <= 2: 
 		return generate_town()
 	else:
 		return generate_dungeon()
@@ -18,7 +18,7 @@ func generate_town():
 
 	return {
 		location_node = town_node,
-		location_padding = 140
+		location_padding = 130
 	}
 
 
@@ -28,5 +28,5 @@ func generate_dungeon():
 	dungeon_node.generate({width=15, height=15, partitions=15, padding=[1], max_room_size=6, min_room_size=3})
 	return {
 		location_node = dungeon_node_root,
-		location_padding = 60
+		location_padding = 50
 	}	

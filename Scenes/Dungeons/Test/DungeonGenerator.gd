@@ -9,9 +9,6 @@ var dungeon_world_location_y := -2000
 const utilities = preload("res://Scripts/Utilities.gd")
 var Utilities
 
-# spawn point for testing
-onready var spawn_point: Spatial = get_node("SpawnPoint")
-
 var wall_block = preload("res://Scenes/Dungeons/Test/DungeonWall.tscn")
 var corner_block = preload("res://Scenes/Dungeons/Test/DungeonWallCorner.tscn")
 var corridor_block = preload("res://Scenes/Dungeons/Test/DungeonCorridor.tscn")
