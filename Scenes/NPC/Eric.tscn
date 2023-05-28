@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=2]
+[gd_scene load_steps=19 format=2]
 
 [ext_resource path="res://Scenes/NPC/metal_armor_material.material" type="Material" id=1]
 [ext_resource path="res://Scenes/NPC/Hair_material.material" type="Material" id=2]
@@ -6,6 +6,7 @@
 [ext_resource path="res://Scenes/NPC/base_material.material" type="Material" id=4]
 [ext_resource path="res://Scenes/NPC/DialogueText.gd" type="Script" id=5]
 [ext_resource path="res://Scenes/NPC/NPC.gd" type="Script" id=6]
+[ext_resource path="res://Sound/Playersounds - Hurt3.ogg" type="AudioStream" id=7]
 
 [sub_resource type="ArrayMesh" id=1]
 resource_name = "human_male_anim_work_Plane"
@@ -1173,3 +1174,7 @@ no_depth_test = true
 autowrap = true
 width = 300.0
 script = ExtResource( 5 )
+
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource( 7 )
+unit_db = 45.31

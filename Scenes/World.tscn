@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=2]
+[gd_scene load_steps=15 format=2]
 
 [ext_resource path="res://Scripts/Generators/TerrainGenerator.gd" type="Script" id=1]
 [ext_resource path="res://Materials/SplatMap.tres" type="Material" id=2]
@@ -9,6 +9,7 @@
 [ext_resource path="res://Scenes/NatureObjects/shoals_shallow_water_0.png" type="Texture" id=7]
 [ext_resource path="res://Environments/World.tres" type="Environment" id=8]
 [ext_resource path="res://Scenes/GUI/ScreenEffects/CanvasLayer.tscn" type="PackedScene" id=9]
+[ext_resource path="res://Sound/Juhani Junkala - Post Apocalyptic Wastelands [Loop Ready].ogg" type="AudioStream" id=10]
 
 [sub_resource type="PlaneMesh" id=2]
 subdivide_width = 100
@@ -102,3 +103,7 @@ anims/RESET = SubResource( 5 )
 anims/water = SubResource( 6 )
 
 [node name="CanvasLayer" parent="." instance=ExtResource( 9 )]
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 10 )
+autoplay = true

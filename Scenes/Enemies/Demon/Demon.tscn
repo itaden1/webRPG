@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=2]
+[gd_scene load_steps=18 format=2]
 
 [ext_resource path="res://Scenes/Enemies/Demon/DemonMaterial.material" type="Material" id=1]
 [ext_resource path="res://Scenes/Enemies/Demon/Run.anim" type="Animation" id=2]
@@ -7,6 +7,7 @@
 [ext_resource path="res://addons/GamePasta.FSM/FiniteStateMachine.gd" type="Script" id=5]
 [ext_resource path="res://addons/GamePasta.FSM/Components/AIControllers/3D/FollowActor.gd" type="Script" id=6]
 [ext_resource path="res://addons/GamePasta.FSM/Components/CharacterControllers/3D/FaceDirectionOfTravel.gd" type="Script" id=7]
+[ext_resource path="res://Sound/GreaWarg_Attack.wav" type="AudioStream" id=8]
 [ext_resource path="res://addons/GamePasta.FSM/State.gd" type="Script" id=9]
 [ext_resource path="res://addons/GamePasta.FSM/Components/AIControllers/3D/PlayAnimation.gd" type="Script" id=10]
 [ext_resource path="res://Scenes/Enemies/Demon/EnemyWeapon.gd" type="Script" id=12]
@@ -703,6 +704,20 @@ tracks/65/keys = {
 "args": [ false ],
 "method": "toggle_weapon_collisions"
 } ]
+}
+tracks/66/type = "audio"
+tracks/66/path = NodePath("AudioStreamPlayer3D")
+tracks/66/interp = 1
+tracks/66/loop_wrap = true
+tracks/66/imported = false
+tracks/66/enabled = true
+tracks/66/keys = {
+"clips": [ {
+"end_offset": 0.0,
+"start_offset": 0.0,
+"stream": ExtResource( 8 )
+} ],
+"times": PoolRealArray( 0.4 )
 }
 
 [sub_resource type="Animation" id=4]
@@ -1506,7 +1521,7 @@ mesh = SubResource( 1 )
 skin = SubResource( 2 )
 
 [node name="WeaponAttachment" type="BoneAttachment" parent="Skeleton"]
-transform = Transform( 0.586308, -0.0146371, 0.809955, 0.153163, 0.983806, -0.093093, -0.795476, 0.178637, 0.579056, -0.347454, 0.342178, -0.894966 )
+transform = Transform( 0.646841, -0.129518, 0.751546, 0.451952, 0.858879, -0.240971, -0.614277, 0.495533, 0.614094, -0.217548, 0.472499, -0.714708 )
 bone_name = "mixamorig_RightHand"
 script = ExtResource( 12 )
 animation_player = NodePath("../../AnimationPlayer")
@@ -1594,3 +1609,7 @@ group_to_check = "Player"
 spatial_of_interest = "Player"
 distance = 8.0
 condition = 1
+
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource( 8 )
+unit_db = 24.742

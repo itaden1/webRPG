@@ -5,6 +5,8 @@ var dialogue_pointer: int = 0
 var dialogue_reset_timer: Timer = Timer.new()
 var reset_time : int = 15
 
+onready var vocal_sound_player = get_node("AudioStreamPlayer3D")
+
 var current_interactor: Spatial
 var health: int = 40
 
@@ -140,5 +142,6 @@ func _reset_dialogue():
 func do_damage(damage: int):
 	GameEvents.emit_signal("npc_emitted_dialogue", self, "Ouch!!")
 	health -= damage
+	vocal_sound_player.play()
 	if health <= 0:
 		queue_free()

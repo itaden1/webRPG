@@ -6,6 +6,7 @@ var attacking: bool = false
 var collided: bool = false
 onready var animation_player: AnimationPlayer = get_node("AnimationPlayer")
 onready var weapon_area: Area = get_node("Sword")
+onready var weapon_sound: AudioStreamPlayer3D = get_node("AudioStreamPlayer3D")
 
 
 func _ready():
@@ -18,6 +19,7 @@ func _input(event):
 	if event.is_action_pressed("DrawSheathWeapon"):
 		if !animation_player.is_playing():
 			drawn = ! drawn
+			weapon_sound.play()
 			visible = drawn
 
 	if drawn:
