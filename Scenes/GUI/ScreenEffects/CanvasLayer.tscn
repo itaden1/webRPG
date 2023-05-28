@@ -1,7 +1,7 @@
 [gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://Scenes/GUI/ScreenEffects/ScreenEffectAnimations.gd" type="Script" id=1]
-[ext_resource path="res://BloodDamage.png" type="Texture" id=2]
+[ext_resource path="res://Scenes/GUI/ScreenEffects/BloodDamage.png" type="Texture" id=2]
 [ext_resource path="res://Fonts/MainFont.tres" type="DynamicFont" id=3]
 [ext_resource path="res://Scenes/GUI/ScreenEffects/Score.gd" type="Script" id=4]
 

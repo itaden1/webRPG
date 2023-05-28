@@ -21,6 +21,13 @@ const roof_peak_wall = preload("res://Scenes/Towns/BuildingBlocks/Tudor/RoofPeak
 
 
 const npc_placeholder = preload("res://Scenes/NPC/MaleNPC.tscn")
+const npc_options = [
+	preload("res://Scenes/NPC/Harold.tscn"),
+	preload("res://Scenes/NPC/Gibson.tscn"),
+	preload("res://Scenes/NPC/Eric.tscn"),
+	preload("res://Scenes/NPC/Ben.tscn")
+]
+
 
 const utilities = preload("res://Scripts/Utilities.gd")
 
@@ -131,9 +138,12 @@ func generate(params: Dictionary):
 			houses.append(b)
 	
 	# add npc spawn
+	var houses_used := []
 	for i in params.number_of_npcs:
 		var house = houses[Rng.get_random_range(0, houses.size()-1)]
-		var npc = npc_placeholder.instance()
+		if houses_used.has(house):
+			continue
+		var npc = npc_options[Rng.get_random_range(0, npc_options.size()-1)].instance()
 		var npc_offset_pos_x = house.end.x - width/2 + 1
 		var npc_offset_pos_y = house.end.y - height/2 + 1
 		npc.transform.origin = Vector3(
@@ -142,6 +152,7 @@ func generate(params: Dictionary):
 			npc_offset_pos_y * 8
 		)
 		add_child(npc)
+		houses_used.append(house)
 
 
 	# Place player spawn point at center of main street (or edge of the first partition)
