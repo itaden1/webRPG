@@ -60,21 +60,22 @@ environment = SubResource( 8 )
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="CenterContainer" type="CenterContainer" parent="CanvasLayer"]
-anchor_right = 1.0
-anchor_bottom = 0.55
-margin_right = 9.0
+anchor_right = 1.012
+anchor_bottom = 0.989
+margin_right = 0.359924
+margin_bottom = -0.179993
 
 [node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/CenterContainer"]
-margin_left = 121.0
-margin_top = 136.0
-margin_right = 607.0
-margin_bottom = 205.0
+margin_left = 275.0
+margin_top = 220.0
+margin_right = 761.0
+margin_bottom = 373.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/CenterContainer/HBoxContainer"]
 margin_right = 486.0
-margin_bottom = 69.0
+margin_bottom = 153.0
 size_flags_vertical = 3
 
 [node name="Title" type="Label" parent="CanvasLayer/CenterContainer/HBoxContainer/VBoxContainer"]
@@ -88,14 +89,12 @@ text = "Legends of Rahnok"
 [node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/CenterContainer/HBoxContainer/VBoxContainer"]
 margin_top = 69.0
 margin_right = 486.0
-margin_bottom = 69.0
+margin_bottom = 153.0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/CenterContainer/HBoxContainer/VBoxContainer/CenterContainer"]
-visible = false
 margin_left = 178.0
-margin_top = -42.0
 margin_right = 308.0
-margin_bottom = 42.0
+margin_bottom = 84.0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/CenterContainer/HBoxContainer/VBoxContainer/CenterContainer/VBoxContainer"]
 margin_right = 130.0
@@ -154,14 +153,13 @@ script = ExtResource( 7 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.34183, 0, 5.09822 )
 
 [node name="Espada" parent="." instance=ExtResource( 5 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.27841, 0.424767, 0 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.27557, 0.633375, 2.60842 )
 
 [node name="OmniLight" parent="Espada" index="2"]
 visible = false
 
 [node name="Node" type="Node" parent="Espada"]
 script = ExtResource( 6 )
-rotation_speed = 0.0
 
 [node name="OmniLight" type="OmniLight" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.99787, 0, 2.82932 )
