@@ -1,7 +1,7 @@
 extends KinematicBody
 
 
-var health := 100
+var health := 60
 
 func _ready():
 	var fsm = get_node("FiniteStateMachine")

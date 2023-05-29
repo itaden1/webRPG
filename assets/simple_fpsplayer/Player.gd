@@ -20,7 +20,7 @@ const MAX_SLOPE_ANGLE = 40
 var camera
 var rotation_helper
 
-var MOUSE_SENSITIVITY = 0.05
+var MOUSE_SENSITIVITY = 0.09
 
 const MAX_SPRINT_SPEED = 20
 const SPRINT_ACCEL = 18

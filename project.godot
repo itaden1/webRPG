@@ -246,6 +246,13 @@ GameEvents="*res://Scripts/Singletons/GameEvents.gd"
 Rng="*res://Scripts/Singletons/RNG.gd"
 GameState="*res://Scripts/Singletons/GameState.gd"
 
+[display]
+
+window/size/width=720
+window/size/height=620
+window/stretch/mode="viewport"
+window/stretch/aspect="keep"
+
 [editor_plugins]
 
 enabled=PoolStringArray( "res://addons/GamePasta.FSM/plugin.cfg" )

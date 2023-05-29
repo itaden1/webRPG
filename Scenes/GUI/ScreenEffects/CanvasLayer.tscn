@@ -138,45 +138,55 @@ margin_right = 5.0
 margin_bottom = 0.281982
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Death/CenterContainer"]
-margin_left = 231.0
-margin_top = 246.0
-margin_right = 814.0
-margin_bottom = 340.0
+margin_left = 151.0
+margin_top = 250.0
+margin_right = 590.0
+margin_bottom = 356.0
 
 [node name="Label" type="Label" parent="Death/CenterContainer/VBoxContainer"]
-margin_right = 583.0
-margin_bottom = 76.0
+margin_right = 439.0
+margin_bottom = 53.0
 custom_fonts/font = ExtResource( 3 )
 text = "You have been slain"
+align = 1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Death/CenterContainer/VBoxContainer"]
-margin_top = 80.0
-margin_right = 583.0
-margin_bottom = 94.0
+margin_top = 57.0
+margin_right = 439.0
+margin_bottom = 71.0
 
 [node name="MarginContainer" type="MarginContainer" parent="Death/CenterContainer/VBoxContainer/HBoxContainer"]
-margin_right = 142.0
+margin_right = 106.0
 margin_bottom = 14.0
 size_flags_horizontal = 3
 
 [node name="Fame" type="Label" parent="Death/CenterContainer/VBoxContainer/HBoxContainer"]
-margin_left = 146.0
-margin_right = 289.0
+margin_left = 110.0
+margin_right = 217.0
 margin_bottom = 14.0
 size_flags_horizontal = 3
 size_flags_vertical = 7
 text = "Fame"
+align = 2
 
 [node name="Score" type="Label" parent="Death/CenterContainer/VBoxContainer/HBoxContainer"]
-margin_left = 293.0
-margin_right = 436.0
+margin_left = 221.0
+margin_right = 328.0
 margin_bottom = 14.0
 size_flags_horizontal = 3
 size_flags_vertical = 7
 script = ExtResource( 4 )
 
 [node name="MarginContainer2" type="MarginContainer" parent="Death/CenterContainer/VBoxContainer/HBoxContainer"]
-margin_left = 440.0
-margin_right = 583.0
+margin_left = 332.0
+margin_right = 439.0
 margin_bottom = 14.0
 size_flags_horizontal = 3
+
+[node name="Label2" type="Label" parent="Death/CenterContainer/VBoxContainer"]
+margin_top = 75.0
+margin_right = 439.0
+margin_bottom = 106.0
+text = "\"- So you thought there was some kind of meaning to this existence?
+But alas, you were always going to find death in this dark place\""
+align = 1
