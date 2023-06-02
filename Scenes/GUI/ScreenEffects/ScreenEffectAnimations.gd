@@ -11,6 +11,9 @@ func _ready():
 	death_timer.one_shot = true
 	death_timer.connect("timeout", self, "load_title_screen")
 	add_child(death_timer)
+	for n in get_parent().get_children():
+		if n.get('visible'):
+			n.visible = false
 
 func _on_player_took_damage(damage_type: int):
 	play("TakeDamageClaw")

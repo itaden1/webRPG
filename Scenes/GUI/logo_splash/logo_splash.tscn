@@ -83,9 +83,9 @@ __meta__ = {
 }
 
 [node name="BackgroundColor" type="ColorRect" parent="AspectRatioContainer"]
-margin_left = -89.5
-margin_right = 1112.5
-margin_bottom = 601.0
+margin_left = -161.5
+margin_right = 800.5
+margin_bottom = 481.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 color = Color( 0.0509804, 0.0470588, 0.0470588, 1 )
@@ -95,10 +95,10 @@ __meta__ = {
 
 [node name="Logo" type="TextureRect" parent="AspectRatioContainer"]
 self_modulate = Color( 1, 1, 1, 0 )
-margin_left = 261.5
-margin_top = 116.0
-margin_right = 761.5
-margin_bottom = 484.0
+margin_left = 69.5
+margin_top = 56.0
+margin_right = 569.5
+margin_bottom = 424.0
 size_flags_horizontal = 4
 size_flags_vertical = 4
 texture = ExtResource( 1 )

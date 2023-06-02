@@ -64,7 +64,10 @@ func physics_process(delta: float):
 	var location: Vector3 = context.actor.global_transform.origin
 	var next_location = get_next_location()
 	var direction = location.direction_to(next_location)
-	navigation_agent.set_velocity(direction * speed)
+	if OS.has_feature("web"):
+		velocity = context.actor.move_and_slide(direction * speed, Vector3.UP)
+	else:
+		navigation_agent.set_velocity(direction * speed)
 	context.update({direction=direction})
 
 func _on_velocity_computed(safe_velocity: Vector3):

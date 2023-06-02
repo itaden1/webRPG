@@ -1575,7 +1575,6 @@ script = ExtResource( 9 )
 [node name="FollowActor" type="Node" parent="FiniteStateMachine/Chase"]
 script = ExtResource( 6 )
 nav_update_time = 1.0
-speed = 500.0
 target_key = "player"
 
 [node name="FaceDirectionOfTravel" type="Node" parent="FiniteStateMachine/Chase"]
@@ -1604,8 +1603,11 @@ animation_name = "Attack"
 [node name="FollowActor" type="Node" parent="FiniteStateMachine/Attack"]
 script = ExtResource( 6 )
 nav_update_time = 1.0
-speed = 50.0
+speed = 5.0
 target_key = "player"
+
+[node name="FaceDirectionOfTravel" type="Node" parent="FiniteStateMachine/Attack"]
+script = ExtResource( 7 )
 
 [node name="ProximityToObjectExit" type="Node" parent="FiniteStateMachine/Attack"]
 script = ExtResource( 4 )

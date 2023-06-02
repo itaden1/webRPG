@@ -240,11 +240,22 @@ config/name="webRPG"
 run/main_scene="res://Scenes/GUI/logo_splash/logo_splash.tscn"
 config/icon="res://icon.png"
 
+[audio]
+
+output_latency=100
+
 [autoload]
 
 GameEvents="*res://Scripts/Singletons/GameEvents.gd"
 Rng="*res://Scripts/Singletons/RNG.gd"
 GameState="*res://Scripts/Singletons/GameState.gd"
+
+[display]
+
+window/size/width=960
+window/size/height=512
+window/stretch/mode="viewport"
+window/stretch/aspect="keep"
 
 [editor_plugins]
 

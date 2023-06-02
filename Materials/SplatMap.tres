@@ -32,9 +32,9 @@ void fragment() {
 
 [resource]
 shader = SubResource( 1 )
-shader_param/grassres = 200.0
-shader_param/earthres = 200.0
-shader_param/rockres = 200.0
+shader_param/grassres = 100.0
+shader_param/earthres = 100.0
+shader_param/rockres = 100.0
 shader_param/splatmap = ExtResource( 1 )
 shader_param/grass = ExtResource( 4 )
 shader_param/earth = ExtResource( 3 )
