@@ -4,6 +4,14 @@ extends Node
 var test_dungeon_scene = preload("res://Scenes/Dungeons/Test/TestDungeon.tscn")
 var town_scene = preload("res://Scenes/Towns/Town.tscn")
 
+
+var town_presets = [
+	{width=6, height=6, partitions=2, padding=[1], number_of_npcs=3, plot_types=[Constants.HOUSE_TYPES.BUILDING, Constants.HOUSE_TYPES.FIELD]},
+	{width=10, height=10, partitions=10, padding=[3,2,1], number_of_npcs=7, plot_types=[Constants.HOUSE_TYPES.BUILDING, Constants.HOUSE_TYPES.BUILDING]},
+	{width=25, height=25, partitions=10, padding=[3,2,1], number_of_npcs=7, plot_types=[Constants.HOUSE_TYPES.BUILDING, Constants.HOUSE_TYPES.FIELD]}
+
+]
+
 func generate_location():
 	# return generate_dungeon()
 	if Rng.get_random_range(0,10) <= 2: 
@@ -14,7 +22,7 @@ func generate_location():
 
 func generate_town():
 	var town_node = town_scene.instance()
-	town_node.generate({width=10, height=10, partitions=10, padding=[3,2,1], number_of_npcs=7})
+	town_node.generate(town_presets[Rng.get_random_range(0, town_presets.size()-1)])
 
 	return {
 		location_node = town_node,

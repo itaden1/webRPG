@@ -120,6 +120,7 @@ func _init():
 func generate(params: Dictionary):
 	width = params.width
 	height = params.height
+	var plot_types = params.plot_types
 	var town_rect: Rect2 = Rect2(Vector2(0, 0), Vector2(width, height))
 	var bpt = bpt_generator.new()
 	var tree = bpt.partition_rect(
@@ -134,7 +135,9 @@ func generate(params: Dictionary):
 
 	for b in tree.keys():
 		if tree[b].size() <= 0:
-			build_house(b)
+			var plot_type = plot_types[Rng.get_random_range(0, plot_types.size()-1)]
+			if plot_type == Constants.HOUSE_TYPES.BUILDING:
+				build_house(b)
 			houses.append(b)
 	
 	# add npc spawn
