@@ -4,7 +4,7 @@ extends Spatial
 const bpt_generator = preload("res://Scripts/Generators/BinaryPartitionTree.gd")
 var bpt = bpt_generator.new()
 
-var dungeon_world_location_y := -2000
+var dungeon_world_location_y := -500
 
 const utilities = preload("res://Scripts/Utilities.gd")
 var Utilities
@@ -26,6 +26,12 @@ var dungeon_interior_node: Spatial
 
 var spawn_scene = preload("res://Scenes/Enemies/Spawner.tscn")
 
+
+var offsets = {
+	green_halls = {
+		0: {horizontal = 9.5, vertical = 9.5}
+	}
+}
 var themes = {
 	green_halls = {
 		0 : {
@@ -48,6 +54,12 @@ var themes = {
 		}
 	}
 }
+
+var dungeon: Dictionary = {}
+var entrance: Spatial
+
+
+
 
 func _init():
 	._init()
@@ -72,9 +84,6 @@ func generate(params: Dictionary):
 		params.padding
 	)
 
-	var offset = 9.5
-
-	var dungeon_exit_vec: Vector2
 
 	var grid: Dictionary = {}
 	for x in range(0, params.width):
@@ -86,37 +95,53 @@ func generate(params: Dictionary):
 		for x in range(l.position.x, l.end.x):
 			for y in range(l.position.y, l.end.y):
 				grid[_as_key(Vector2(x,y))] = 1
-				if !dungeon_exit_vec:
-					dungeon_exit_vec = Vector2(l.position.x, l.position.y-1)
 
 	for l in all_leaves:
 		var corridor_grid = make_corridors(tree, l, {})
-
 		for k in corridor_grid.keys():
 			if grid[k] == 0:
 				grid[k] = corridor_grid[k]
 
-	dungeon_interior_node = build_dungeon(grid, offset)
+	var exit_vec: Vector2
+	var possible_exits := []
+	for n in grid.keys():
+		var vec = _key_as_vec(n)
+		if vec.x == 0 or vec.y == 0:
+			if grid[n] == 1:
+				possible_exits.append(vec)
+
+	exit_vec = possible_exits[Rng.get_random_range(0, possible_exits.size()-1)]
+	grid[_as_key(exit_vec)] = 2
+
+	entrance = dungeon_portal.instance()
+	add_child(entrance)
 	
+	var dungeon_exit = dungeon_portal.instance()
+	add_child(dungeon_exit)
+
+	var offset = offsets["green_halls"][0].horizontal
+
+	entrance.exit = dungeon_exit.get_node("ExitPosition")
+	entrance.exit_environment = indoor_environment
+	dungeon_exit.exit_environment = outdoor_environment
+	dungeon_exit.exit = entrance.get_node("ExitPosition")
+	dungeon_exit.transform.origin = Vector3(exit_vec.x * offset + 4, dungeon_world_location_y, exit_vec.y * offset + 8)
+
+	add_enemy_spawn_points(grid, offset)
+	
+	dungeon.layout = grid
+
+func remove_dungeon_from_world():
+	dungeon_interior_node.queue_free()
+
+func add_dungeon_to_world():
+	var offset = offsets["green_halls"][0].horizontal
+	
+	dungeon_interior_node = build_dungeon(dungeon.layout, offset)
 	dungeon_interior_node.transform.origin.y = dungeon_world_location_y
-	
 	add_child(dungeon_interior_node)
 
-	var dungeon_entrance = dungeon_portal.instance()
-	add_child(dungeon_entrance)
-	var dungeon_exit = dungeon_portal.instance()
-	dungeon_interior_node.add_child(dungeon_exit)
-
-	dungeon_entrance.exit = dungeon_exit.get_node("ExitPosition")
-	dungeon_entrance.exit_environment = indoor_environment
-	dungeon_exit.exit_environment = outdoor_environment
-	dungeon_exit.exit = dungeon_entrance.get_node("ExitPosition")
-	dungeon_exit.transform.origin = Vector3(dungeon_exit_vec.x * offset + 4, 0, dungeon_exit_vec.y * offset + 8)
-
-
-	add_enemy_spawn_points(dungeon_interior_node, grid, offset)
-
-func add_enemy_spawn_points(parent_node: Node, grid: Dictionary, offset: float):
+func add_enemy_spawn_points(grid: Dictionary, offset: float):
 	var grid_keys: Array = grid.keys()
 	grid_keys.shuffle()
 	var amount_of_enemies = Rng.get_random_range(7, 20)
@@ -124,8 +149,12 @@ func add_enemy_spawn_points(parent_node: Node, grid: Dictionary, offset: float):
 		var enemy_spawn_point = spawn_scene.instance()
 		enemy_spawn_point.transform.origin.x = _key_as_vec(grid_keys[i]).x * offset
 		enemy_spawn_point.transform.origin.z = _key_as_vec(grid_keys[i]).y * offset
+		enemy_spawn_point.transform.origin.y = dungeon_world_location_y
+
+		enemy_spawn_point.dungeon = self
+
 		enemy_spawn_point.navigation_node = get_parent().get_parent() # todo: clean this up 
-		parent_node.add_child(enemy_spawn_point)
+		add_child(enemy_spawn_point)
 
 
 func make_corridors(tree: Dictionary, branch: Rect2, grid: Dictionary):

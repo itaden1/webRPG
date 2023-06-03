@@ -4,13 +4,18 @@ var exit: Position3D
 var exit_environment: Environment
 
 onready var root_dungeon_node = get_parent().get_parent()
+onready var dungeon_generator_node = get_parent()
 
 func interact(interactor: Spatial):
+	if root_dungeon_node.has_method("bake_navigation_mesh"):
+		dungeon_generator_node.add_dungeon_to_world()
+		root_dungeon_node.navmesh = NavigationMesh.new()
+		root_dungeon_node.bake_navigation_mesh(false)
+
+	else:
+		dungeon_generator_node.remove_dungeon()
+
 	interactor.global_transform.origin = exit.global_transform.origin
 	interactor.rotation.y = exit.rotation.y
 	get_tree().root.get_node("World/WorldEnvironment").environment = exit_environment
-	
-	if root_dungeon_node.has_method("bake_navigation_mesh"):
-		root_dungeon_node.navmesh = NavigationMesh.new()
-		root_dungeon_node.bake_navigation_mesh(false)
-		GameEvents.emit_signal("player_entered_dungeon", interactor)
+	GameEvents.emit_signal("player_entered_dungeon", interactor, dungeon_generator_node)

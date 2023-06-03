@@ -8,6 +8,8 @@ var player: KinematicBody
 var spawn_timer: Timer = Timer.new()
 var spawned = false
 
+var dungeon: Spatial
+
 var navigation_node: Navigation
 
 func _ready():
@@ -20,9 +22,10 @@ func _ready():
 	var _b = GameEvents.connect("player_entered_dungeon", self, "set_player_instance")
 
 
-func set_player_instance(player_inst: KinematicBody):
-	player = player_inst
-	spawn()
+func set_player_instance(player_inst: KinematicBody, dungeon_entered: Spatial):
+	if dungeon_entered == self.dungeon:
+		player = player_inst
+		spawn()
 
 func spawn():
 	if can_spawn():

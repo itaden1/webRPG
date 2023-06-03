@@ -78,9 +78,6 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 ratio = 2.0
 stretch_mode = 3
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="BackgroundColor" type="ColorRect" parent="AspectRatioContainer"]
 margin_left = -33.5
