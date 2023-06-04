@@ -392,6 +392,7 @@ func get_biome(x: float, y: float):
 		return biomes.GRASSLAND
 
 func _ready():
+	WorldData.generate_world()
 
 	get_node("Player").global_transform.origin = Vector3(world_size.x/2, 1000, world_size.y/2)
 	add_child(thread_timer)

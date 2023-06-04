@@ -250,6 +250,7 @@ GameEvents="*res://Scripts/Singletons/GameEvents.gd"
 Rng="*res://Scripts/Singletons/RNG.gd"
 GameState="*res://Scripts/Singletons/GameState.gd"
 Constants="*res://Scripts/Singletons/Constants.gd"
+WorldData="*res://Scripts/Singletons/WorldData.gd"
 
 [display]
 
