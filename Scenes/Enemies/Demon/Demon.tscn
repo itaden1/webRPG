@@ -1364,7 +1364,7 @@ bones/34/name = "mixamorig_RightHand"
 bones/34/parent = 33
 bones/34/rest = Transform( 0.996435, -0.0552082, -0.0637866, 0.0564346, 0.998251, 0.0175849, 0.0627042, -0.021122, 0.997809, -2.23517e-08, 0.330177, 1.37836e-07 )
 bones/34/enabled = true
-bones/34/bound_children = [  ]
+bones/34/bound_children = [ NodePath("WeaponAttachment") ]
 bones/35/name = "mixamorig_RightHandThumb1"
 bones/35/parent = 34
 bones/35/rest = Transform( 0.972486, 0.229181, -0.0418038, -0.232962, 0.956701, -0.174506, 3.98606e-07, 0.179443, 0.983768, 0.0305726, 0.0741842, 0.0144583 )
@@ -1562,7 +1562,7 @@ script = ExtResource( 4 )
 change_to_path = NodePath("../../Chase")
 group_to_check = "Player"
 spatial_of_interest = "Player"
-distance = 40.0
+distance = 20.0
 
 [node name="PlayAnimationComponent" type="Node" parent="FiniteStateMachine/Idle"]
 script = ExtResource( 10 )

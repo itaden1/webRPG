@@ -42,6 +42,6 @@ func _on_enemy_exited_tree():
 func can_spawn():
 	if player != null:
 		var distance_to_player: float = global_transform.origin.distance_to(player.global_transform.origin)
-		return distance_to_player < 150 and distance_to_player > 10 and !spawned
+		return distance_to_player < 100 and distance_to_player > 10 and !spawned
 	return false
 		
