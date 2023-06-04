@@ -450,6 +450,8 @@ func apply_heights_to_mesh(
 		var _b = dt.commit_to_surface(terrain_mesh)
 		return terrain_mesh
 
+
+# TODO refactor, this function is in utilities now
 func normalize_to_zero_one_range(num: float):
 	var max_num = 1
 	var min_num = -1
@@ -466,6 +468,7 @@ func get_modified_land_height(x: float, y: float):
 func modify_land_height(h: float):
 	return pow(h * hill_multiplyer * hill_exponent_fudge, hill_exponent)
 
+#TODO refactor and move to utilities.gd
 func euclidean_squared_distance(x: float, y: float) -> float:
 	# gets the euclidean squared distance from the vertex to the map border
 	

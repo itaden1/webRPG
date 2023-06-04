@@ -81,3 +81,32 @@ func get_rect_difference(first_rect: Rect2, second_rect: Rect2) -> Vector2:
 		abs(first_rect.size.x - second_rect.size.x),
 		abs(first_rect.size.y - second_rect.size.y)
 	)
+
+
+func normalize_to_zero_one_range(num: float):
+	# get the value of num as a value between 0 - 1
+	var max_num = 1
+	var min_num = -1
+	return (num - min_num) / (max_num - min_num)
+
+
+func euclidean_squared_distance(x: float, y: float, width: float, height: float) -> float:
+	# gets the euclidean squared distance from the vertex to the map border
+	
+	var nx = 2 * x/width - 1
+	var ny = 2 * y/height - 1
+	
+	var distance = min(1, (pow(nx, 2) + pow(ny, 2)) / sqrt(2))
+
+	return distance
+
+
+func get_datatool_for_mesh(mesh: Mesh) -> MeshDataTool:
+	# given a mesh return mesh data tool to edit it
+	var st := SurfaceTool.new()
+	st.create_from(mesh,0)
+	var array_mesh : ArrayMesh = st.commit()
+	
+	var dt := MeshDataTool.new()
+	var _a = dt.create_from_surface(array_mesh, 0)
+	return dt

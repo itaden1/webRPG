@@ -8,8 +8,8 @@ var weapon_drawn: bool setget , _get_is_weapon_drawn
 
 const GRAVITY =-32.8
 var vel = Vector3()
-const MAX_SPEED = 12
-const JUMP_SPEED = 8
+const MAX_SPEED = 520
+const JUMP_SPEED = 28
 const ACCEL = 8.5
 
 var dir = Vector3()
@@ -70,9 +70,9 @@ func process_input(delta):
 
 	# ----------------------------------
 	# Jumping
-	if is_on_floor():
-		if Input.is_key_pressed(KEY_SPACE):
-			vel.y = JUMP_SPEED
+#	if is_on_floor():
+	if Input.is_key_pressed(KEY_SPACE):
+		vel.y = JUMP_SPEED
 	# ----------------------------------
 
 
