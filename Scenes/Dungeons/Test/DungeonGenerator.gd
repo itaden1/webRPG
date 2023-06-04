@@ -88,18 +88,18 @@ func generate(params: Dictionary):
 	var grid: Dictionary = {}
 	for x in range(0, params.width):
 		for y in range(0, params.height):
-			grid[_as_key(Vector2(x,y))] = 0
+			grid[_as_key(Vector2(x,y))] = Constants.TILE_TYPES.BLOCKED #0
 
 	var all_leaves = bpt.get_leaf_nodes(tree, tree.keys()[0])
 	for l in all_leaves:
 		for x in range(l.position.x, l.end.x):
 			for y in range(l.position.y, l.end.y):
-				grid[_as_key(Vector2(x,y))] = 1
+				grid[_as_key(Vector2(x,y))] = Constants.TILE_TYPES.OPEN #1
 
 	for l in all_leaves:
 		var corridor_grid = make_corridors(tree, l, {})
 		for k in corridor_grid.keys():
-			if grid[k] == 0:
+			if grid[k] == Constants.TILE_TYPES.BLOCKED:
 				grid[k] = corridor_grid[k]
 
 	var exit_vec: Vector2
@@ -107,11 +107,11 @@ func generate(params: Dictionary):
 	for n in grid.keys():
 		var vec = _key_as_vec(n)
 		if vec.x == 0 or vec.y == 0:
-			if grid[n] == 1:
+			if grid[n] == Constants.TILE_TYPES.OPEN:
 				possible_exits.append(vec)
 
 	exit_vec = possible_exits[Rng.get_random_range(0, possible_exits.size()-1)]
-	grid[_as_key(exit_vec)] = 2
+	grid[_as_key(exit_vec)] = Constants.TILE_TYPES.EXIT# 2
 
 	entrance = dungeon_portal.instance()
 	add_child(entrance)

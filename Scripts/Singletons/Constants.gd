@@ -8,3 +8,9 @@ enum HOUSE_TYPES {
 	FIELD
 }
 
+enum TILE_TYPES {
+	BLOCKED,
+	OPEN,
+	EXIT
+}
+
