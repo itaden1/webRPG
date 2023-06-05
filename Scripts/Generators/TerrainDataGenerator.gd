@@ -1,5 +1,6 @@
 extends Node
 
+const bpt_generator = preload("res://Scripts/Generators/BinaryPartitionTree.gd")
 const utilities = preload("res://Scripts/Utilities.gd")
 var Utilities
 
@@ -15,6 +16,19 @@ var chunk_divisions: Vector2
 var hill_multiplyer: int
 var hill_exponent: int
 var hill_exponent_fudge: int = 1
+var max_locations_per_chunk = 3
+
+
+# TODO use resources to describe locations
+const city_template = {
+	width=25, height=25, partitions=10, padding=[3,2,1], number_of_npcs=7, 
+	plot_types=[Constants.HOUSE_TYPES.BUILDING, Constants.HOUSE_TYPES.FIELD, Constants.HOUSE_TYPES.THREE_STORY_BUILDING, Constants.HOUSE_TYPES.TWO_STORY_BUILDING]
+}
+
+const town_template = {
+	width=10, height=10, partitions=10, padding=[3,2,1], number_of_npcs=7, 
+	plot_types=[Constants.HOUSE_TYPES.BUILDING, Constants.HOUSE_TYPES.TWO_STORY_BUILDING, Constants.HOUSE_TYPES.FIELD]
+}
 
 func _init():
 	._init()
@@ -129,13 +143,10 @@ func build_world(
 
 			data.chunks[Utilities.vec_as_key(chunk_data.position)] = chunk_data
 
-	# generate large towns and cities
+	# select chunks for capital cities
 	# Only one city per chunk
-	var kingdom_choices = [
-		Constants.KINGDOM_TYPES.DESERT,
-		Constants.KINGDOM_TYPES.GRASSLAND,
-		Constants.KINGDOM_TYPES.SNOW
-	]
+	var kingdom_choices = Constants.KINGDOM_TYPES.values()
+
 	var max_cities := 3
 	var city_dist_from_other_city = chunk_size.x * 6
 	var cities := []
@@ -151,7 +162,10 @@ func build_world(
 					dist_from_other_city = distance
 					break
 			if dist_from_other_city >= city_dist_from_other_city:
-				c.locations = [{type=Constants.LOCATION_TYPES.CITY}]
+				c.locations = [{
+					type=Constants.LOCATION_TYPES.CITY,
+					layout=build_city(city_template)
+				}]
 				cities.append(c.position)
 				var k = Rng.get_random_range(0, kingdom_choices.size()-1)
 				c.kingdom_type = kingdom_choices[k]
@@ -171,7 +185,7 @@ func build_world(
 		c.kingdom_type = closest_city.kingdom_type
 
 
-	# generate towns
+	# Determine chunks that will contain towns
 	var town_dist_from_other_city = chunk_size.x * 3
 	var max_towns := 10
 	for v in valid_town_chunks:
@@ -186,10 +200,16 @@ func build_world(
 					dist_from_other_town = distance
 					break
 			if dist_from_other_town >= town_dist_from_other_city:
-				c.locations = [{type=Constants.LOCATION_TYPES.TOWN}]
+				# TODO generate the town and other locations
+				c.locations = [{
+					location = Vector2(0, 0), # TODO get a random empty / buildable location in the chunk
+					type=Constants.LOCATION_TYPES.TOWN,
+					layout=build_town(town_template)
+				}]
 				cities.append(c.position)
 
-	# find blocks that are inhabitable by small communities
+
+	# Determine chunks that are inhabitable by small communities
 	# This includes farms / villages / monastaries / mines and other man made locations
 	var min_habitation_distance = chunk_size.x
 	for ck in data.chunks.keys():
@@ -201,11 +221,47 @@ func build_world(
 				c.locations = [{type=Constants.LOCATION_TYPES.VILLAGE}]
 
 
-
-
+	# generate wilderness areas
+	for ck in data.chunks.keys():
+		var c = data.chunks[ck]
+		if c.locations.size() == 0:
+			# TODO place wilderness locations
+			pass
 
 	return data
 
+
+func build_city(template: Dictionary):
+	pass
+
+func build_town(template: Dictionary) -> Dictionary:
+	var width = template.width
+	var height = template.height
+	var plot_types = template.plot_types
+	var town_rect: Rect2 = Rect2(Vector2(0, 0), Vector2(width, height))
+	var bpt = bpt_generator.new()
+	var tree = bpt.partition_rect(
+		town_rect,
+		template.partitions,
+		6,
+		2,
+		template.padding
+	)
+
+	var data := {}
+
+	var houses: Array = []
+
+	for b in tree.keys():
+		if tree[b].size() <= 0:
+			var plot_type = plot_types[Rng.get_random_range(0, plot_types.size()-1)]
+			if plot_type == Constants.HOUSE_TYPES.BUILDING:
+				pass
+				# build_house(b)
+			houses.append(b)
+			data.houses = {rect=b, type=plot_type}
+	
+	return data
 
 func get_raw_land_height(x: float, y: float):
 	var val = hill_noise.get_noise_3d(x, 0, y)
