@@ -67,13 +67,19 @@ func build_world(
 	precipitation_noise.period = data.precipitation_noise.period
 	precipitation_noise.persistence = data.precipitation_noise.persistence
 
+
+	# save chunks that are good for placing large cities on
+	var valid_city_chunks := []
+	var valid_town_chunks := []
+
 	# loop through each chunk of the world and create data
-	data.chunks = []
+	data.chunks = {}
 	for x in range(0, world_size.x, chunk_size.x):
 		for y in range(0, world_size.y, chunk_size.y):
 			var chunk_data = {}
 			chunk_data.position = Vector2(x,y)
 			chunk_data.mesh_data = []
+			chunk_data.locations = []
 
 			# create the mesh data, for now we just copy it to an array for easy re use
 			# but maybe just saving the mesh as is might be more optimal?
@@ -101,19 +107,77 @@ func build_world(
 				get_reshaped_elevation(x+chunk_size.x, y+chunk_size.y)
 			]
 			var above_sea_level_score = 0
-			var height_diff = 0
+			var terrain_steepnes_score = 0
 			for e in point_heights:
 				if e > modify_land_height(OCEAN_LEVEL) + 2:
 					above_sea_level_score += 1
 
-				var new_diff = abs(point_heights[0] - e)
-				if new_diff > height_diff:
-					height_diff = new_diff
+				var new_steepnes_score = abs(point_heights[0] - e)
+				if new_steepnes_score > terrain_steepnes_score:
+					terrain_steepnes_score = new_steepnes_score
 			
 			chunk_data.above_sea_level_score = above_sea_level_score
-			chunk_data.terrain_steepnes_score = height_diff
+			chunk_data.terrain_steepnes_score = terrain_steepnes_score	
 
-			data.chunks.append(chunk_data)
+			# check if its okay to place a large location here and add it to the list
+			if above_sea_level_score >= 2 and above_sea_level_score < 4 and terrain_steepnes_score < 100:
+				valid_city_chunks.append(chunk_data.position)
+			
+			# check if its valid to place a town here and add it to the list
+			if above_sea_level_score >= 3 and terrain_steepnes_score < 150:
+				valid_town_chunks.append(chunk_data.position)
+
+			data.chunks[Utilities.vec_as_key(chunk_data.position)] = chunk_data
+
+	# generate large towns and cities
+	# Only one city per chunk
+	var max_cities := 3
+	var city_dist_from_other_city = chunk_size.x * 8
+	var cities := []
+	for v in valid_city_chunks:
+		var c = data.chunks[Utilities.vec_as_key(v)]
+		if cities.size() >= max_cities:
+			break
+		elif valid_city_chunks.has(c.position):
+			var dist_from_other_city = city_dist_from_other_city
+			for city in cities:
+				var distance = city.distance_to(c.position)
+				if distance < city_dist_from_other_city:
+					dist_from_other_city = distance
+					break
+			if dist_from_other_city >= city_dist_from_other_city:
+				c.locations = [{type=Constants.LOCATION_TYPES.CITY}]
+				cities.append(c.position)
+
+	# generate towns
+	var town_dist_from_other_city = chunk_size.x * 3
+	var max_towns := 10
+	for v in valid_town_chunks:
+		var c = data.chunks[Utilities.vec_as_key(v)]
+		if cities.size() >= max_towns + max_cities:
+			break
+		elif valid_town_chunks.has(c.position):
+			var dist_from_other_town = town_dist_from_other_city
+			for city in cities:
+				var distance = city.distance_to(c.position)
+				if distance < town_dist_from_other_city:
+					dist_from_other_town = distance
+					break
+			if dist_from_other_town >= town_dist_from_other_city:
+				c.locations = [{type=Constants.LOCATION_TYPES.TOWN}]
+				cities.append(c.position)
+
+	# find blocks that are inhabitable by small communities
+	# This includes farms / villages / monastaries / mines and other man made locations
+	var min_habitation_distance = chunk_size.x
+	for ck in data.chunks.keys():
+		var c = data.chunks[ck]
+		for city in cities:
+			var distance = city.distance_to(c.position)
+			if distance <= min_habitation_distance and distance > 0 and c.above_sea_level_score >= 4 and c.terrain_steepnes_score < 250:
+				# TODO more location types
+				c.locations = [{type=Constants.LOCATION_TYPES.VILLAGE}]
+
 
 	return data
 
@@ -135,5 +199,5 @@ func get_reshaped_elevation(x: float, y: float) -> float:
 		#modify the exponent to have flatter lands above ocean level
 		var e = elevation - OCEAN_LEVEL
 
-		return modify_land_height(e) + modify_land_height(OCEAN_LEVEL) + 2
+		return modify_land_height(e) + modify_land_height(OCEAN_LEVEL) + 25
 	return modify_land_height(elevation)

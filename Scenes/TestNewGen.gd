@@ -15,7 +15,8 @@ func _ready():
 	WorldData.generate_world()
 	var world = WorldData.world
 
-	for chunk in world.chunks:
+	for k in world.chunks.keys():
+		var chunk = world.chunks[k]
 		var plane_mesh := PlaneMesh.new()
 		plane_mesh.subdivide_depth = 50
 		plane_mesh.subdivide_width = 50
@@ -27,9 +28,17 @@ func _ready():
 		mesh_inst.material_override.albedo_texture = load("res://Materials/Dirt_15-128x128.png")
 		add_child(mesh_inst)
 		mesh_inst.global_transform.origin = Vector3(chunk.position.x, 0, chunk.position.y)
-		if chunk.terrain_steepnes_score <= 150 and chunk.above_sea_level_score > 2:
+		for location in chunk.locations:
+			var colors = {
+				Constants.LOCATION_TYPES.CITY: Color.blue,
+				Constants.LOCATION_TYPES.TOWN: Color.aqua,
+				Constants.LOCATION_TYPES.VILLAGE: Color.brown
+			}
 			var sc = load("res://Scenes/NatureObjects/DEBUG/ForbiddenPlacement.tscn")
 			var inst = sc.instance()
+			var material = SpatialMaterial.new()
+			material.albedo_color = colors[location.type]
+			inst.get_node("MeshInstance").material_override = material
 			mesh_inst.add_child(inst)
 
 func apply_heights_to_mesh(

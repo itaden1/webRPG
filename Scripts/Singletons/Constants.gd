@@ -1,6 +1,11 @@
 extends Node
 
-
+enum LOCATION_TYPES {
+	CITY,
+	TOWN,
+	FARM,
+	VILLAGE,
+}
 enum HOUSE_TYPES {
 	COTTAGE,
 	EMPTY,

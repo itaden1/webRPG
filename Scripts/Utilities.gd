@@ -110,3 +110,13 @@ func get_datatool_for_mesh(mesh: Mesh) -> MeshDataTool:
 	var dt := MeshDataTool.new()
 	var _a = dt.create_from_surface(array_mesh, 0)
 	return dt
+
+
+# A lot of the generation queries dictionaries with vector2
+# These 2 functions facilitate transforming a vec2 into a string(key) and vice versa
+func vec_as_key(vector: Vector2):
+	return str(int(vector.x), ",", int(vector.y))
+
+func key_as_vec(key: String):
+	var parts = key.split(",")
+	return Vector2(parts[0], parts[1])

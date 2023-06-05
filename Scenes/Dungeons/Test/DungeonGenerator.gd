@@ -88,13 +88,13 @@ func generate(params: Dictionary):
 	var grid: Dictionary = {}
 	for x in range(0, params.width):
 		for y in range(0, params.height):
-			grid[_as_key(Vector2(x,y))] = Constants.TILE_TYPES.BLOCKED #0
+			grid[Utilities.vec_as_key(Vector2(x,y))] = Constants.TILE_TYPES.BLOCKED #0
 
 	var all_leaves = bpt.get_leaf_nodes(tree, tree.keys()[0])
 	for l in all_leaves:
 		for x in range(l.position.x, l.end.x):
 			for y in range(l.position.y, l.end.y):
-				grid[_as_key(Vector2(x,y))] = Constants.TILE_TYPES.OPEN #1
+				grid[Utilities.vec_as_key(Vector2(x,y))] = Constants.TILE_TYPES.OPEN #1
 
 	for l in all_leaves:
 		var corridor_grid = make_corridors(tree, l, {})
@@ -105,13 +105,13 @@ func generate(params: Dictionary):
 	var exit_vec: Vector2
 	var possible_exits := []
 	for n in grid.keys():
-		var vec = _key_as_vec(n)
+		var vec = Utilities.key_as_vec(n)
 		if vec.x == 0 or vec.y == 0:
 			if grid[n] == Constants.TILE_TYPES.OPEN:
 				possible_exits.append(vec)
 
 	exit_vec = possible_exits[Rng.get_random_range(0, possible_exits.size()-1)]
-	grid[_as_key(exit_vec)] = Constants.TILE_TYPES.EXIT# 2
+	grid[Utilities.vec_as_key(exit_vec)] = Constants.TILE_TYPES.EXIT# 2
 
 	entrance = dungeon_portal.instance()
 	add_child(entrance)
@@ -147,8 +147,8 @@ func add_enemy_spawn_points(grid: Dictionary, offset: float):
 	var amount_of_enemies = Rng.get_random_range(7, 20)
 	for i in range(amount_of_enemies):
 		var enemy_spawn_point = spawn_scene.instance()
-		enemy_spawn_point.transform.origin.x = _key_as_vec(grid_keys[i]).x * offset
-		enemy_spawn_point.transform.origin.z = _key_as_vec(grid_keys[i]).y * offset
+		enemy_spawn_point.transform.origin.x = Utilities.key_as_vec(grid_keys[i]).x * offset
+		enemy_spawn_point.transform.origin.z = Utilities.key_as_vec(grid_keys[i]).y * offset
 		enemy_spawn_point.transform.origin.y = dungeon_world_location_y
 
 		enemy_spawn_point.dungeon = self
@@ -177,13 +177,13 @@ func make_corridors(tree: Dictionary, branch: Rect2, grid: Dictionary):
 				if s.position.y == l.end.y:
 					# s is below l
 					for y in range(l_center.y, s_center.y):
-						grid[_as_key(Vector2(s_center.x, y))] = 1
+						grid[Utilities.vec_as_key(Vector2(s_center.x, y))] = 1
 					corridor_built = true
 					break
 				else:
 					# s is above l
 					for y in range(s_center.y, l_center.y):
-						grid[_as_key(Vector2(s_center.x, y))] = 1
+						grid[Utilities.vec_as_key(Vector2(s_center.x, y))] = 1
 					corridor_built = true
 					break
 			elif s.position.y == l.position.y:
@@ -191,26 +191,18 @@ func make_corridors(tree: Dictionary, branch: Rect2, grid: Dictionary):
 				if s.position.x == l.end.x:
 					# s is to the right of l
 					for x in range(l_center.x, s_center.x):
-						grid[_as_key(Vector2(x, s_center.y))] = 1
+						grid[Utilities.vec_as_key(Vector2(x, s_center.y))] = 1
 					corridor_built = true
 					break
 				else:
 					# s is to the left of  l
 					for x in range(s_center.x, l_center.x):
-						grid[_as_key(Vector2(x, s_center.y))] = 1
+						grid[Utilities.vec_as_key(Vector2(x, s_center.y))] = 1
 					corridor_built = true
 					break
 		if corridor_built:
 			break
 	return make_corridors(tree, parent, grid)
-
-
-func _as_key(vector: Vector2):
-	return str(int(vector.x), ",", int(vector.y))
-
-func _key_as_vec(key: String):
-	var parts = key.split(",")
-	return Vector2(parts[0], parts[1])
 
 func get_block(mask: int, style: String, level: int) -> Dictionary:
 	var level_style = themes[style]
@@ -231,7 +223,7 @@ func build_dungeon(grid: Dictionary, offset: float) -> Spatial:
 
 	for r in grid.keys():
 		if grid[r] == 1:
-			var vec = _key_as_vec(r)
+			var vec = Utilities.key_as_vec(r)
 			var f_block = floor_block.instance()
 			f_block.transform.origin.x = vec.x * offset
 			f_block.transform.origin.z = vec.y * offset

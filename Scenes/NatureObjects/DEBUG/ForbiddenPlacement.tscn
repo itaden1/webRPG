@@ -10,6 +10,6 @@ size = Vector3( 5, 100, 5 )
 [node name="Spatial" type="Spatial"]
 transform = Transform( 1, 0, 0, 0, 100, 0, 0, 0, 1, 0, 0, 0 )
 
-[node name="Spatial" type="MeshInstance" parent="."]
+[node name="MeshInstance" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.06751, 0 )
 mesh = SubResource( 1 )
