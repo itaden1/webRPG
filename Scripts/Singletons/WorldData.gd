@@ -12,6 +12,7 @@ world: {
 	chunks: [
 		{
 			position: vec2, # where this chunk is placed in the world
+			kingdom_type: enum # what type of land this is and who is the ruler
 			mesh_data: [], # list of vec3 vertex data
 			shader: Resource # which shader to use, determines the textures on the map
 			texture_data: {}, # dictionary <vec2, brush>

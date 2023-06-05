@@ -25,7 +25,12 @@ func _ready():
 		var mesh_inst =MeshInstance.new()
 		mesh_inst.mesh = terrain_mesh
 		mesh_inst.material_override = SpatialMaterial.new()
-		mesh_inst.material_override.albedo_texture = load("res://Materials/Dirt_15-128x128.png")
+		var materials_map = {
+			Constants.KINGDOM_TYPES.DESERT: load("res://Materials/Dirt_15-128x128.png"),
+			Constants.KINGDOM_TYPES.SNOW: load("res://Materials/Snow_01-128x128.png"),
+			Constants.KINGDOM_TYPES.GRASSLAND: load("res://Materials/Grass_02-128x128.png"),
+		}
+		mesh_inst.material_override.albedo_texture = materials_map[chunk.kingdom_type]
 		add_child(mesh_inst)
 		mesh_inst.global_transform.origin = Vector3(chunk.position.x, 0, chunk.position.y)
 		for location in chunk.locations:

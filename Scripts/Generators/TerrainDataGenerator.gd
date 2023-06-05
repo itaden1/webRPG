@@ -4,7 +4,7 @@ const utilities = preload("res://Scripts/Utilities.gd")
 var Utilities
 
 # TODO move to constants file?
-const OCEAN_LEVEL = 0.18
+const OCEAN_LEVEL = 0.21
 
 var hill_noise := OpenSimplexNoise.new()
 var precipitation_noise := OpenSimplexNoise.new()
@@ -131,8 +131,13 @@ func build_world(
 
 	# generate large towns and cities
 	# Only one city per chunk
+	var kingdom_choices = [
+		Constants.KINGDOM_TYPES.DESERT,
+		Constants.KINGDOM_TYPES.GRASSLAND,
+		Constants.KINGDOM_TYPES.SNOW
+	]
 	var max_cities := 3
-	var city_dist_from_other_city = chunk_size.x * 8
+	var city_dist_from_other_city = chunk_size.x * 6
 	var cities := []
 	for v in valid_city_chunks:
 		var c = data.chunks[Utilities.vec_as_key(v)]
@@ -148,6 +153,23 @@ func build_world(
 			if dist_from_other_city >= city_dist_from_other_city:
 				c.locations = [{type=Constants.LOCATION_TYPES.CITY}]
 				cities.append(c.position)
+				var k = Rng.get_random_range(0, kingdom_choices.size()-1)
+				c.kingdom_type = kingdom_choices[k]
+				kingdom_choices.pop_at(k)
+
+	# assign kindom to chunk, indicates which capital is clossest 
+	# as well as textures / trees locations found there
+	for ck in data.chunks.keys():
+		var c = data.chunks[ck]
+		var closest_city = null
+		for k in cities:
+			if closest_city == null:
+				closest_city = data.chunks[Utilities.vec_as_key(k)]
+			var distance = k.distance_to(c.position)
+			if distance < closest_city.position.distance_to(c.position):
+				closest_city = data.chunks[Utilities.vec_as_key(k)]
+		c.kingdom_type = closest_city.kingdom_type
+
 
 	# generate towns
 	var town_dist_from_other_city = chunk_size.x * 3
@@ -179,6 +201,9 @@ func build_world(
 				c.locations = [{type=Constants.LOCATION_TYPES.VILLAGE}]
 
 
+
+
+
 	return data
 
 
@@ -197,7 +222,7 @@ func get_reshaped_elevation(x: float, y: float) -> float:
 	elevation = elevation + (0-distance) / 2
 	if elevation > OCEAN_LEVEL:
 		#modify the exponent to have flatter lands above ocean level
-		var e = elevation - OCEAN_LEVEL
+		var e = elevation - OCEAN_LEVEL + 0.02
 
 		return modify_land_height(e) + modify_land_height(OCEAN_LEVEL) + 25
 	return modify_land_height(elevation)

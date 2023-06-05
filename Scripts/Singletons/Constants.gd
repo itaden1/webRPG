@@ -6,6 +6,7 @@ enum LOCATION_TYPES {
 	FARM,
 	VILLAGE,
 }
+
 enum HOUSE_TYPES {
 	COTTAGE,
 	EMPTY,
@@ -17,5 +18,11 @@ enum TILE_TYPES {
 	BLOCKED,
 	OPEN,
 	EXIT
+}
+
+enum KINGDOM_TYPES {
+	DESERT,
+	GRASSLAND,
+	SNOW
 }
 
