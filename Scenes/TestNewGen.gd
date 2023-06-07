@@ -3,6 +3,8 @@ extends Spatial
 const utilities = preload("res://Scripts/Utilities.gd")
 var Utilities
 
+var world_data: Dictionary
+
 # Declare member variables here. Examples:
 # var a = 2
 # var b = "text"
@@ -13,11 +15,12 @@ func _init():
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	WorldData.generate_world()
-	var world = WorldData.world
+	world_data = WorldData.world
 
-	for k in world.chunks.keys():
-		var chunk = world.chunks[k]
+	for k in world_data.chunks.keys():
+		var chunk = world_data.chunks[k]
 		var plane_mesh := PlaneMesh.new()
+		var chunk_position = Utilities.key_as_vec(k)
 		plane_mesh.subdivide_depth = 50
 		plane_mesh.subdivide_width = 50
 		plane_mesh.size = Vector2(1000, 1000)
@@ -45,6 +48,43 @@ func _ready():
 			material.albedo_color = colors[location.type]
 			inst.get_node("MeshInstance").material_override = material
 			mesh_inst.add_child(inst)
+			
+			var location_node = Spatial.new()
+
+			if location.type == Constants.LOCATION_TYPES.TOWN:
+				location_node.global_transform.origin = Vector3(
+					location.position.x + chunk_position.x, 
+					location.position.y, 
+					location.position.z + chunk_position.y
+				)
+				build_town(location.layout, location_node)
+				add_child(location_node)
+
+func build_town(layout: Array, location_node: Spatial):
+	"""
+	iterate through each floor of each building and place the relevent tile based on bitmask value
+	"""
+	for l in layout:
+		for f in range(l.grid.size()):
+			for k in l.grid[f].keys():
+				if f >= l.grid.size() -1:
+					pass
+					# TODO build roof nodes
+				else:
+					var mask = l.grid[f][k]
+					var vec = Utilities.key_as_vec(k)
+					var tile_data = WorldData.house_themes[l.culture][f][mask]
+					var offsets = WorldData.house_themes[l.culture]["offsets"][f]
+					if tile_data.has("scene"):
+						var tile = tile_data.scene.instance()
+						tile.rotate(Vector3.UP, deg2rad(tile_data.rotation))
+						tile.transform.origin = Vector3(
+							vec.x*offsets.horizontal, 
+							f*offsets.vertical, 
+							vec.y*offsets.horizontal
+						)
+						location_node.add_child(tile)
+
 
 func apply_heights_to_mesh(
 	mesh: PlaneMesh, 

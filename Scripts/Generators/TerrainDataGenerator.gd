@@ -93,6 +93,7 @@ func build_world(
 			var chunk_data = {}
 			chunk_data.position = Vector2(x,y)
 			chunk_data.mesh_data = []
+			chunk_data.mesh_data_dict = {}
 			chunk_data.locations = []
 
 			# create the mesh data, for now we just copy it to an array for easy re use
@@ -108,6 +109,7 @@ func build_world(
 				var e = get_reshaped_elevation(vert.x+x, vert.z+y)
 				vert.y = e
 				chunk_data.mesh_data.append(vert)
+				chunk_data.mesh_data_dict[Utilities.vec_as_key(Vector2(vert.x, vert.z))] = vert
 			
 			# determine whether this is an above see level chunk
 			# for each corner of the chunk get its height above sea level
@@ -201,9 +203,13 @@ func build_world(
 					break
 			if dist_from_other_town >= town_dist_from_other_city:
 				# TODO generate the town and other locations
+				# TODO: sample the terrain to get valid building location
+				var valid_positions:  Array = get_valid_building_positions(c.mesh_data)
+				var pos = valid_positions[Rng.get_random_range(0, valid_positions.size()-1)]
 				c.locations = [{
-					location = Vector2(0, 0), # TODO get a random empty / buildable location in the chunk
+					position = pos,
 					type=Constants.LOCATION_TYPES.TOWN,
+					name="Foo Town", # TODO: random gen town name
 					layout=build_town(town_template)
 				}]
 				cities.append(c.position)
@@ -234,7 +240,7 @@ func build_world(
 func build_city(template: Dictionary):
 	pass
 
-func build_town(template: Dictionary) -> Dictionary:
+func build_town(template: Dictionary) -> Array:
 	var width = template.width
 	var height = template.height
 	var plot_types = template.plot_types
@@ -248,24 +254,57 @@ func build_town(template: Dictionary) -> Dictionary:
 		template.padding
 	)
 
-	var data := {}
+	var data := []
 
 	var houses: Array = []
 
 	for b in tree.keys():
 		if tree[b].size() <= 0:
 			var plot_type = plot_types[Rng.get_random_range(0, plot_types.size()-1)]
-			if plot_type == Constants.HOUSE_TYPES.BUILDING:
-				pass
-				# build_house(b)
+			var orientations = [0, 1]
+			var orientation = orientations[Rng.get_random_range(0, orientations.size()-1)]
+			var floor_count = 1
+			match plot_type:
+				Constants.HOUSE_TYPES.BUILDING: floor_count = 1
+				Constants.HOUSE_TYPES.TWO_STORY_BUILDING: floor_count = 2
+				Constants.HOUSE_TYPES.THREE_STORY_BUILDING: floor_count = 3
+
+				
+			build_building(b, orientation, floor_count)
+
 			houses.append(b)
-			data.houses = {rect=b, type=plot_type}
-	
+			data.append({
+				rect=b, 
+				type=plot_type, 
+				culture=Constants.CULTURES.TUDOR, # TODO select culture based on region of world
+				grid=build_building(b, orientation, floor_count)
+			})
 	return data
+
+func build_building(rect: Rect2, orientation: int, floor_count: int):
+	var layout := []
+	for f in floor_count + 1:
+		var floor_layout := {}
+		for x in range(0, rect.size.x):
+			for y in range(0, rect.size.y):
+				var mask = Utilities.get_four_bit_bitmask_from_rect(rect, Vector2(rect.position.x+x, rect.position.y+y))
+				floor_layout[Utilities.vec_as_key(Vector2(rect.position.x+x, rect.position.y+y))] = mask
+				if f > floor_count:
+					pass
+					# TODO rotate roof randomly
+		layout.append(floor_layout)
+	return layout
 
 func get_raw_land_height(x: float, y: float):
 	var val = hill_noise.get_noise_3d(x, 0, y)
 	return Utilities.normalize_to_zero_one_range(val)
+
+func get_valid_building_positions(mesh_data: Array) -> Array:
+	var arr := []
+	for vert in mesh_data:
+		if vert.y > modify_land_height(OCEAN_LEVEL):
+			arr.append(vert)
+	return arr
 
 
 func modify_land_height(h: float):
@@ -278,7 +317,7 @@ func get_reshaped_elevation(x: float, y: float) -> float:
 	elevation = elevation + (0-distance) / 2
 	if elevation > OCEAN_LEVEL:
 		#modify the exponent to have flatter lands above ocean level
-		var e = elevation - OCEAN_LEVEL + 0.02
+		var e = elevation - OCEAN_LEVEL + 0.06
 
 		return modify_land_height(e) + modify_land_height(OCEAN_LEVEL) + 25
 	return modify_land_height(elevation)

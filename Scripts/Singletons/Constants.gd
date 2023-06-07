@@ -30,3 +30,7 @@ enum KINGDOM_TYPES {
 	SNOW
 }
 
+enum CULTURES {
+	TUDOR
+}
+
