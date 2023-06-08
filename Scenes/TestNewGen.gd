@@ -52,7 +52,7 @@ func _ready():
 			var location_node = Spatial.new()
 
 			if location.type == Constants.LOCATION_TYPES.TOWN:
-				location_node.global_transform.origin = Vector3(
+				location_node.transform.origin = Vector3(
 					location.position.x + chunk_position.x, 
 					location.position.y, 
 					location.position.z + chunk_position.y
@@ -65,26 +65,52 @@ func build_town(layout: Array, location_node: Spatial):
 	iterate through each floor of each building and place the relevent tile based on bitmask value
 	"""
 	for l in layout:
+		var building_node := Spatial.new()
 		for f in range(l.grid.size()):
-			for k in l.grid[f].keys():
-				if f >= l.grid.size() -1:
-					pass
-					# TODO build roof nodes
-				else:
-					var mask = l.grid[f][k]
-					var vec = Utilities.key_as_vec(k)
-					var tile_data = WorldData.house_themes[l.culture][f][mask]
-					var offsets = WorldData.house_themes[l.culture]["offsets"][f]
-					if tile_data.has("scene"):
-						var tile = tile_data.scene.instance()
-						tile.rotate(Vector3.UP, deg2rad(tile_data.rotation))
-						tile.transform.origin = Vector3(
-							vec.x*offsets.horizontal, 
-							f*offsets.vertical, 
-							vec.y*offsets.horizontal
-						)
-						location_node.add_child(tile)
+			var floor_layout = l.grid[f]
+			var culture = l.culture
+			var level = f
+			var level_key = level
+			if f >= l.grid.size() -1:
+				level_key = "roof"
 
+			var tile_data = WorldData.house_themes[culture][level_key]
+			var offsets = WorldData.house_themes[culture]["offsets"][level_key]
+
+			var reposition_amount := Vector2(0,0)
+			if f > 0:
+				var rect_diff: Vector2 = Utilities.get_rect_difference(
+					l.rect.grow(WorldData.house_themes[culture]["offsets"][f].horizontal),
+					l.rect.grow(WorldData.house_themes[culture]["offsets"][f-1].horizontal)
+				)
+				reposition_amount = rect_diff
+
+			var floor_node = place_floor(floor_layout, tile_data, level, offsets, reposition_amount)
+
+				# floor_node.transform.origin.x = building_node.transform.origin.x - 10#reposition_amount.x
+				# floor_node.transform.origin.z = building_node.transform.origin.z - 10#reposition_amount.y
+			building_node.add_child(floor_node)
+
+		location_node.add_child(building_node)
+
+
+func place_floor(floor_layout: Dictionary, tile_data: Dictionary, level, offsets, reposition_amount) -> Spatial:
+	var node: Spatial = Spatial.new()
+	for k in floor_layout.keys():
+		var mask = floor_layout[k]
+		var vec = Utilities.key_as_vec(k)
+		var tile = tile_data[mask]
+		if tile.has("scene"):
+			var tile_inst = tile.scene.instance()
+			tile_inst.rotate(Vector3.UP, deg2rad(tile.rotation))
+			tile_inst.transform.origin = Vector3(
+				vec.x * (offsets.horizontal  - reposition_amount.x/2), 
+				level * offsets.vertical, 
+				vec.y * (offsets.horizontal  - reposition_amount.y/2)
+			)
+			node.add_child(tile_inst)
+
+	return node
 
 func apply_heights_to_mesh(
 	mesh: PlaneMesh, 

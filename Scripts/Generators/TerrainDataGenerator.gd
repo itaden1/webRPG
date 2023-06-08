@@ -205,14 +205,15 @@ func build_world(
 				# TODO generate the town and other locations
 				# TODO: sample the terrain to get valid building location
 				var valid_positions:  Array = get_valid_building_positions(c.mesh_data)
-				var pos = valid_positions[Rng.get_random_range(0, valid_positions.size()-1)]
-				c.locations = [{
-					position = pos,
-					type=Constants.LOCATION_TYPES.TOWN,
-					name="Foo Town", # TODO: random gen town name
-					layout=build_town(town_template)
-				}]
-				cities.append(c.position)
+				if valid_positions.size() > 0:
+					var pos = valid_positions[Rng.get_random_range(0, valid_positions.size()-1)]
+					c.locations = [{
+						position = pos,
+						type=Constants.LOCATION_TYPES.TOWN,
+						name="Foo Town", # TODO: random gen town name
+						layout=build_town(town_template)
+					}]
+					cities.append(c.position)
 
 
 	# Determine chunks that are inhabitable by small communities

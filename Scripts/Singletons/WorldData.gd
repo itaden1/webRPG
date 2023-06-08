@@ -157,6 +157,7 @@ var house_themes = {
 			0: {horizontal = 8.25, vertical = 0},
 			1: {horizontal = 9.8, vertical = 9},
 			2: {horizontal = 9.8, vertical = 9},
+			"roof": {horizontal = 9.8, vertical = 9},
 		}
 	}
 }
