@@ -61,103 +61,106 @@ func generate_world():
 ##############################################
 #          Resources
 ##############################################
-const door_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/WallDoor001.tscn")
-const corner_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/GroundfloorCornerWindow001.tscn")
-const wall_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/GroundFloorWall001.tscn")
+const corner_se_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/CornerSE001.tscn")
+const corner_sw_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/CornerSW001.tscn")
 
-const first_floor_corner_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/WallCornerUpper002.tscn")
-const first_floor_wall_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/UpperFloorWall001.tscn")
+const wall_ew_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/WallEW001.tscn")
+const wall_ns_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/WallNS001.tscn")
+
+
+const first_floor_corner_nw_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/UpperCornerNW001.tscn")
+const first_floor_corner_sw_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/UpperCornerSW001.tscn")
+
+const first_floor_wall_ns_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/UpperWallNS001.tscn")
+const first_floor_wall_ew_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/UpperWallEW001.tscn")
+
 
 const ground_floor = preload("res://Scenes/Towns/BuildingBlocks/Tudor/Floor001.tscn")
-const first_floor = preload("res://Scenes/Towns/BuildingBlocks/Tudor/FloorUpper001.tscn")
-const blank_block = preload("res://Scenes/Towns/BuildingBlocks/Generic/Blank.tscn")
+# const first_floor = preload("res://Scenes/Towns/BuildingBlocks/Tudor/FloorUpper001.tscn")
+const floor_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/Floor001.tscn")
 
-const roof_edge_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/RoofEdge001.tscn")
-const roof_corner_block_1 = preload("res://Scenes/Towns/BuildingBlocks/Tudor/RoofCornerNE001.tscn")
-const roof_corner_block_2 = preload("res://Scenes/Towns/BuildingBlocks/Tudor/RoofCornerSE001.tscn")
+const roof_edge_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/Roof001.tscn")
+const roof_corner_block_1 = preload("res://Scenes/Towns/BuildingBlocks/Tudor/RoofSECorner001.tscn")
+const roof_corner_block_2 = preload("res://Scenes/Towns/BuildingBlocks/Tudor/RoofSWCorner001.tscn")
 
 const roof_peak = preload("res://Scenes/Towns/BuildingBlocks/Tudor/RoofPeak001.tscn")
-const roof_peak_wall = preload("res://Scenes/Towns/BuildingBlocks/Tudor/RoofPeakWall001.tscn")
+const roof_peak_wall = preload("res://Scenes/Towns/BuildingBlocks/Tudor/RoofPeakEdge001.tscn")
 
 var house_themes = {
 	Constants.CULTURES.TUDOR : {
 		0 : {
 			0 : {},
-			1 : {scene=wall_block, rotation=180},
-			2 : {scene=wall_block, rotation=270},
-			3 : {scene=corner_block, rotation=0},
-			4 : {scene=wall_block, rotation=90},
-			5 : {scene=corner_block, rotation=270},
+			1 : {scene=wall_ns_block, rotation=180},
+			2 : {scene=wall_ew_block, rotation=180},
+			3 : {scene=corner_se_block, rotation=0},
+			4 : {scene=wall_ew_block, rotation=0},
+			5 : {scene=corner_sw_block, rotation=180},
 			6 : {},
 			7 : {},
-			8 : {scene=wall_block, rotation=0},
+			8 : {scene=wall_ns_block, rotation=0},
 			9 : {},
-			10 : {scene=corner_block, rotation=90},
+			10 : {scene=corner_sw_block, rotation=0},
 			11 : {},
-			12 : {scene=corner_block, rotation=180},
+			12 : {scene=corner_se_block, rotation=180},
 			13 : {},
 			14 : {},
 			15 : {}
 		},
 		1 : {
 			0 : {},
-			1 : {scene=first_floor_wall_block, rotation=180},
-			2 : {scene=first_floor_wall_block, rotation=270},
-			3 : {scene=first_floor_corner_block, rotation=270},
-			4 : {scene=first_floor_wall_block, rotation=90},
-			5 : {scene=first_floor_corner_block, rotation=180},
+			1 : {scene=first_floor_wall_ns_block, rotation=180},
+			2 : {scene=first_floor_wall_ew_block, rotation=180},
+			3 : {scene=first_floor_corner_nw_block, rotation=0},
+			4 : {scene=first_floor_wall_ew_block, rotation=0},
+			5 : {scene=first_floor_corner_sw_block, rotation=180},
 			6 : {},
 			7 : {},
-			8 : {scene=first_floor_wall_block, rotation=0},
+			8 : {scene=first_floor_wall_ns_block, rotation=0},
 			9 : {},
-			10 : {scene=first_floor_corner_block, rotation=0},
+			10 : {scene=first_floor_corner_sw_block, rotation=0},
 			11 : {},
-			12 : {scene=first_floor_corner_block, rotation=90},
+			12 : {scene=first_floor_corner_nw_block, rotation=180},
 			13 : {},
 			14 : {},
 			15 : {}
 		},
 		2 : {
 			0 : {},
-			1 : {scene=first_floor_wall_block, rotation=180},
-			2 : {scene=first_floor_wall_block, rotation=270},
-			3 : {scene=first_floor_corner_block, rotation=270},
-			4 : {scene=first_floor_wall_block, rotation=90},
-			5 : {scene=first_floor_corner_block, rotation=180},
+			1 : {scene=first_floor_wall_ns_block, rotation=180},
+			2 : {scene=first_floor_wall_ew_block, rotation=180},
+			3 : {scene=first_floor_corner_nw_block, rotation=0},
+			4 : {scene=first_floor_wall_ew_block, rotation=0},
+			5 : {scene=first_floor_corner_sw_block, rotation=180},
 			6 : {},
 			7 : {},
-			8 : {scene=first_floor_wall_block, rotation=0},
+			8 : {scene=first_floor_wall_ns_block, rotation=0},
 			9 : {},
-			10 : {scene=first_floor_corner_block, rotation=0},
+			10 : {scene=first_floor_corner_sw_block, rotation=0},
 			11 : {},
-			12 : {scene=first_floor_corner_block, rotation=90},
+			12 : {scene=first_floor_corner_nw_block, rotation=180},
 			13 : {},
 			14 : {},
 			15 : {}
 		},
 		"roof" : {# Roof
-			0 : {scene=roof_peak, rotation=0},
-			1 : {scene=roof_peak_wall, rotation=0},#
-			2 : {scene=roof_edge_block, rotation=180},
-			3 : {scene=roof_corner_block_2, rotation=180},
-			4 : {scene=roof_edge_block, rotation=0},
-			5 : {scene=roof_corner_block_1, rotation=0},
+			0 : {scene=roof_peak, rotation=180},
+			1 : {scene=roof_peak_wall, rotation=180},#
+			2 : {scene=roof_edge_block, rotation=0},
+			3 : {scene=roof_corner_block_2, rotation=0},
+			4 : {scene=roof_edge_block, rotation=180},
+			5 : {scene=roof_corner_block_1, rotation=180},
 			6 : {},
 			7 : {},
-			8 : {scene=roof_peak_wall, rotation=180},#
+			8 : {scene=roof_peak_wall, rotation=0},#
 			9 : {},
-			10 : {scene=roof_corner_block_1, rotation=180},
+			10 : {scene=roof_corner_block_1, rotation=0},
 			11 : {},
-			12 : {scene=roof_corner_block_2, rotation=0},#
+			12 : {scene=roof_corner_block_2, rotation=180},#
 			13 : {},
 			14 : {},
 			15 : {}
 		},
-		"offsets": {
-			0: {horizontal = 8.25, vertical = 0},
-			1: {horizontal = 9.8, vertical = 9},
-			2: {horizontal = 9.8, vertical = 9},
-			"roof": {horizontal = 9.8, vertical = 9},
-		}
+		"offsets": {horizontal = 10, vertical = 10}
+
 	}
 }

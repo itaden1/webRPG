@@ -8,7 +8,7 @@ var weapon_drawn: bool setget , _get_is_weapon_drawn
 
 const GRAVITY =-32.8
 var vel = Vector3()
-const MAX_SPEED = 720
+const MAX_SPEED = 420
 const JUMP_SPEED = 128
 const ACCEL = 8.5
 

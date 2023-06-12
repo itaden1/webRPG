@@ -21,12 +21,12 @@ var max_locations_per_chunk = 3
 
 # TODO use resources to describe locations
 const city_template = {
-	width=25, height=25, partitions=10, padding=[3,2,1], number_of_npcs=7, 
+	width=25, height=25, partitions=10, padding=[3,2,1], number_of_npcs=7, block_offset=10,
 	plot_types=[Constants.HOUSE_TYPES.BUILDING, Constants.HOUSE_TYPES.FIELD, Constants.HOUSE_TYPES.THREE_STORY_BUILDING, Constants.HOUSE_TYPES.TWO_STORY_BUILDING]
 }
 
 const town_template = {
-	width=10, height=10, partitions=10, padding=[3,2,1], number_of_npcs=7, 
+	width=10, height=10, partitions=10, padding=[3,2,1], number_of_npcs=7, block_offset=10,
 	plot_types=[Constants.HOUSE_TYPES.BUILDING, Constants.HOUSE_TYPES.TWO_STORY_BUILDING, Constants.HOUSE_TYPES.FIELD]
 }
 
@@ -207,11 +207,15 @@ func build_world(
 				var valid_positions:  Array = get_valid_building_positions(c.mesh_data)
 				if valid_positions.size() > 0:
 					var pos = valid_positions[Rng.get_random_range(0, valid_positions.size()-1)]
+
+					#TODO chose random template
+					var template = town_template
+					flatten_terrain(c.mesh_data_dict, pos, template.width, template.height, template.block_offset)
 					c.locations = [{
 						position = pos,
 						type=Constants.LOCATION_TYPES.TOWN,
 						name="Foo Town", # TODO: random gen town name
-						layout=build_town(town_template)
+						layout=build_town(template)
 					}]
 					cities.append(c.position)
 
@@ -235,7 +239,30 @@ func build_world(
 			# TODO place wilderness locations
 			pass
 
+	# transform mesh_data_dict into array
+	for ck in data.chunks.keys():
+		var c = data.chunks[ck]
+		var arr := []
+		for k in c.mesh_data_dict.keys():
+			var val = c.mesh_data_dict[k]
+			arr.append(val)
+		c.mesh_data = arr
+
 	return data
+
+func flatten_terrain(mesh_data: Dictionary, pos: Vector3, width: float, height: float, step_size):
+
+	var segment_size_x = chunk_size.x / chunk_divisions.x
+	var segment_size_y = chunk_size.y / chunk_divisions.y
+	for x in range(pos.x, stepify(pos.x + width, segment_size_x), segment_size_x*width):
+		for z in range(pos.z, stepify(pos.z + height, segment_size_y), segment_size_y*height):
+			var k = Utilities.vec_as_key(Vector2(x, z))
+			print("foo")
+			if mesh_data.has(k):
+				mesh_data[k].y = pos.y
+			else:
+				print("fuck")
+
 
 
 func build_city(template: Dictionary):

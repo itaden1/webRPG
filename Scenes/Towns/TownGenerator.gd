@@ -1,23 +1,32 @@
 extends Spatial
 
 const bpt_generator = preload("res://Scripts/Generators/BinaryPartitionTree.gd")
-const door_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/WallDoor001.tscn")
-const corner_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/GroundfloorCornerWindow001.tscn")
-const wall_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/GroundFloorWall001.tscn")
+# const door_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/WallDoor001.tscn")
 
-const first_floor_corner_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/WallCornerUpper002.tscn")
-const first_floor_wall_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/UpperFloorWall001.tscn")
+const corner_se_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/CornerSE001.tscn")
+const corner_sw_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/CornerSW001.tscn")
+
+const wall_ew_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/WallEW001.tscn")
+const wall_ns_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/WallNS001.tscn")
+
+
+const first_floor_corner_nw_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/UpperCornerNW001.tscn")
+const first_floor_corner_sw_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/UpperCornerSW001.tscn")
+
+const first_floor_wall_ns_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/UpperWallNS001.tscn")
+const first_floor_wall_ew_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/UpperWallEW001.tscn")
+
 
 const ground_floor = preload("res://Scenes/Towns/BuildingBlocks/Tudor/Floor001.tscn")
-const first_floor = preload("res://Scenes/Towns/BuildingBlocks/Tudor/FloorUpper001.tscn")
-const blank_block = preload("res://Scenes/Towns/BuildingBlocks/Generic/Blank.tscn")
+#const first_floor = preload("res://Scenes/Towns/BuildingBlocks/Tudor/FloorUpper001.tscn")
+const floor_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/Floor001.tscn")
 
-const roof_edge_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/RoofEdge001.tscn")
-const roof_corner_block_1 = preload("res://Scenes/Towns/BuildingBlocks/Tudor/RoofCornerNE001.tscn")
-const roof_corner_block_2 = preload("res://Scenes/Towns/BuildingBlocks/Tudor/RoofCornerSE001.tscn")
+const roof_edge_block = preload("res://Scenes/Towns/BuildingBlocks/Tudor/Roof001.tscn")
+const roof_corner_block_1 = preload("res://Scenes/Towns/BuildingBlocks/Tudor/RoofSECorner001.tscn")
+const roof_corner_block_2 = preload("res://Scenes/Towns/BuildingBlocks/Tudor/RoofSWCorner001.tscn")
 
 const roof_peak = preload("res://Scenes/Towns/BuildingBlocks/Tudor/RoofPeak001.tscn")
-const roof_peak_wall = preload("res://Scenes/Towns/BuildingBlocks/Tudor/RoofPeakWall001.tscn")
+const roof_peak_wall = preload("res://Scenes/Towns/BuildingBlocks/Tudor/RoofPeakEdge001.tscn")
 
 
 const npc_placeholder = preload("res://Scenes/NPC/MaleNPC.tscn")
@@ -39,9 +48,9 @@ var spawn_point: Spatial
 
 var level_offsets := {
 	tudor = {
-		0: {horizontal = 8.25, vertical = 0},
-		1: {horizontal = 9.8, vertical = 9},
-		"default": {horizontal = 9.8, vertical = 9}
+		0: {horizontal = 10, vertical = 0},
+		1: {horizontal = 10, vertical = 10},
+		"default": {horizontal = 10, vertical = 10}
 	}
 }
 func get_level_offset(key: String, level: int) -> Dictionary:
@@ -57,54 +66,54 @@ var themes = {
 	tudor = {
 		0 : {
 			0 : {},
-			1 : {scene=wall_block, rotation=180},
-			2 : {scene=wall_block, rotation=270},
-			3 : {scene=corner_block, rotation=0},
-			4 : {scene=wall_block, rotation=90},
-			5 : {scene=corner_block, rotation=270},
+			1 : {scene=wall_ns_block, rotation=180},
+			2 : {scene=wall_ew_block, rotation=180},
+			3 : {scene=corner_se_block, rotation=0},
+			4 : {scene=wall_ew_block, rotation=0},
+			5 : {scene=corner_sw_block, rotation=180},
 			6 : {},
 			7 : {},
-			8 : {scene=wall_block, rotation=0},
+			8 : {scene=wall_ns_block, rotation=0},
 			9 : {},
-			10 : {scene=corner_block, rotation=90},
+			10 : {scene=corner_sw_block, rotation=0},
 			11 : {},
-			12 : {scene=corner_block, rotation=180},
+			12 : {scene=corner_se_block, rotation=180},
 			13 : {},
 			14 : {},
 			15 : {}
 		},
 		1 : {
 			0 : {},
-			1 : {scene=first_floor_wall_block, rotation=180},
-			2 : {scene=first_floor_wall_block, rotation=270},
-			3 : {scene=first_floor_corner_block, rotation=270},
-			4 : {scene=first_floor_wall_block, rotation=90},
-			5 : {scene=first_floor_corner_block, rotation=180},
+			1 : {scene=first_floor_wall_ns_block, rotation=180},
+			2 : {scene=first_floor_wall_ew_block, rotation=180},
+			3 : {scene=first_floor_corner_nw_block, rotation=0},
+			4 : {scene=first_floor_wall_ew_block, rotation=0},
+			5 : {scene=first_floor_corner_sw_block, rotation=180},
 			6 : {},
 			7 : {},
-			8 : {scene=first_floor_wall_block, rotation=0},
+			8 : {scene=first_floor_wall_ns_block, rotation=0},
 			9 : {},
-			10 : {scene=first_floor_corner_block, rotation=0},
+			10 : {scene=first_floor_corner_sw_block, rotation=0},
 			11 : {},
-			12 : {scene=first_floor_corner_block, rotation=90},
+			12 : {scene=first_floor_corner_nw_block, rotation=180},
 			13 : {},
 			14 : {},
 			15 : {}
 		},
 		"roof" : {# Roof
-			0 : {scene=roof_peak, rotation=0},
-			1 : {scene=roof_peak_wall, rotation=0},#
-			2 : {scene=roof_edge_block, rotation=180},
-			3 : {scene=roof_corner_block_2, rotation=180},
-			4 : {scene=roof_edge_block, rotation=0},
-			5 : {scene=roof_corner_block_1, rotation=0},
+			0 : {scene=roof_peak, rotation=180},
+			1 : {scene=roof_peak_wall, rotation=180},#
+			2 : {scene=roof_edge_block, rotation=0},
+			3 : {scene=roof_corner_block_2, rotation=0},
+			4 : {scene=roof_edge_block, rotation=180},
+			5 : {scene=roof_corner_block_1, rotation=180},
 			6 : {},
 			7 : {},
-			8 : {scene=roof_peak_wall, rotation=180},#
+			8 : {scene=roof_peak_wall, rotation=0},#
 			9 : {},
-			10 : {scene=roof_corner_block_1, rotation=180},
+			10 : {scene=roof_corner_block_1, rotation=0},
 			11 : {},
-			12 : {scene=roof_corner_block_2, rotation=0},#
+			12 : {scene=roof_corner_block_2, rotation=180},#
 			13 : {},
 			14 : {},
 			15 : {}
@@ -177,14 +186,14 @@ func get_block(mask: int, style: String, level: int) -> Dictionary:
 
 
 	if block.keys().size() <= 0:
-		block = {scene=blank_block, rotation=0}
+		block = {scene=floor_block, rotation=0}
 	return block
 	
 func get_floor_block(key: int) -> PackedScene:
-	if key == 0:
-		return ground_floor
-	else:
-		return first_floor
+	#if key == 0:
+	return ground_floor
+	#else:
+	#	return first_floor
 
 
 func build_house(rect: Rect2):
@@ -256,11 +265,11 @@ func build_floor(rect: Rect2, style: String, level: int) -> Spatial:
 	var floor_block = get_floor_block(level)
 	for x in range(0, rect.size.x):
 		for z in range(0, rect.size.y):
-			var floor_inst: Spatial = floor_block.instance()
+			# var floor_inst: Spatial = floor_block.instance()
 
-			base_node.add_child(floor_inst)
-			floor_inst.transform.origin.x = x * offsets.horizontal
-			floor_inst.transform.origin.z = z * offsets.horizontal
+			# base_node.add_child(floor_inst)
+			# floor_inst.transform.origin.x = x * offsets.horizontal
+			# floor_inst.transform.origin.z = z * offsets.horizontal
 
 
 			var mask = Utilities.get_four_bit_bitmask_from_rect(rect, Vector2(rect.position.x+x, rect.position.y+z))
