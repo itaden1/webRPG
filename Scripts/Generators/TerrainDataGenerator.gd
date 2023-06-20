@@ -210,12 +210,18 @@ func build_world(
 
 					#TODO chose random template
 					var template = town_template
-					flatten_terrain(c.mesh_data_dict, pos, template.width, template.height, template.block_offset)
+					var town = build_town(template)
+					# TODO make better stamp
+					var stamp := []
+					for x in range(template.width):
+						for y in range(template.height):
+							stamp.append(Vector2(x, y))
+					c.mesh_data = flatten_terrain(c.mesh_data, pos, stamp)
 					c.locations = [{
 						position = pos,
 						type=Constants.LOCATION_TYPES.TOWN,
 						name="Foo Town", # TODO: random gen town name
-						layout=build_town(template)
+						layout=town
 					}]
 					cities.append(c.position)
 
@@ -240,29 +246,45 @@ func build_world(
 			pass
 
 	# transform mesh_data_dict into array
-	for ck in data.chunks.keys():
-		var c = data.chunks[ck]
-		var arr := []
-		for k in c.mesh_data_dict.keys():
-			var val = c.mesh_data_dict[k]
-			arr.append(val)
-		c.mesh_data = arr
+	# for ck in data.chunks.keys():
+	# 	var c = data.chunks[ck]
+	# 	var arr := []
+	# 	for k in c.mesh_data_dict.keys():
+	# 		var val = c.mesh_data_dict[k]
+	# 		arr.append(val)
+	# 	c.mesh_data = arr
 
 	return data
 
-func flatten_terrain(mesh_data: Dictionary, pos: Vector3, width: float, height: float, step_size):
+func flatten_terrain(terrain_mesh_data: Array, pos: Vector3, shape: Array = [
+	Vector2(0,0),
+	Vector2(1,0),
+	Vector2(0,1),
+	Vector2(1,1),
+	Vector2(1,2),
+	Vector2(2,2),
+	Vector2(2,3),
+	Vector2(3,2),
+	Vector2(3,3),
+	Vector2(4,4),
+	Vector2(5,5),
+	Vector2(6,6),
+]) -> Array:
+	"""
+	Taking a mesh as input apply the shape to the position on the mesh. Flattenning / smoothing the
+	terrain to the height of pos
+	"""
+	var dist = Vector2(terrain_mesh_data[0].x, terrain_mesh_data[0].z).distance_to(
+		Vector2(terrain_mesh_data[1].x, terrain_mesh_data[1].z))
+	var flattened = []
+	for d in terrain_mesh_data:
+		for v in shape:
+			var vec_3 = Vector3(pos.x + v.x * dist, d.y, pos.z + v.y * dist)
+			if d.distance_to(vec_3) < dist:
+				d.y = pos.y
+		flattened.append(d)
 
-	var segment_size_x = chunk_size.x / chunk_divisions.x
-	var segment_size_y = chunk_size.y / chunk_divisions.y
-	for x in range(pos.x, stepify(pos.x + width, segment_size_x), segment_size_x*width):
-		for z in range(pos.z, stepify(pos.z + height, segment_size_y), segment_size_y*height):
-			var k = Utilities.vec_as_key(Vector2(x, z))
-			print("foo")
-			if mesh_data.has(k):
-				mesh_data[k].y = pos.y
-			else:
-				print("fuck")
-
+	return flattened
 
 
 func build_city(template: Dictionary):
@@ -309,7 +331,7 @@ func build_town(template: Dictionary) -> Array:
 			})
 	return data
 
-func build_building(rect: Rect2, orientation: int, floor_count: int):
+func build_building(rect: Rect2, orientation: int, floor_count: int) -> Array:
 	var layout := []
 	for f in floor_count + 1:
 		var floor_layout := {}
