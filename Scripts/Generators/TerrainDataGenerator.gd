@@ -245,6 +245,12 @@ func build_world(
 			# TODO place wilderness locations
 			pass
 
+
+	# Tree placement
+	for ck in data.chunks.keys():
+		var c = data.chunks[ck]
+		place_trees(c)
+	
 	# transform mesh_data_dict into array
 	# for ck in data.chunks.keys():
 	# 	var c = data.chunks[ck]
@@ -256,6 +262,49 @@ func build_world(
 
 	return data
 
+func place_trees(chunk):
+	chunk.objects = []
+	var dist = Vector2(chunk.mesh_data[0].x, chunk.mesh_data[0].z).distance_to(
+		Vector2(chunk.mesh_data[1].x, chunk.mesh_data[1].z))
+	for v in range(0, chunk.mesh_data.size(), 10):
+		var vert = chunk.mesh_data[v]
+		var biome = get_biome(chunk.kingdom_type, vert.x + chunk.position.x, vert.y + chunk.position.y)
+		var obj_type = get_object(biome)
+
+		#TODO stagger location
+		#TODO ensure above sea level
+		if obj_type == "pine":
+			chunk.objects.append(
+				{ob=obj_type, location=vert, rotation=0}
+			)
+
+
+func get_object(biome):
+	#TODO refactor to easily generate different object types for different biomes
+	if biome == Constants.BIOMES.TEMPERATE_DECIDUOUS_FOREST:
+		return "pine"
+	return ""
+
+func get_biome(kingdom_type, x: float, y: float):
+	var altitude = get_reshaped_elevation(x, y)
+	var moisture = Utilities.normalize_to_zero_one_range(precipitation_noise.get_noise_3d(x, 0, y))
+
+	# TODO use kingdome type to create regions (snow, autumnal forrests, desert etc.)
+	if altitude > 750:
+		return Constants.BIOMES.HIGH_ALTITUDE
+	elif altitude > 300:
+		if moisture > 0.6: return Constants.BIOMES.SNOW_FORRESTS
+		else: return Constants.BIOMES.SNOW_PLANES
+	elif altitude > 50:
+		if moisture > 0.6: return Constants.BIOMES.TEMPERATE_DECIDUOUS_FOREST
+		elif moisture > 0.4: return Constants.BIOMES.WOODLANDS
+		else: return Constants.BIOMES.GRASSLAND
+	elif altitude > 0:
+		if moisture > 0.65: return Constants.BIOMES.SWAMP_LANDS
+		else: return Constants.BIOMES.GRASSLAND
+	else:
+		return Constants.BIOMES.GRASSLAND
+	
 func flatten_terrain(terrain_mesh_data: Array, pos: Vector3, shape: Array) -> Array:
 	"""
 	Taking a mesh as input apply the shape to the position on the mesh. Flattenning / smoothing the
@@ -337,10 +386,17 @@ func get_raw_land_height(x: float, y: float):
 	return Utilities.normalize_to_zero_one_range(val)
 
 func get_valid_building_positions(mesh_data: Array) -> Array:
+	"""
+	A valid building spot is a spot where we are not too close to the edge of a chunk, 
+	so we dont have flattened terain creeping over borders and creating holes in the mesh
+	It is above sea level
+	TODO: create a limit for building on steep terrain
+	"""
 	var arr := []
 	for vert in mesh_data:
 		if vert.y > modify_land_height(OCEAN_LEVEL):
-			arr.append(vert)
+			if vert.x < 300 and vert.x > -300 and vert.y < 300 and vert.y > -300:
+				arr.append(vert)
 	return arr
 
 
