@@ -213,8 +213,8 @@ func build_world(
 					var town = build_town(template)
 					# TODO make better stamp
 					var stamp := []
-					for x in range(template.width):
-						for y in range(template.height):
+					for x in range(-2, template.width-2):
+						for y in range(-2, template.height-2):
 							stamp.append(Vector2(x, y))
 					c.mesh_data = flatten_terrain(c.mesh_data, pos, stamp)
 					c.locations = [{
@@ -256,20 +256,7 @@ func build_world(
 
 	return data
 
-func flatten_terrain(terrain_mesh_data: Array, pos: Vector3, shape: Array = [
-	Vector2(0,0),
-	Vector2(1,0),
-	Vector2(0,1),
-	Vector2(1,1),
-	Vector2(1,2),
-	Vector2(2,2),
-	Vector2(2,3),
-	Vector2(3,2),
-	Vector2(3,3),
-	Vector2(4,4),
-	Vector2(5,5),
-	Vector2(6,6),
-]) -> Array:
+func flatten_terrain(terrain_mesh_data: Array, pos: Vector3, shape: Array) -> Array:
 	"""
 	Taking a mesh as input apply the shape to the position on the mesh. Flattenning / smoothing the
 	terrain to the height of pos
@@ -280,7 +267,7 @@ func flatten_terrain(terrain_mesh_data: Array, pos: Vector3, shape: Array = [
 	for d in terrain_mesh_data:
 		for v in shape:
 			var vec_3 = Vector3(pos.x + v.x * dist, d.y, pos.z + v.y * dist)
-			if d.distance_to(vec_3) < dist:
+			if d.distance_to(vec_3) < dist/2:
 				d.y = pos.y
 		flattened.append(d)
 
