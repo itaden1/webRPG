@@ -161,6 +161,5 @@ var house_themes = {
 			15 : {}
 		},
 		"offsets": {horizontal = 10, vertical = 10}
-
 	}
 }

@@ -266,30 +266,46 @@ func place_trees(chunk):
 	chunk.objects = []
 	var dist = Vector2(chunk.mesh_data[0].x, chunk.mesh_data[0].z).distance_to(
 		Vector2(chunk.mesh_data[1].x, chunk.mesh_data[1].z))
-	for v in range(0, chunk.mesh_data.size(), 10):
+	for v in range(0, chunk.mesh_data.size(), 15):
+		# TODO check vert position and skip to achieve more even placememt
+		# TODO check no placement zones (towns etc.)
 		var vert = chunk.mesh_data[v]
-		var biome = get_biome(chunk.kingdom_type, vert.x + chunk.position.x, vert.y + chunk.position.y)
-		var obj_type = get_object(biome)
+		if vert.y < modify_land_height(OCEAN_LEVEL):
+			continue
+		var biome = get_biome(vert.x + chunk.position.x, vert.y + chunk.position.y)
+		var obj_type = get_object(chunk.kingdom_type, biome)
 
-		#TODO stagger location
-		#TODO ensure above sea level
-		if obj_type == "pine":
-			chunk.objects.append(
-				{ob=obj_type, location=vert, rotation=0}
-			)
+		#stagger location
+		var ob_x = vert.x + Rng.get_random_range(-dist*5, dist*5)
+		var ob_z = vert.z # + Rng.get_random_range(-dist, dist)
+		var ob_y = get_reshaped_elevation(ob_x+chunk.position.x, ob_z+chunk.position.y)
+
+		var ob_vec = Vector3(ob_x, ob_y, ob_z)
+		chunk.objects.append(
+			{biome=biome, object_index=obj_type, location=ob_vec, rotation=0}
+		)
 
 
-func get_object(biome):
-	#TODO refactor to easily generate different object types for different biomes
-	if biome == Constants.BIOMES.TEMPERATE_DECIDUOUS_FOREST:
-		return "pine"
-	return ""
+func get_object(region, biome):
+	#TODO factor in regions as well
+	var biome_objects = Constants.BIOME_OBJECTS[biome]
+	var acc = 0
+	var roll = Rng.get_random_range(1, 100)
+	var item_index: int
+	for i in range(biome_objects.size()):
+		var o = biome_objects[i]
+		if not item_index:
+			if roll > 100 - o.chance - acc:
+				item_index = i
+				break
 
-func get_biome(kingdom_type, x: float, y: float):
+		acc += o.chance
+	return item_index
+
+func get_biome(x: float, y: float):
 	var altitude = get_reshaped_elevation(x, y)
 	var moisture = Utilities.normalize_to_zero_one_range(precipitation_noise.get_noise_3d(x, 0, y))
 
-	# TODO use kingdome type to create regions (snow, autumnal forrests, desert etc.)
 	if altitude > 750:
 		return Constants.BIOMES.HIGH_ALTITUDE
 	elif altitude > 300:
@@ -349,21 +365,22 @@ func build_town(template: Dictionary) -> Array:
 			var plot_type = plot_types[Rng.get_random_range(0, plot_types.size()-1)]
 			var orientations = [0, 1]
 			var orientation = orientations[Rng.get_random_range(0, orientations.size()-1)]
-			var floor_count = 1
+			var floor_count = 0
 			match plot_type:
 				Constants.HOUSE_TYPES.BUILDING: floor_count = 1
 				Constants.HOUSE_TYPES.TWO_STORY_BUILDING: floor_count = 2
 				Constants.HOUSE_TYPES.THREE_STORY_BUILDING: floor_count = 3
 
-				
-			build_building(b, orientation, floor_count)
+			var layout := []
+			if floor_count > 0:
+				layout = build_building(b, orientation, floor_count)
 
 			houses.append(b)
 			data.append({
 				rect=b, 
 				type=plot_type, 
 				culture=Constants.CULTURES.TUDOR, # TODO select culture based on region of world
-				grid=build_building(b, orientation, floor_count)
+				grid=layout
 			})
 	return data
 
@@ -395,7 +412,8 @@ func get_valid_building_positions(mesh_data: Array) -> Array:
 	var arr := []
 	for vert in mesh_data:
 		if vert.y > modify_land_height(OCEAN_LEVEL):
-			if vert.x < 300 and vert.x > -300 and vert.y < 300 and vert.y > -300:
+			# TODO get correct vertex range. mesh verts are between -500 and 500
+			if vert.x < 200 and vert.x > -200 and vert.y < 200 and vert.y > -200:
 				arr.append(vert)
 	return arr
 

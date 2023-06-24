@@ -34,7 +34,7 @@ onready var biome_brushes = {
 	biomes.HIGH_ALTITUDE : [blue_brush]
 }
 
-var biome_objects = {
+const biome_objects = {
 	biomes.GRASSLAND : [
 		{		
 			obj=preload("res://Scenes/NatureObjects/GrassBushFall.tscn"),

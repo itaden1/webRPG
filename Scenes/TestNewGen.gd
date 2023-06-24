@@ -60,7 +60,8 @@ func _ready():
 				build_town(location.layout, location_node)
 				add_child(location_node)
 		for o in chunk.objects:
-			var tree = load("res://Scenes/NatureObjects/Tree08winter.tscn")
+			var tree = Constants.BIOME_OBJECTS[o.biome][o.object_index].obj
+			# var tree = load("res://Scenes/NatureObjects/Tree08winter.tscn")
 			var tree_inst = tree.instance()
 			add_child(tree_inst)
 			tree_inst.transform.origin.x = o.location.x + chunk_position.x
