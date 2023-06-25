@@ -27,13 +27,10 @@ func _ready():
 		var terrain_mesh = apply_heights_to_mesh(plane_mesh, chunk.mesh_data)
 		var mesh_inst =MeshInstance.new()
 		mesh_inst.mesh = terrain_mesh
-		mesh_inst.material_override = SpatialMaterial.new()
-		var materials_map = {
-			Constants.KINGDOM_TYPES.DESERT: load("res://Materials/Dirt_15-128x128.png"),
-			Constants.KINGDOM_TYPES.SNOW: load("res://Materials/Snow_01-128x128.png"),
-			Constants.KINGDOM_TYPES.GRASSLAND: load("res://Materials/Grass_02-128x128.png"),
-		}
-		mesh_inst.material_override.albedo_texture = materials_map[chunk.kingdom_type]
+		mesh_inst.material_override = Constants.REGION_MATERIALS[chunk.region_type].duplicate()
+
+		mesh_inst.material_override.set_shader_param("splatmap", create_splatmap(chunk.texture_data))
+
 		add_child(mesh_inst)
 		mesh_inst.global_transform.origin = Vector3(chunk.position.x, 0, chunk.position.y)
 		for location in chunk.locations:
@@ -60,14 +57,31 @@ func _ready():
 				build_town(location.layout, location_node)
 				add_child(location_node)
 		for o in chunk.objects:
-			var tree = Constants.BIOME_OBJECTS[o.biome][o.object_index].obj
-			# var tree = load("res://Scenes/NatureObjects/Tree08winter.tscn")
-			var tree_inst = tree.instance()
-			add_child(tree_inst)
-			tree_inst.transform.origin.x = o.location.x + chunk_position.x
-			tree_inst.transform.origin.y = o.location.y
-			tree_inst.transform.origin.z = o.location.z + chunk_position.y
+			var idx = o.object_index
+			if idx != null:
+				var tree = Constants.BIOME_OBJECTS[o.biome][o.object_index].obj		
+				var tree_inst = tree.instance()
+				add_child(tree_inst)
+				tree_inst.transform.origin.x = o.location.x + chunk_position.x
+				tree_inst.transform.origin.y = o.location.y
+				tree_inst.transform.origin.z = o.location.z + chunk_position.y
 
+func create_splatmap(texture_data):
+	var splat_texture := ImageTexture.new()
+	var splat_image := Image.new()
+
+	# TODO add these values to world data and retriev from there
+	var image_size = 256
+	var paint_rect_size = 8
+	splat_image.create(image_size, image_size, false, Image.FORMAT_RGBA8)
+	for k in texture_data.splatmap_data.keys():
+		var brush = Constants.BIOME_BRUSHES[texture_data.splatmap_data[k].biome][texture_data.splatmap_data[k].brush]
+
+		splat_image.blend_rect(brush, Rect2(Vector2(0, 0), Vector2(16,16)), Vector2(k.x, k.y))
+
+
+	splat_texture.create_from_image(splat_image, 0)
+	return splat_texture
 
 func build_town(layout: Array, location_node: Spatial):
 	"""

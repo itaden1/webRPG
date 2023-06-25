@@ -18,6 +18,8 @@ var hill_exponent: int
 var hill_exponent_fudge: int = 1
 var max_locations_per_chunk = 3
 
+var splatmap_brush_size := 8
+var splatmap_image_size := 256
 
 # TODO use resources to describe locations
 const city_template = {
@@ -41,7 +43,9 @@ func build_world(
 	_chunk_divisions: Vector2,
 	_hill_multiplyer: int,
 	_hill_exponent: int,
-	_hill_exponent_fudge: int = 1
+	_hill_exponent_fudge: int = 1,
+	_splatmap_image_size: int = 256,
+	_splatmap_brush_size: int = 8
 ):
 
 	world_size = _world_size
@@ -50,6 +54,8 @@ func build_world(
 	hill_multiplyer = _hill_multiplyer
 	hill_exponent = _hill_exponent
 	hill_exponent_fudge = _hill_exponent_fudge
+	splatmap_brush_size = _splatmap_brush_size
+	splatmap_image_size = _splatmap_image_size
 
 	# object to hold all world data
 	var data = {}
@@ -147,7 +153,7 @@ func build_world(
 
 	# select chunks for capital cities
 	# Only one city per chunk
-	var kingdom_choices = Constants.KINGDOM_TYPES.values()
+	var kingdom_choices = Constants.REGION_TYPES.values()
 
 	var max_cities := 3
 	var city_dist_from_other_city = chunk_size.x * 6
@@ -170,10 +176,10 @@ func build_world(
 				}]
 				cities.append(c.position)
 				var k = Rng.get_random_range(0, kingdom_choices.size()-1)
-				c.kingdom_type = kingdom_choices[k]
+				c.region_type = kingdom_choices[k]
 				kingdom_choices.pop_at(k)
 
-	# assign kindom to chunk, indicates which capital is clossest 
+	# assign kindom /region to chunk, indicates which capital is clossest 
 	# as well as textures / trees locations found there
 	for ck in data.chunks.keys():
 		var c = data.chunks[ck]
@@ -184,7 +190,13 @@ func build_world(
 			var distance = k.distance_to(c.position)
 			if distance < closest_city.position.distance_to(c.position):
 				closest_city = data.chunks[Utilities.vec_as_key(k)]
-		c.kingdom_type = closest_city.kingdom_type
+		c.region_type = closest_city.region_type
+
+
+	# create splat map data fr each chunk
+	for ck in data.chunks.keys():
+		var c = data.chunks[ck]
+		c.texture_data = generate_texture_data(c)
 
 
 	# Determine chunks that will contain towns
@@ -250,15 +262,7 @@ func build_world(
 	for ck in data.chunks.keys():
 		var c = data.chunks[ck]
 		place_trees(c)
-	
-	# transform mesh_data_dict into array
-	# for ck in data.chunks.keys():
-	# 	var c = data.chunks[ck]
-	# 	var arr := []
-	# 	for k in c.mesh_data_dict.keys():
-	# 		var val = c.mesh_data_dict[k]
-	# 		arr.append(val)
-	# 	c.mesh_data = arr
+
 
 	return data
 
@@ -272,12 +276,16 @@ func place_trees(chunk):
 		var vert = chunk.mesh_data[v]
 		if vert.y < modify_land_height(OCEAN_LEVEL):
 			continue
-		var biome = get_biome(vert.x + chunk.position.x, vert.y + chunk.position.y)
-		var obj_type = get_object(chunk.kingdom_type, biome)
+		# Placement is off by about 1/2 of chunk size
+		var biome = get_biome(
+			(vert.x + chunk.position.x),# - chunk_size.x / 4, 
+			(vert.z + chunk.position.y) #- chunk_size.y / 4
+		)
+		var obj_type = get_object(chunk.region_type, biome)
 
 		#stagger location
 		var ob_x = vert.x + Rng.get_random_range(-dist*5, dist*5)
-		var ob_z = vert.z # + Rng.get_random_range(-dist, dist)
+		var ob_z = vert.z 
 		var ob_y = get_reshaped_elevation(ob_x+chunk.position.x, ob_z+chunk.position.y)
 
 		var ob_vec = Vector3(ob_x, ob_y, ob_z)
@@ -291,7 +299,8 @@ func get_object(region, biome):
 	var biome_objects = Constants.BIOME_OBJECTS[biome]
 	var acc = 0
 	var roll = Rng.get_random_range(1, 100)
-	var item_index: int
+	var item_index = null
+	print(item_index)
 	for i in range(biome_objects.size()):
 		var o = biome_objects[i]
 		if not item_index:
@@ -338,6 +347,30 @@ func flatten_terrain(terrain_mesh_data: Array, pos: Vector3, shape: Array) -> Ar
 
 	return flattened
 
+func generate_texture_data(chunk):
+
+	var data := {}
+	data.region_type = chunk.region_type
+	data.splatmap_data = {}
+
+	var rects_to_paint = splatmap_image_size / splatmap_brush_size
+	for i in range(rects_to_paint):
+		for j in range(rects_to_paint):
+			var region_size_x = (chunk_size.x / rects_to_paint)
+			var region_size_y = (chunk_size.y / rects_to_paint)
+			var pos_x = region_size_x * i + chunk.position.x - (chunk_size.x / 2) 
+			var pos_y = region_size_y * j + chunk.position.y - (chunk_size.y / 2) 
+
+			var biome: int = get_biome(pos_x, pos_y)
+			var brushes : Array = Constants.BIOME_BRUSHES[biome]
+			var brush_idx: int
+			if brushes.size() == 1:
+				brush_idx = 0
+			else:
+				brush_idx = Rng.get_random_range(0, brushes.size()-1)
+			data.splatmap_data[Vector2(i * splatmap_brush_size, j * splatmap_brush_size)] = {brush=brush_idx, biome=biome}
+	
+	return data
 
 func build_city(template: Dictionary):
 	pass
@@ -408,7 +441,9 @@ func get_valid_building_positions(mesh_data: Array) -> Array:
 	so we dont have flattened terain creeping over borders and creating holes in the mesh
 	It is above sea level
 	TODO: create a limit for building on steep terrain
+
 	"""
+
 	var arr := []
 	for vert in mesh_data:
 		if vert.y > modify_land_height(OCEAN_LEVEL):

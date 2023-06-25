@@ -1,0 +1,26 @@
+[gd_resource type="Shader" format=2]
+
+[resource]
+code = "shader_type spatial;
+
+uniform sampler2D splatmap;
+uniform sampler2D grass;
+uniform sampler2D earth;
+uniform sampler2D rock;
+
+uniform float grassres = 1;
+uniform float earthres = 1;
+uniform float rockres = 1;
+
+void fragment() {
+	float grassval = texture(splatmap, UV).g;
+	float earthval = texture(splatmap, UV).r;
+	float rockval = texture(splatmap, UV).b;
+	vec3 earthcolor = texture(earth, UV * earthres).rgb * earthval;
+	vec3 grasscolor = texture(grass, UV * grassres).rgb * grassval;
+	vec3 rockcolor = texture(rock, UV * rockres).rgb * rockval;
+	
+	vec3 result = earthcolor + grasscolor + rockcolor;
+	
+	ALBEDO = result;
+}"

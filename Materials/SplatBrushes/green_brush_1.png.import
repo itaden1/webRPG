@@ -1,0 +1,13 @@
+[remap]
+
+importer="image"
+type="Image"
+path="res://.import/green_brush_1.png-4c894b7c610cd500176d08c42bd3530d.image"
+
+[deps]
+
+source_file="res://Materials/SplatBrushes/green_brush_1.png"
+dest_files=[ "res://.import/green_brush_1.png-4c894b7c610cd500176d08c42bd3530d.image" ]
+
+[params]
+

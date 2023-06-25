@@ -1,0 +1,13 @@
+[remap]
+
+importer="image"
+type="Image"
+path="res://.import/blue_brush_1.png-942de999982cf887a5b82bf56ab9611c.image"
+
+[deps]
+
+source_file="res://Materials/SplatBrushes/blue_brush_1.png"
+dest_files=[ "res://.import/blue_brush_1.png-942de999982cf887a5b82bf56ab9611c.image" ]
+
+[params]
+
