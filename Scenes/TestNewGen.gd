@@ -21,8 +21,8 @@ func _ready():
 		var chunk = world_data.chunks[k]
 		var plane_mesh := PlaneMesh.new()
 		var chunk_position = Utilities.key_as_vec(k)
-		plane_mesh.subdivide_depth = 50
-		plane_mesh.subdivide_width = 50
+		plane_mesh.subdivide_depth = 30
+		plane_mesh.subdivide_width = 30
 		plane_mesh.size = Vector2(1000, 1000)
 		var terrain_mesh = apply_heights_to_mesh(plane_mesh, chunk.mesh_data)
 		var mesh_inst =MeshInstance.new()
@@ -30,6 +30,7 @@ func _ready():
 		mesh_inst.material_override = Constants.REGION_MATERIALS[chunk.region_type].duplicate()
 
 		mesh_inst.material_override.set_shader_param("splatmap", create_splatmap(chunk.texture_data))
+		mesh_inst.create_trimesh_collision()
 
 		add_child(mesh_inst)
 		mesh_inst.global_transform.origin = Vector3(chunk.position.x, 0, chunk.position.y)
@@ -56,15 +57,24 @@ func _ready():
 				)
 				build_town(location.layout, location_node)
 				add_child(location_node)
+			if location.type == Constants.LOCATION_TYPES.CITY:
+				# TODO other city things
+				location_node.transform.origin = Vector3(
+					location.position.x + chunk_position.x, 
+					location.position.y, 
+					location.position.z + chunk_position.y
+				)
+				build_town(location.layout, location_node)
+				add_child(location_node)
 		for o in chunk.objects:
 			var idx = o.object_index
 			if idx != null:
-				var tree = Constants.BIOME_OBJECTS[o.biome][o.object_index].obj		
-				var tree_inst = tree.instance()
-				add_child(tree_inst)
-				tree_inst.transform.origin.x = o.location.x + chunk_position.x
-				tree_inst.transform.origin.y = o.location.y
-				tree_inst.transform.origin.z = o.location.z + chunk_position.y
+				var obj = Constants.BIOME_OBJECTS[o.biome][idx].obj		
+				var obj_inst = obj.instance()
+				add_child(obj_inst)
+				obj_inst.transform.origin.x = o.location.x + chunk_position.x
+				obj_inst.transform.origin.y = o.location.y
+				obj_inst.transform.origin.z = o.location.z + chunk_position.y
 
 func create_splatmap(texture_data):
 	var splat_texture := ImageTexture.new()

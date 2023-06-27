@@ -51,7 +51,7 @@ func generate_world():
 	world = generator.build_world(
 		Vector2(10000, 10000),
 		Vector2(1000, 1000),
-		Vector2(50, 50),
+		Vector2(30, 30),
 		20,
 		3
 	)

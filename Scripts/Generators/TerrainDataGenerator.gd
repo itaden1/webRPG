@@ -24,7 +24,7 @@ var splatmap_image_size := 256
 # TODO use resources to describe locations
 const city_template = {
 	width=25, height=25, partitions=10, padding=[3,2,1], number_of_npcs=7, block_offset=10,
-	plot_types=[Constants.HOUSE_TYPES.BUILDING, Constants.HOUSE_TYPES.FIELD, Constants.HOUSE_TYPES.THREE_STORY_BUILDING, Constants.HOUSE_TYPES.TWO_STORY_BUILDING]
+	plot_types=[Constants.HOUSE_TYPES.BUILDING, Constants.HOUSE_TYPES.FIELD, Constants.HOUSE_TYPES.TWO_STORY_BUILDING, Constants.HOUSE_TYPES.THREE_STORY_BUILDING]
 }
 
 const town_template = {
@@ -170,9 +170,29 @@ func build_world(
 					dist_from_other_city = distance
 					break
 			if dist_from_other_city >= city_dist_from_other_city:
+				# TODO: random template
+				var template = city_template
+				
+				var city = build_city(template)
+				# TODO make better stamp
+				var stamp := []
+				for x in range(-2, template.width-2):
+					for y in range(-2, template.height-2):
+						stamp.append(Vector2(x, y))
+				var y = get_reshaped_elevation(c.position.x, c.position.y)
+				if y < modify_land_height(OCEAN_LEVEL):
+					y = modify_land_height(OCEAN_LEVEL) + 25
+				var vec_3_pos = Vector3(0, y, 0)
+				c.mesh_data = flatten_terrain(
+					c.mesh_data, 
+					vec_3_pos,
+					stamp
+				)
 				c.locations = [{
+					position = vec_3_pos,
+					name="Argon", # TODO: random gen town name
 					type=Constants.LOCATION_TYPES.CITY,
-					layout=build_city(city_template)
+					layout=city
 				}]
 				cities.append(c.position)
 				var k = Rng.get_random_range(0, kingdom_choices.size()-1)
@@ -216,12 +236,13 @@ func build_world(
 			if dist_from_other_town >= town_dist_from_other_city:
 				# TODO generate the town and other locations
 				# TODO: sample the terrain to get valid building location
-				var valid_positions:  Array = get_valid_building_positions(c.mesh_data)
+				#TODO chose random template
+				var template = town_template
+				var valid_positions:  Array = get_valid_building_positions(c.mesh_data, template.width, template.height)
 				if valid_positions.size() > 0:
 					var pos = valid_positions[Rng.get_random_range(0, valid_positions.size()-1)]
 
-					#TODO chose random template
-					var template = town_template
+
 					var town = build_town(template)
 					# TODO make better stamp
 					var stamp := []
@@ -300,7 +321,6 @@ func get_object(region, biome):
 	var acc = 0
 	var roll = Rng.get_random_range(1, 100)
 	var item_index = null
-	print(item_index)
 	for i in range(biome_objects.size()):
 		var o = biome_objects[i]
 		if not item_index:
@@ -372,8 +392,9 @@ func generate_texture_data(chunk):
 	
 	return data
 
-func build_city(template: Dictionary):
-	pass
+func build_city(template: Dictionary) -> Array:
+	# TODO city things walls, districts, palace etc
+	return build_town(template)
 
 func build_town(template: Dictionary) -> Array:
 	var width = template.width
@@ -435,7 +456,7 @@ func get_raw_land_height(x: float, y: float):
 	var val = hill_noise.get_noise_3d(x, 0, y)
 	return Utilities.normalize_to_zero_one_range(val)
 
-func get_valid_building_positions(mesh_data: Array) -> Array:
+func get_valid_building_positions(mesh_data: Array, width: float, height:float) -> Array:
 	"""
 	A valid building spot is a spot where we are not too close to the edge of a chunk, 
 	so we dont have flattened terain creeping over borders and creating holes in the mesh
