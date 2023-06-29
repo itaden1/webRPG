@@ -5,6 +5,8 @@ var Utilities
 
 var world_data: Dictionary
 
+
+var player_placed := false
 # Declare member variables here. Examples:
 # var a = 2
 # var b = "text"
@@ -17,7 +19,10 @@ func _ready():
 	WorldData.generate_world()
 	world_data = WorldData.world
 
+	#TODO remove this variable
+	var debug_chunk_offset = 0
 	for k in world_data.chunks.keys():
+		debug_chunk_offset += 1
 		var chunk = world_data.chunks[k]
 		var plane_mesh := PlaneMesh.new()
 		var chunk_position = Utilities.key_as_vec(k)
@@ -33,7 +38,7 @@ func _ready():
 		mesh_inst.create_trimesh_collision()
 
 		add_child(mesh_inst)
-		mesh_inst.global_transform.origin = Vector3(chunk.position.x, 0, chunk.position.y)
+		mesh_inst.global_transform.origin = Vector3(chunk.position.x+debug_chunk_offset, 0, chunk.position.y+debug_chunk_offset)
 		for location in chunk.locations:
 			var colors = {
 				Constants.LOCATION_TYPES.CITY: Color.blue,
@@ -99,7 +104,19 @@ func build_town(layout: Array, location_node: Spatial):
 	"""
 	for l in layout:
 		var building_node := Spatial.new()
-		for f in range(l.grid.size()):
+		var grid_size = l.grid.size()
+		var offsets = WorldData.house_themes[l.culture]["offsets"]
+		if l.type == Constants.HOUSE_TYPES.FIELD:
+			# TODO create proper spawn zone
+			# place spawn point in empty lot for now
+			if player_placed == false:
+				var player_scene = load("res://assets/simple_fpsplayer/Player.tscn")
+				var player = player_scene.instance()
+				building_node.add_child(player)
+				player.transform.origin = Vector3(l.rect.position.x*offsets.horizontal, player.transform.origin.y, l.rect.position.y*offsets.horizontal)
+				player_placed = true
+			
+		for f in range(grid_size):
 			var floor_layout = l.grid[f]
 			var culture = l.culture
 			var level = f
@@ -108,7 +125,6 @@ func build_town(layout: Array, location_node: Spatial):
 				level_key = "roof"
 
 			var tile_data = WorldData.house_themes[culture][level_key]
-			var offsets = WorldData.house_themes[culture]["offsets"]
 
 			var floor_node = place_floor(floor_layout, tile_data, level, offsets)
 

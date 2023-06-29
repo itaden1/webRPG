@@ -24,12 +24,14 @@ var splatmap_image_size := 256
 # TODO use resources to describe locations
 const city_template = {
 	width=25, height=25, partitions=10, padding=[3,2,1], number_of_npcs=7, block_offset=10,
-	plot_types=[Constants.HOUSE_TYPES.BUILDING, Constants.HOUSE_TYPES.FIELD, Constants.HOUSE_TYPES.TWO_STORY_BUILDING, Constants.HOUSE_TYPES.THREE_STORY_BUILDING]
+	plot_types=[Constants.HOUSE_TYPES.BUILDING, Constants.HOUSE_TYPES.FIELD, Constants.HOUSE_TYPES.TWO_STORY_BUILDING, Constants.HOUSE_TYPES.THREE_STORY_BUILDING],
+	stamp_width=10, stamp_height=10
 }
 
 const town_template = {
 	width=10, height=10, partitions=10, padding=[3,2,1], number_of_npcs=7, block_offset=10,
-	plot_types=[Constants.HOUSE_TYPES.BUILDING, Constants.HOUSE_TYPES.TWO_STORY_BUILDING, Constants.HOUSE_TYPES.FIELD]
+	plot_types=[Constants.HOUSE_TYPES.BUILDING, Constants.HOUSE_TYPES.TWO_STORY_BUILDING, Constants.HOUSE_TYPES.FIELD],
+	stamp_width=5, stamp_height=5
 }
 
 func _init():
@@ -142,7 +144,7 @@ func build_world(
 			chunk_data.terrain_steepnes_score = terrain_steepnes_score	
 
 			# check if its okay to place a large location here and add it to the list
-			if above_sea_level_score >= 2 and above_sea_level_score < 4 and terrain_steepnes_score < 100:
+			if above_sea_level_score >= 3 and above_sea_level_score <= 4 and terrain_steepnes_score < 100:
 				valid_city_chunks.append(chunk_data.position)
 			
 			# check if its valid to place a town here and add it to the list
@@ -174,11 +176,13 @@ func build_world(
 				var template = city_template
 				
 				var city = build_city(template)
+
 				# TODO make better stamp
 				var stamp := []
-				for x in range(-2, template.width-2):
-					for y in range(-2, template.height-2):
+				for x in range(-2, template.stamp_width-2):
+					for y in range(-2, template.stamp_height-2):
 						stamp.append(Vector2(x, y))
+
 				var y = get_reshaped_elevation(c.position.x, c.position.y)
 				if y < modify_land_height(OCEAN_LEVEL):
 					y = modify_land_height(OCEAN_LEVEL) + 25
@@ -190,7 +194,7 @@ func build_world(
 				)
 				c.locations = [{
 					position = vec_3_pos,
-					name="Argon", # TODO: random gen town name
+					name="Argon", # TODO: random gen city name
 					type=Constants.LOCATION_TYPES.CITY,
 					layout=city
 				}]
@@ -246,8 +250,8 @@ func build_world(
 					var town = build_town(template)
 					# TODO make better stamp
 					var stamp := []
-					for x in range(-2, template.width-2):
-						for y in range(-2, template.height-2):
+					for x in range(-2, template.stamp_width-2):
+						for y in range(-2, template.stamp_height-2):
 							stamp.append(Vector2(x, y))
 					c.mesh_data = flatten_terrain(c.mesh_data, pos, stamp)
 					c.locations = [{
@@ -355,13 +359,18 @@ func flatten_terrain(terrain_mesh_data: Array, pos: Vector3, shape: Array) -> Ar
 	Taking a mesh as input apply the shape to the position on the mesh. Flattenning / smoothing the
 	terrain to the height of pos
 	"""
+
 	var dist = Vector2(terrain_mesh_data[0].x, terrain_mesh_data[0].z).distance_to(
 		Vector2(terrain_mesh_data[1].x, terrain_mesh_data[1].z))
 	var flattened = []
+	var pos_adjusted := false
 	for d in terrain_mesh_data:
+
 		for v in shape:
-			var vec_3 = Vector3(pos.x + v.x * dist, d.y, pos.z + v.y * dist)
-			if d.distance_to(vec_3) < dist/2:
+			var vec_2 = Vector2(pos.x + v.x * dist, pos.z + v.y * dist)
+			if Vector2(d.x, d.z).distance_to(vec_2) < dist:
+				if shape.size() > 600:
+					print(d)
 				d.y = pos.y
 		flattened.append(d)
 
