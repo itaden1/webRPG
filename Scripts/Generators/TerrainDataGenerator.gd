@@ -21,17 +21,34 @@ var max_locations_per_chunk = 3
 var splatmap_brush_size := 8
 var splatmap_image_size := 256
 
+var vertex_seperation_distance: float
+
+var town_zones := []
+
 # TODO use resources to describe locations
 const city_template = {
-	width=25, height=25, partitions=10, padding=[3,2,1], number_of_npcs=7, block_offset=10,
-	plot_types=[Constants.HOUSE_TYPES.BUILDING, Constants.HOUSE_TYPES.FIELD, Constants.HOUSE_TYPES.TWO_STORY_BUILDING, Constants.HOUSE_TYPES.THREE_STORY_BUILDING],
-	stamp_width=10, stamp_height=10
+	width=25, height=25, partitions=10, padding=[3,3,2,2,1], number_of_npcs=7, block_offset=10,
+	required_plots=[
+		Constants.HOUSE_TYPES.TRAINING_GROUND, 
+		Constants.HOUSE_TYPES.TWO_STORY_BUILDING,
+		Constants.HOUSE_TYPES.TWO_STORY_BUILDING, 
+		Constants.HOUSE_TYPES.TWO_STORY_BUILDING, 
+		Constants.HOUSE_TYPES.THREE_STORY_BUILDING
+	],
+	plot_types=[Constants.HOUSE_TYPES.BUILDING, Constants.HOUSE_TYPES.FIELD, Constants.HOUSE_TYPES.TWO_STORY_BUILDING, Constants.HOUSE_TYPES.THREE_STORY_BUILDING]
 }
 
 const town_template = {
 	width=10, height=10, partitions=10, padding=[3,2,1], number_of_npcs=7, block_offset=10,
-	plot_types=[Constants.HOUSE_TYPES.BUILDING, Constants.HOUSE_TYPES.TWO_STORY_BUILDING, Constants.HOUSE_TYPES.FIELD],
-	stamp_width=5, stamp_height=5
+	minimum_buildings=4,
+	required_plots=[
+		Constants.HOUSE_TYPES.BUILDING, 
+		Constants.HOUSE_TYPES.BUILDING, 
+		Constants.HOUSE_TYPES.BUILDING, 
+		Constants.HOUSE_TYPES.TWO_STORY_BUILDING, 
+		Constants.HOUSE_TYPES.FIELD
+	],
+	plot_types=[Constants.HOUSE_TYPES.BUILDING, Constants.HOUSE_TYPES.TWO_STORY_BUILDING, Constants.HOUSE_TYPES.FIELD]
 }
 
 func _init():
@@ -61,6 +78,9 @@ func build_world(
 
 	# object to hold all world data
 	var data = {}
+	data.world_size = world_size
+	data.chunk_size = chunk_size
+	data.chunk_divisions = chunk_divisions
 
 	# noise data for the heightmap
 	data.hill_noise = {
@@ -119,6 +139,12 @@ func build_world(
 				chunk_data.mesh_data.append(vert)
 				chunk_data.mesh_data_dict[Utilities.vec_as_key(Vector2(vert.x, vert.z))] = vert
 			
+
+
+			# check base distance between verts
+			vertex_seperation_distance = Vector2(chunk_data.mesh_data[0].x, chunk_data.mesh_data[0].z).distance_to(
+				Vector2(chunk_data.mesh_data[1].x, chunk_data.mesh_data[1].z))
+
 			# determine whether this is an above see level chunk
 			# for each corner of the chunk get its height above sea level
 			# chunks with a score < 4 are candidates for a port town
@@ -142,6 +168,7 @@ func build_world(
 			
 			chunk_data.above_sea_level_score = above_sea_level_score
 			chunk_data.terrain_steepnes_score = terrain_steepnes_score	
+			chunk_data.building_zone = []
 
 			# check if its okay to place a large location here and add it to the list
 			if above_sea_level_score >= 3 and above_sea_level_score <= 4 and terrain_steepnes_score < 100:
@@ -177,16 +204,23 @@ func build_world(
 				
 				var city = build_city(template)
 
+				# adjust template size to match world size
+				var adjusted_width = template.width * (vertex_seperation_distance/template.block_offset)
+				var adjusted_height = template.height * (vertex_seperation_distance/template.block_offset)
+				
 				# TODO make better stamp
 				var stamp := []
-				for x in range(-2, template.stamp_width-2):
-					for y in range(-2, template.stamp_height-2):
+				for x in range(-2, adjusted_width*2, vertex_seperation_distance):
+					for y in range(-2, adjusted_height*2, vertex_seperation_distance):
 						stamp.append(Vector2(x, y))
 
 				var y = get_reshaped_elevation(c.position.x, c.position.y)
 				if y < modify_land_height(OCEAN_LEVEL):
 					y = modify_land_height(OCEAN_LEVEL) + 25
 				var vec_3_pos = Vector3(0, y, 0)
+
+				vec_3_pos.x = vec_3_pos.x - adjusted_width
+				vec_3_pos.z = vec_3_pos.z - adjusted_height
 				c.mesh_data = flatten_terrain(
 					c.mesh_data, 
 					vec_3_pos,
@@ -194,6 +228,8 @@ func build_world(
 				)
 				c.locations = [{
 					position = vec_3_pos,
+					width = adjusted_width,
+					height = adjusted_height,
 					name="Argon", # TODO: random gen city name
 					type=Constants.LOCATION_TYPES.CITY,
 					layout=city
@@ -244,18 +280,28 @@ func build_world(
 				var template = town_template
 				var valid_positions:  Array = get_valid_building_positions(c.mesh_data, template.width, template.height)
 				if valid_positions.size() > 0:
-					var pos = valid_positions[Rng.get_random_range(0, valid_positions.size()-1)]
+					# adjust template size to match world size
+					var adjusted_width = template.width * (vertex_seperation_distance/template.block_offset)
+					var adjusted_height = template.height * (vertex_seperation_distance/template.block_offset)
 
+					var pos = valid_positions[Rng.get_random_range(0, valid_positions.size()-1)]
+					# offset slightly so origin is more aligned with center
+					pos.x = pos.x - adjusted_width
+					pos.z = pos.z - adjusted_height
 
 					var town = build_town(template)
+
 					# TODO make better stamp
 					var stamp := []
-					for x in range(-2, template.stamp_width-2):
-						for y in range(-2, template.stamp_height-2):
+					for x in range(-2, adjusted_width*2, vertex_seperation_distance):
+						for y in range(-2, adjusted_height*2, vertex_seperation_distance):
 							stamp.append(Vector2(x, y))
+
 					c.mesh_data = flatten_terrain(c.mesh_data, pos, stamp)
 					c.locations = [{
 						position = pos,
+						width = adjusted_width,
+						height = adjusted_height,
 						type=Constants.LOCATION_TYPES.TOWN,
 						name="Foo Town", # TODO: random gen town name
 						layout=town
@@ -271,8 +317,16 @@ func build_world(
 		for city in cities:
 			var distance = city.distance_to(c.position)
 			if distance <= min_habitation_distance and distance > 0 and c.above_sea_level_score >= 4 and c.terrain_steepnes_score < 250:
-				# TODO more location types
-				c.locations = [{type=Constants.LOCATION_TYPES.VILLAGE}]
+				# TODO add the location types
+				c.locations = [{
+					position = Vector3(c.position.x, 0, c.position.y),
+					width=0,
+					height=0,
+					type=Constants.LOCATION_TYPES.VILLAGE,
+					name="Farm", # TODO: random gen town name
+					layout={}
+				}]
+
 
 
 	# generate wilderness areas
@@ -293,14 +347,16 @@ func build_world(
 
 func place_trees(chunk):
 	chunk.objects = []
-	var dist = Vector2(chunk.mesh_data[0].x, chunk.mesh_data[0].z).distance_to(
-		Vector2(chunk.mesh_data[1].x, chunk.mesh_data[1].z))
-	for v in range(0, chunk.mesh_data.size(), 15):
+	var dist = vertex_seperation_distance
+	for v in range(0, chunk.mesh_data.size(), 5):
 		# TODO check vert position and skip to achieve more even placememt
 		# TODO check no placement zones (towns etc.)
 		var vert = chunk.mesh_data[v]
 		if vert.y < modify_land_height(OCEAN_LEVEL):
 			continue
+
+
+
 		# Placement is off by about 1/2 of chunk size
 		var biome = get_biome(
 			(vert.x + chunk.position.x),# - chunk_size.x / 4, 
@@ -314,6 +370,16 @@ func place_trees(chunk):
 		var ob_y = get_reshaped_elevation(ob_x+chunk.position.x, ob_z+chunk.position.y)
 
 		var ob_vec = Vector3(ob_x, ob_y, ob_z)
+
+		# avoid placing trees in town zones
+		var skip := false
+		for bz in chunk.locations:
+			if Vector2(ob_vec.x, ob_vec.z).distance_to(Vector2(bz.position.x, bz.position.z)) < bz.width*3: # TODO remove magic number
+				skip = true
+				break
+		if skip:
+			continue
+
 		chunk.objects.append(
 			{biome=biome, object_index=obj_type, location=ob_vec, rotation=0}
 		)
@@ -357,21 +423,22 @@ func get_biome(x: float, y: float):
 func flatten_terrain(terrain_mesh_data: Array, pos: Vector3, shape: Array) -> Array:
 	"""
 	Taking a mesh as input apply the shape to the position on the mesh. Flattenning / smoothing the
-	terrain to the height of pos
+	terrain to the height of pos. Also acts as a marker to not place random trees.
 	"""
 
-	var dist = Vector2(terrain_mesh_data[0].x, terrain_mesh_data[0].z).distance_to(
-		Vector2(terrain_mesh_data[1].x, terrain_mesh_data[1].z))
+	var dist = vertex_seperation_distance
 	var flattened = []
-	var pos_adjusted := false
 	for d in terrain_mesh_data:
 
-		for v in shape:
-			var vec_2 = Vector2(pos.x + v.x * dist, pos.z + v.y * dist)
-			if Vector2(d.x, d.z).distance_to(vec_2) < dist:
-				if shape.size() > 600:
-					print(d)
-				d.y = pos.y
+		# check if this is a chunk edge and dont modify if it is
+		if d.x == 0 - chunk_size.x/2 or d.x == chunk_size.x/2 or d.z == 0 - chunk_size.y/2 or d.z == chunk_size.y/2:
+			flattened.append(d)
+			continue
+		else:
+			for v in shape:
+				var vec_2 = Vector2(pos.x + v.x, pos.z + v.y)
+				if Vector2(d.x, d.z).distance_to(vec_2) < dist:
+					d.y = pos.y
 		flattened.append(d)
 
 	return flattened
@@ -423,9 +490,18 @@ func build_town(template: Dictionary) -> Array:
 
 	var houses: Array = []
 
-	for b in tree.keys():
+	# apply some randomness to where buildings are placed
+	var buildings = tree.keys()
+	buildings.shuffle()
+
+	for i in range(buildings.size()):
+		var b: Rect2 = buildings[i]
 		if tree[b].size() <= 0:
-			var plot_type = plot_types[Rng.get_random_range(0, plot_types.size()-1)]
+			var plot_type : int
+			if i >= template.required_plots.size():
+				plot_type = plot_types[Rng.get_random_range(0, plot_types.size()-1)]
+			else:
+				plot_type = template.required_plots[i]
 			var orientations = [0, 1]
 			var orientation = orientations[Rng.get_random_range(0, orientations.size()-1)]
 			var floor_count = 0
@@ -433,6 +509,7 @@ func build_town(template: Dictionary) -> Array:
 				Constants.HOUSE_TYPES.BUILDING: floor_count = 1
 				Constants.HOUSE_TYPES.TWO_STORY_BUILDING: floor_count = 2
 				Constants.HOUSE_TYPES.THREE_STORY_BUILDING: floor_count = 3
+
 
 			var layout := []
 			if floor_count > 0:
@@ -478,7 +555,7 @@ func get_valid_building_positions(mesh_data: Array, width: float, height:float) 
 	for vert in mesh_data:
 		if vert.y > modify_land_height(OCEAN_LEVEL):
 			# TODO get correct vertex range. mesh verts are between -500 and 500
-			if vert.x < 200 and vert.x > -200 and vert.y < 200 and vert.y > -200:
+			if vert.x < 400 and vert.x > -400 and vert.z < 400 and vert.z > -400:
 				arr.append(vert)
 	return arr
 

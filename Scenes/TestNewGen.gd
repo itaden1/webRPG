@@ -22,13 +22,13 @@ func _ready():
 	#TODO remove this variable
 	var debug_chunk_offset = 0
 	for k in world_data.chunks.keys():
-		debug_chunk_offset += 1
+		# debug_chunk_offset += 1
 		var chunk = world_data.chunks[k]
 		var plane_mesh := PlaneMesh.new()
 		var chunk_position = Utilities.key_as_vec(k)
-		plane_mesh.subdivide_depth = 30
-		plane_mesh.subdivide_width = 30
-		plane_mesh.size = Vector2(1000, 1000)
+		plane_mesh.subdivide_depth = world_data.chunk_divisions.x
+		plane_mesh.subdivide_width = world_data.chunk_divisions.y
+		plane_mesh.size = world_data.chunk_size
 		var terrain_mesh = apply_heights_to_mesh(plane_mesh, chunk.mesh_data)
 		var mesh_inst =MeshInstance.new()
 		mesh_inst.mesh = terrain_mesh
@@ -106,7 +106,7 @@ func build_town(layout: Array, location_node: Spatial):
 		var building_node := Spatial.new()
 		var grid_size = l.grid.size()
 		var offsets = WorldData.house_themes[l.culture]["offsets"]
-		if l.type == Constants.HOUSE_TYPES.FIELD:
+		if l.type == Constants.HOUSE_TYPES.TRAINING_GROUND:
 			# TODO create proper spawn zone
 			# place spawn point in empty lot for now
 			if player_placed == false:

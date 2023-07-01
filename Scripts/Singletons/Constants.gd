@@ -10,6 +10,7 @@ enum LOCATION_TYPES {
 enum HOUSE_TYPES {
 	COTTAGE,
 	EMPTY,
+	TRAINING_GROUND,
 	BUILDING,
 	TWO_STORY_BUILDING,
 	THREE_STORY_BUILDING,
@@ -102,19 +103,11 @@ const BIOME_OBJECTS = {
 	BIOMES.TEMPERATE_DECIDUOUS_FOREST : [
 		{		
 			obj=preload("res://Scenes/NatureObjects/Tree01summer.tscn"),
-			chance=30
-		},
-		{		
-			obj=preload("res://Scenes/NatureObjects/GrassBushFall.tscn"),
-			chance=1
+			chance=80
 		},
 		{		
 			obj=preload("res://Scenes/NatureObjects/Tree03summer.tscn"),
-			chance=34
-		},
-		{		
-			obj=preload("res://Scenes/NatureObjects/Tree03summerSmall.tscn"),
-			chance=35
+			chance=19
 		}
 	],
 	BIOMES.SNOW_FORRESTS : [
