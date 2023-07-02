@@ -60,7 +60,8 @@ func _ready():
 					location.position.y, 
 					location.position.z + chunk_position.y
 				)
-				build_town(location.layout, location_node)
+				build_town(location.layout.buildings, location_node)
+				place_npcs(location.layout.spawn_points, location_node, location.culture)
 				add_child(location_node)
 			if location.type == Constants.LOCATION_TYPES.CITY:
 				# TODO other city things
@@ -69,7 +70,8 @@ func _ready():
 					location.position.y, 
 					location.position.z + chunk_position.y
 				)
-				build_town(location.layout, location_node)
+				build_town(location.layout.buildings, location_node)
+				place_npcs(location.layout.spawn_points, location_node, location.culture)
 				add_child(location_node)
 		for o in chunk.objects:
 			var idx = o.object_index
@@ -97,6 +99,23 @@ func create_splatmap(texture_data):
 
 	splat_texture.create_from_image(splat_image, 0)
 	return splat_texture
+
+func place_npcs(spawn_points: Array, location_node: Spatial, culture: int):
+	"""
+	place some npcs at locations
+
+	"""
+	var npc_scene: PackedScene = load("res://Scenes/NPC/Ben.tscn")
+	var offsets = WorldData.house_themes[culture]["offsets"]
+
+	for p in spawn_points:
+		var npc: Spatial = npc_scene.instance()
+		var px = (p.x * offsets.horizontal) #+ (offsets.horizontal / 2)
+		var py = (p.y * offsets.horizontal) #+ (offsets.horizontal / 2)
+		npc.transform.origin = Vector3(px, 0, py)
+		location_node.add_child(npc)
+
+
 
 func build_town(layout: Array, location_node: Spatial):
 	"""

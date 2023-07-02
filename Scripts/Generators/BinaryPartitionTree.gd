@@ -154,6 +154,34 @@ func get_sibling(bpt_graph: Dictionary, branch: Rect2):
 		if c != branch:
 			return c
 
+
+func graph_as_grid(graph: Dictionary) -> Array:
+	"""
+	creates a grid representation of BPT graph in the form of a 2D Array
+	for every leaf node in the graph (Rect2), grid values will equal 1. for spaces in betwee
+	they will equal 0
+	Params:
+		graph(Dictionary): The graph we are searching in
+	Returns: 
+		Array<Array<int>>
+
+	"""
+	var size: Vector2 = graph.keys()[0].size
+	var grid := []
+
+	# create an empty 2d Array
+	for x in range(size.x):
+		grid.append([])
+		for y in range(size.y):
+			grid[x].append(0)
+
+	var leaf_nodes = get_leaf_nodes(graph, graph.keys()[0])
+	for rect in leaf_nodes:
+		for point_x in range(rect.position.x, rect.size.x):
+			for point_y in range(rect.position.y, rect.size.y):
+				grid[point_x][point_y] = 1
+	return grid
+
 func _run_tests():
 	_test_get_children()
 	_test_get_parent_node()

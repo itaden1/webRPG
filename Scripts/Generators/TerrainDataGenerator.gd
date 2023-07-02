@@ -27,7 +27,7 @@ var town_zones := []
 
 # TODO use resources to describe locations
 const city_template = {
-	width=25, height=25, partitions=10, padding=[3,3,2,2,1], number_of_npcs=7, block_offset=10,
+	width=25, height=25, partitions=10, padding=[3,3,2,2,1], number_of_npcs=17, block_offset=10,
 	required_plots=[
 		Constants.HOUSE_TYPES.TRAINING_GROUND, 
 		Constants.HOUSE_TYPES.TWO_STORY_BUILDING,
@@ -232,7 +232,8 @@ func build_world(
 					height = adjusted_height,
 					name="Argon", # TODO: random gen city name
 					type=Constants.LOCATION_TYPES.CITY,
-					layout=city
+					layout=city,
+					culture=Constants.CULTURES.TUDOR # TODO select culture based on region of world
 				}]
 				cities.append(c.position)
 				var k = Rng.get_random_range(0, kingdom_choices.size()-1)
@@ -304,7 +305,8 @@ func build_world(
 						height = adjusted_height,
 						type=Constants.LOCATION_TYPES.TOWN,
 						name="Foo Town", # TODO: random gen town name
-						layout=town
+						layout=town,
+						culture=Constants.CULTURES.TUDOR # TODO select culture based on region of world
 					}]
 					cities.append(c.position)
 
@@ -468,11 +470,11 @@ func generate_texture_data(chunk):
 	
 	return data
 
-func build_city(template: Dictionary) -> Array:
+func build_city(template: Dictionary) -> Dictionary:
 	# TODO city things walls, districts, palace etc
 	return build_town(template)
 
-func build_town(template: Dictionary) -> Array:
+func build_town(template: Dictionary) -> Dictionary:
 	var width = template.width
 	var height = template.height
 	var plot_types = template.plot_types
@@ -486,7 +488,28 @@ func build_town(template: Dictionary) -> Array:
 		template.padding
 	)
 
-	var data := []
+	# get the bpt graph in 2d Array form
+	# grid values of 0 represent streets of the town
+	# TODO move to its own function
+	var street_grid: Array = bpt.graph_as_grid(tree)
+
+	var data := {}
+	data.buildings = []
+	data.grid=street_grid
+	data.spawn_points = []
+
+	# Place some npcs in the town
+	var placements := []
+	for x in range(0, data.grid.size()-1):
+		for y in range(0, data.grid[x].size()-1):
+			placements.append(Vector2(x, y))
+
+	for npc in template.number_of_npcs:
+		var vec = Vector2(placements[Rng.get_random_range(0, placements.size()-1)])
+		data.spawn_points.append(vec)
+		placements.pop_at(placements.find(vec))
+
+			
 
 	var houses: Array = []
 
@@ -516,7 +539,7 @@ func build_town(template: Dictionary) -> Array:
 				layout = build_building(b, orientation, floor_count)
 
 			houses.append(b)
-			data.append({
+			data.buildings.append({
 				rect=b, 
 				type=plot_type, 
 				culture=Constants.CULTURES.TUDOR, # TODO select culture based on region of world

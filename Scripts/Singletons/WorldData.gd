@@ -23,18 +23,26 @@ world: {
 			is_above_water: True, # whether this node is above the sea/ below the sea
 			biome_type: snow/ desert etc. etc
 			locations : [
-				layout: [
 					{
-						rect: Rect2,
-						grid: [
-							Dict<vec2: mask>
-						]
+						position: vec3,
+						width=float,
+						height=float,
+						culture=int,
+						type=int,
+						name=String
+						layout={
+							buildings: Array [
+								{
+									rect=Rect2, 
+									type=int, 
+									culture=int
+									grid=Array<Dictionary>
+								}
+							],
+							grid: Array<Array<int>>
+							spawn_points: Array<Vec2/3>
+						}
 					}
-				],
-				spawn_points: [],
-				name:
-				type: # town city dungeon cave etc. 
-				...
 			]
 		}
 	]
