@@ -7,14 +7,11 @@ var world_data: Dictionary
 
 
 var player_placed := false
-# Declare member variables here. Examples:
-# var a = 2
-# var b = "text"
+
 func _init():
 	._init()
 	Utilities = utilities.new()
 
-# Called when the node enters the scene tree for the first time.
 func _ready():
 	WorldData.generate_world()
 	world_data = WorldData.world
@@ -61,7 +58,7 @@ func _ready():
 					location.position.z + chunk_position.y
 				)
 				build_town(location.layout.buildings, location_node)
-				place_npcs(location.layout.spawn_points, location_node, location.culture)
+				place_npcs(location.npc_spawn_points, location_node, location.culture)
 				add_child(location_node)
 			if location.type == Constants.LOCATION_TYPES.CITY:
 				# TODO other city things
@@ -73,6 +70,19 @@ func _ready():
 				build_town(location.layout.buildings, location_node)
 				place_npcs(location.layout.spawn_points, location_node, location.culture)
 				add_child(location_node)
+			if location.dungeon != null:
+				var offsets = WorldData.house_themes[location.culture]["offsets"]
+				var entrance_vec = location.dungeon.entrance
+				var entrance_scene = load("res://Scenes/Dungeons/Test/Entrance.tscn")
+				var entrance = entrance_scene.instance()
+				var px = (entrance_vec.x * offsets.horizontal) #+ (offsets.horizontal / 2)
+				var py = (entrance_vec.y * offsets.horizontal) 
+				entrance.transform.origin.x = px
+				entrance.transform.origin.z = py
+				location_node.add_child(entrance)
+
+				print("build dungeon")
+
 		for o in chunk.objects:
 			var idx = o.object_index
 			if idx != null:
@@ -99,6 +109,7 @@ func create_splatmap(texture_data):
 
 	splat_texture.create_from_image(splat_image, 0)
 	return splat_texture
+
 
 func place_npcs(spawn_points: Array, location_node: Spatial, culture: int):
 	"""

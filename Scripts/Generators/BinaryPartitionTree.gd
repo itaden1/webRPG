@@ -4,9 +4,13 @@ extends Node
 var graph: Dictionary
 var rects: Array
 
+var Utilities
+const utilities = preload("res://Scripts/Utilities.gd")
 
 func _init():
 	._init()
+	Utilities = utilities.new()
+
 	if not OS.has_feature("standalone") or OS.is_debug_build():
 		_run_tests()
 
@@ -155,7 +159,7 @@ func get_sibling(bpt_graph: Dictionary, branch: Rect2):
 			return c
 
 
-func graph_as_grid(graph: Dictionary) -> Array:
+func graph_as_grid(bpt_graph: Dictionary) -> Dictionary:
 	"""
 	creates a grid representation of BPT graph in the form of a 2D Array
 	for every leaf node in the graph (Rect2), grid values will equal 1. for spaces in betwee
@@ -163,24 +167,81 @@ func graph_as_grid(graph: Dictionary) -> Array:
 	Params:
 		graph(Dictionary): The graph we are searching in
 	Returns: 
-		Array<Array<int>>
+		Dictionary<Vector2, int>
 
 	"""
 	var size: Vector2 = graph.keys()[0].size
-	var grid := []
+	var grid := {}
 
 	# create an empty 2d Array
 	for x in range(size.x):
-		grid.append([])
+		# grid.append([])
 		for y in range(size.y):
-			grid[x].append(0)
+			# grid[x].append(Constants.TILE_TYPES.BLOCKED)
+			grid[Utilities.vec_as_key(Vector2(x, y))] = Constants.TILE_TYPES.BLOCKED
 
-	var leaf_nodes = get_leaf_nodes(graph, graph.keys()[0])
+	var leaf_nodes = get_leaf_nodes(bpt_graph, bpt_graph.keys()[0])
 	for rect in leaf_nodes:
 		for point_x in range(rect.position.x, rect.size.x):
 			for point_y in range(rect.position.y, rect.size.y):
-				grid[point_x][point_y] = 1
+				print(point_x, point_y)
+				grid[Utilities.vec_as_key(Vector2(point_x, point_y))] = Constants.TILE_TYPES.OPEN
+				# grid[point_x][point_y] = Constants.TILE_TYPES.OPEN
 	return grid
+
+func make_corridors(tree: Dictionary, branch: Rect2, grid: Dictionary):
+	""" 
+	Connects leaf nodes of the BPT graph returning a grid describing where joins are placed
+
+	"""
+	
+	# TODO: Make a function in bpt script that describes corridor connections as a graph
+	# TODO: Expiriment with looping paths
+	var parent = get_parent_node(tree, branch)
+	if !parent:
+		return grid
+	var branch_leaves = get_leaf_nodes(tree, branch)
+	var sibling = get_sibling(tree, branch)
+	var sibling_leaves = get_leaf_nodes(tree, sibling)
+
+	for s in sibling_leaves:
+		var s_center = s.get_center()
+		var corridor_built = false
+		for l in branch_leaves:
+			var l_center = l.get_center()
+			if s.position.x == l.position.x:
+				# above/below eachother
+				if s.position.y == l.end.y:
+					# s is below l
+					for y in range(l_center.y, s_center.y):
+						grid[Utilities.vec_as_key(Vector2(s_center.x, y))] = Constants.TILE_TYPES.OPEN
+					corridor_built = true
+					break
+				else:
+					# s is above l
+					for y in range(s_center.y, l_center.y):
+						grid[Utilities.vec_as_key(Vector2(s_center.x, y))] = Constants.TILE_TYPES.OPEN
+					corridor_built = true
+					break
+			elif s.position.y == l.position.y:
+				# next to eachother
+				if s.position.x == l.end.x:
+					# s is to the right of l
+					for x in range(l_center.x, s_center.x):
+						grid[Utilities.vec_as_key(Vector2(x, s_center.y))] = Constants.TILE_TYPES.OPEN
+					corridor_built = true
+					break
+				else:
+					# s is to the left of  l
+					for x in range(s_center.x, l_center.x):
+						grid[Utilities.vec_as_key(Vector2(x, s_center.y))] = Constants.TILE_TYPES.OPEN
+					corridor_built = true
+					break
+		if corridor_built:
+			break
+	return make_corridors(tree, parent, grid)
+
+
 
 func _run_tests():
 	_test_get_children()

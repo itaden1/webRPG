@@ -26,6 +26,10 @@ var vertex_seperation_distance: float
 var town_zones := []
 
 # TODO use resources to describe locations
+const crypt_template = {
+	width=25, height=25, partitions=10, padding=[3], max_room_size=6, min_room_size=3
+}
+
 const city_template = {
 	width=25, height=25, partitions=10, padding=[3,3,2,2,1], number_of_npcs=17, block_offset=10,
 	required_plots=[
@@ -35,7 +39,8 @@ const city_template = {
 		Constants.HOUSE_TYPES.TWO_STORY_BUILDING, 
 		Constants.HOUSE_TYPES.THREE_STORY_BUILDING
 	],
-	plot_types=[Constants.HOUSE_TYPES.BUILDING, Constants.HOUSE_TYPES.FIELD, Constants.HOUSE_TYPES.TWO_STORY_BUILDING, Constants.HOUSE_TYPES.THREE_STORY_BUILDING]
+	plot_types=[Constants.HOUSE_TYPES.BUILDING, Constants.HOUSE_TYPES.FIELD, Constants.HOUSE_TYPES.TWO_STORY_BUILDING, Constants.HOUSE_TYPES.THREE_STORY_BUILDING],
+	dungeons=[Constants.DUNGEON_TYPES.CRYPT]
 }
 
 const town_template = {
@@ -48,7 +53,8 @@ const town_template = {
 		Constants.HOUSE_TYPES.TWO_STORY_BUILDING, 
 		Constants.HOUSE_TYPES.FIELD
 	],
-	plot_types=[Constants.HOUSE_TYPES.BUILDING, Constants.HOUSE_TYPES.TWO_STORY_BUILDING, Constants.HOUSE_TYPES.FIELD]
+	plot_types=[Constants.HOUSE_TYPES.BUILDING, Constants.HOUSE_TYPES.TWO_STORY_BUILDING, Constants.HOUSE_TYPES.FIELD],
+	dungeons=[]
 }
 
 func _init():
@@ -203,6 +209,8 @@ func build_world(
 				var template = city_template
 				
 				var city = build_city(template)
+				city.spawn_points = place_npcs(city.grid, template.number_of_npcs)
+				var dungeon = generate_dungeon(city.grid, template.dungeons)
 
 				# adjust template size to match world size
 				var adjusted_width = template.width * (vertex_seperation_distance/template.block_offset)
@@ -233,7 +241,8 @@ func build_world(
 					name="Argon", # TODO: random gen city name
 					type=Constants.LOCATION_TYPES.CITY,
 					layout=city,
-					culture=Constants.CULTURES.TUDOR # TODO select culture based on region of world
+					culture=Constants.CULTURES.TUDOR, # TODO select culture based on region of world
+					dungeon=dungeon
 				}]
 				cities.append(c.position)
 				var k = Rng.get_random_range(0, kingdom_choices.size()-1)
@@ -291,6 +300,8 @@ func build_world(
 					pos.z = pos.z - adjusted_height
 
 					var town = build_town(template)
+					var spawn_points: Array = place_npcs(town.grid, template.number_of_npcs)
+					var dungeon = generate_dungeon(town.grid, template.dungeons)
 
 					# TODO make better stamp
 					var stamp := []
@@ -306,7 +317,9 @@ func build_world(
 						type=Constants.LOCATION_TYPES.TOWN,
 						name="Foo Town", # TODO: random gen town name
 						layout=town,
-						culture=Constants.CULTURES.TUDOR # TODO select culture based on region of world
+						culture=Constants.CULTURES.TUDOR, # TODO select culture based on region of world
+						npc_spawn_points=spawn_points,
+						dungeon=dungeon
 					}]
 					cities.append(c.position)
 
@@ -326,7 +339,8 @@ func build_world(
 					height=0,
 					type=Constants.LOCATION_TYPES.VILLAGE,
 					name="Farm", # TODO: random gen town name
-					layout={}
+					layout={},
+					dungeon=null
 				}]
 
 
@@ -470,6 +484,81 @@ func generate_texture_data(chunk):
 	
 	return data
 
+
+func generate_dungeon(possible_entrances: Dictionary, dungeon_types: Array):
+	var dungeon_type: int = 0
+	var dungeon_template: Dictionary
+	if dungeon_types.size() > 1:
+		dungeon_type = dungeon_types[Rng.get_random_range(0, dungeon_types.size())]
+	
+	match dungeon_type:
+		Constants.DUNGEON_TYPES.CRYPT:
+			dungeon_template = crypt_template
+
+	var dungeon_rect: Rect2 = Rect2(Vector2(0, 0), Vector2(dungeon_template.width, dungeon_template.height))
+	var bpt = bpt_generator.new()
+	var tree = bpt.partition_rect(
+		dungeon_rect,
+		dungeon_template.partitions,
+		dungeon_template.max_room_size,
+		dungeon_template.min_room_size,
+		dungeon_template.padding
+	)
+
+	var dungeon_grid: Dictionary = {}
+	dungeon_grid = bpt.graph_as_grid(tree)
+	# for x in range(0, dungeon_template.width):
+	# 	for y in range(0, dungeon_template.height):
+	# 		dungeon_grid[Utilities.vec_as_key(Vector2(x,y))] = Constants.TILE_TYPES.BLOCKED #0
+
+	var all_leaves = bpt.get_leaf_nodes(tree, tree.keys()[0])
+	# for l in all_leaves:
+	# 	for x in range(l.position.x, l.end.x):
+	# 		for y in range(l.position.y, l.end.y):
+	# 			dungeon_grid[Utilities.vec_as_key(Vector2(x,y))] = Constants.TILE_TYPES.OPEN #1
+
+	for l in all_leaves:
+		var corridor_grid = bpt.make_corridors(tree, l, {})
+		for k in corridor_grid.keys():
+			if dungeon_grid[k] == Constants.TILE_TYPES.BLOCKED:
+				dungeon_grid[k] = corridor_grid[k]
+
+	var exit_vec: Vector2
+	var possible_exits := []
+	for n in dungeon_grid.keys():
+		var vec = Utilities.key_as_vec(n)
+		if vec.x == 0 or vec.y == 0:
+			if dungeon_grid[n] == Constants.TILE_TYPES.OPEN:
+				possible_exits.append(vec)
+
+	exit_vec = possible_exits[Rng.get_random_range(0, possible_exits.size()-1)]
+	dungeon_grid[Utilities.vec_as_key(exit_vec)] = Constants.TILE_TYPES.EXIT# 2
+	var entry = possible_entrances.keys()[Rng.get_random_range(0, possible_entrances.keys().size()-1)]
+	return {
+		layout=dungeon_grid,
+		entrance=Utilities.key_as_vec(entry)
+	}
+
+func place_npcs(grid: Dictionary, number_of_npcs: int) -> Array:
+	
+	var npc_spawn_points := []
+
+	# Create an array of potential places. Each one is popped from the Array when used
+	var placements := []
+	for p in grid.keys():
+		var vec = Utilities.key_as_vec(p)
+		placements.append(vec)
+	# for x in range(0, grid.size()-1):
+	# 	for y in range(0, grid[x].size()-1):
+	# 		placements.append(Vector2(x, y))
+
+	for npc in number_of_npcs:
+		var vec = Vector2(placements[Rng.get_random_range(0, placements.size()-1)])
+		npc_spawn_points.append(vec)
+		placements.pop_at(placements.find(vec))
+	return npc_spawn_points
+
+
 func build_city(template: Dictionary) -> Dictionary:
 	# TODO city things walls, districts, palace etc
 	return build_town(template)
@@ -490,26 +579,11 @@ func build_town(template: Dictionary) -> Dictionary:
 
 	# get the bpt graph in 2d Array form
 	# grid values of 0 represent streets of the town
-	# TODO move to its own function
-	var street_grid: Array = bpt.graph_as_grid(tree)
+	var street_grid: Dictionary = bpt.graph_as_grid(tree)
 
 	var data := {}
 	data.buildings = []
 	data.grid=street_grid
-	data.spawn_points = []
-
-	# Place some npcs in the town
-	var placements := []
-	for x in range(0, data.grid.size()-1):
-		for y in range(0, data.grid[x].size()-1):
-			placements.append(Vector2(x, y))
-
-	for npc in template.number_of_npcs:
-		var vec = Vector2(placements[Rng.get_random_range(0, placements.size()-1)])
-		data.spawn_points.append(vec)
-		placements.pop_at(placements.find(vec))
-
-			
 
 	var houses: Array = []
 

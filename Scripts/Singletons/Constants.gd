@@ -45,6 +45,10 @@ enum BIOMES {
 	HIGH_ALTITUDE
 }
 
+enum DUNGEON_TYPES {
+	CRYPT
+}
+
 ## Splatmaps ##
 
 const REB_BRUSH_1 = preload("res://Materials/SplatBrushes/red_brush_1.png")
