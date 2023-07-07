@@ -59,8 +59,6 @@ var dungeon: Dictionary = {}
 var entrance: Spatial
 
 
-
-
 func _init():
 	._init()
 	Utilities = utilities.new()

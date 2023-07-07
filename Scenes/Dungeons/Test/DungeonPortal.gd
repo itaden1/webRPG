@@ -3,8 +3,8 @@ extends Spatial
 var exit: Position3D
 var exit_environment: Environment
 
-onready var root_dungeon_node = get_parent().get_parent()
-onready var dungeon_generator_node = get_parent()
+var root_dungeon_node: Node
+var dungeon_generator_node: Node
 
 func interact(interactor: Spatial):
 	if root_dungeon_node.has_method("bake_navigation_mesh"):
@@ -17,5 +17,5 @@ func interact(interactor: Spatial):
 
 	interactor.global_transform.origin = exit.global_transform.origin
 	interactor.rotation.y = exit.rotation.y
-	get_tree().root.get_node("World/WorldEnvironment").environment = exit_environment
+	#get_tree().root.get_node("World/WorldEnvironment").environment = exit_environment
 	GameEvents.emit_signal("player_entered_dungeon", interactor, dungeon_generator_node)

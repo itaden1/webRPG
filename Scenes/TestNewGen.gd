@@ -71,7 +71,7 @@ func _ready():
 				place_npcs(location.layout.spawn_points, location_node, location.culture)
 				add_child(location_node)
 			if location.dungeon != null:
-				var offsets = WorldData.house_themes[location.culture]["offsets"]
+				var offsets = Constants.HOUSE_THEMES[location.culture]["offsets"]
 				var entrance_vec = location.dungeon.entrance
 				var entrance_scene = load("res://Scenes/Dungeons/Test/Entrance.tscn")
 				var entrance = entrance_scene.instance()
@@ -81,7 +81,32 @@ func _ready():
 				entrance.transform.origin.z = py
 				location_node.add_child(entrance)
 
-				print("build dungeon")
+				
+
+				var dungeon_scene = load("res://Scenes/Dungeons/Dungeon.tscn")
+				var dungeon = dungeon_scene.instance()
+				dungeon.layout = location.dungeon.layout
+				dungeon.offset = offsets.horizontal
+
+				var exit = entrance_scene.instance()
+				location_node.add_child(exit)
+				exit.transform.origin = Vector3(location.dungeon.entrance.x * offsets.horizontal + 4, -1000, location.dungeon.entrance.y * offsets.horizontal + 8)
+
+				# entrance.exit = exit.get_node("ExitPosition")
+				# entrance.exit_environment = indoor_environment
+				# dungeon_exit.exit_environment = outdoor_environment
+				# exit.exit = entrance.get_node("ExitPosition")
+
+				var exit_portal = exit.get_node("DungeonPortal")
+				var entrance_portal = entrance.get_node("DungeonPortal")
+				entrance_portal.exit = exit_portal.get_node("ExitPosition")
+				exit_portal.exit = entrance_portal.get_node("ExitPosition")
+				entrance_portal.root_dungeon_node = dungeon.get_node("Navigation/NavigationMeshInstance")
+				entrance_portal.dungeon_generator_node = dungeon
+
+				location_node.add_child(dungeon)
+				# dungeon.build_dungeon(location.dungeon.layout, offsets.horizontal)
+
 
 		for o in chunk.objects:
 			var idx = o.object_index
@@ -117,7 +142,7 @@ func place_npcs(spawn_points: Array, location_node: Spatial, culture: int):
 
 	"""
 	var npc_scene: PackedScene = load("res://Scenes/NPC/Ben.tscn")
-	var offsets = WorldData.house_themes[culture]["offsets"]
+	var offsets = Constants.HOUSE_THEMES[culture]["offsets"]
 
 	for p in spawn_points:
 		var npc: Spatial = npc_scene.instance()
@@ -135,7 +160,7 @@ func build_town(layout: Array, location_node: Spatial):
 	for l in layout:
 		var building_node := Spatial.new()
 		var grid_size = l.grid.size()
-		var offsets = WorldData.house_themes[l.culture]["offsets"]
+		var offsets = Constants.HOUSE_THEMES[l.culture]["offsets"]
 		if l.type == Constants.HOUSE_TYPES.TRAINING_GROUND:
 			# TODO create proper spawn zone
 			# place spawn point in empty lot for now
@@ -154,7 +179,7 @@ func build_town(layout: Array, location_node: Spatial):
 			if f >= l.grid.size() -1:
 				level_key = "roof"
 
-			var tile_data = WorldData.house_themes[culture][level_key]
+			var tile_data = Constants.HOUSE_THEMES[culture][level_key]
 
 			var floor_node = place_floor(floor_layout, tile_data, level, offsets)
 

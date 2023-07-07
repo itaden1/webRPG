@@ -1,9 +1,10 @@
-[gd_scene load_steps=29 format=2]
+[gd_scene load_steps=30 format=2]
 
 [ext_resource path="res://Scenes/Dungeons/Test/StoneSlabFloor.material" type="Material" id=1]
 [ext_resource path="res://Scenes/Dungeons/Test/DungeonBricks.material" type="Material" id=2]
 [ext_resource path="res://Scenes/Dungeons/Test/GreenStone.material" type="Material" id=3]
 [ext_resource path="res://Scenes/Dungeons/Test/PillarBrick.material" type="Material" id=4]
+[ext_resource path="res://Scenes/Dungeons/DungeonPortal.tscn" type="PackedScene" id=5]
 [ext_resource path="res://Scenes/Dungeons/Test/DarkStone.material" type="Material" id=6]
 
 [sub_resource type="ArrayMesh" id=1]
@@ -376,3 +377,6 @@ mesh = SubResource( 12 )
 
 [node name="CollisionShape" type="CollisionShape" parent="StoneSlab002/StaticBody"]
 shape = SubResource( 24 )
+
+[node name="DungeonPortal" parent="." instance=ExtResource( 5 )]
+transform = Transform( -0.999916, 0, -0.0129674, 0, 1, 0, 0.0129674, 0, -0.999916, 3.12802, 0, 9.59947 )

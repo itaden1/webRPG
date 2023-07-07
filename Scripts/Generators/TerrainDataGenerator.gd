@@ -530,10 +530,13 @@ func generate_dungeon(possible_entrances: Dictionary, dungeon_types: Array):
 		if vec.x == 0 or vec.y == 0:
 			if dungeon_grid[n] == Constants.TILE_TYPES.OPEN:
 				possible_exits.append(vec)
+		dungeon_grid[n] = Utilities.get_four_bit_bitmask_from_grid(dungeon_grid, vec)
 
 	exit_vec = possible_exits[Rng.get_random_range(0, possible_exits.size()-1)]
 	dungeon_grid[Utilities.vec_as_key(exit_vec)] = Constants.TILE_TYPES.EXIT# 2
 	var entry = possible_entrances.keys()[Rng.get_random_range(0, possible_entrances.keys().size()-1)]
+	
+	
 	return {
 		layout=dungeon_grid,
 		entrance=Utilities.key_as_vec(entry)
