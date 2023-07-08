@@ -184,7 +184,6 @@ func graph_as_grid(bpt_graph: Dictionary) -> Dictionary:
 	for rect in leaf_nodes:
 		for point_x in range(rect.position.x, rect.size.x):
 			for point_y in range(rect.position.y, rect.size.y):
-				print(point_x, point_y)
 				grid[Utilities.vec_as_key(Vector2(point_x, point_y))] = Constants.TILE_TYPES.OPEN
 				# grid[point_x][point_y] = Constants.TILE_TYPES.OPEN
 	return grid

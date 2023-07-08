@@ -60,19 +60,26 @@ func build_dungeon(grid: Dictionary, offset: float) -> Spatial:
 	for r in grid.keys():
 		# if grid[r] == 1:
 
-
-		# var mask = Utilities.get_four_bit_bitmask_from_grid(grid, vec)
-
-		var block = get_block(grid[r], Constants.DUNGEON_TYPES.CRYPT, 0)
-		
-		if block == null:
-			continue
-
 		var vec = Utilities.key_as_vec(r)
 		var f_block = floor_block.instance()
 		f_block.transform.origin.x = vec.x * offset
 		f_block.transform.origin.z = vec.y * offset
 		base_node.add_child(f_block)
+		# var mask = Utilities.get_four_bit_bitmask_from_grid(grid, vec)
+
+
+		# roof
+		var r_block = floor_block.instance()
+		r_block.transform.origin.x = vec.x * offset
+		r_block.transform.origin.z = vec.y * offset
+		r_block.transform.origin.y = 10
+		base_node.add_child(r_block)
+		
+		var block = get_block(grid[r], Constants.DUNGEON_TYPES.CRYPT, 0)
+		
+		if block == null:
+			continue
+
 
 		var inst: Spatial = block.scene.instance()
 		inst.rotate(Vector3.UP, deg2rad(block.rotation))
@@ -82,11 +89,6 @@ func build_dungeon(grid: Dictionary, offset: float) -> Spatial:
 		inst.transform.origin.x = vec.x * offset
 		inst.transform.origin.z = vec.y * offset
 
-		# roof
-		var r_block = floor_block.instance()
-		r_block.transform.origin.x = vec.x * offset
-		r_block.transform.origin.z = vec.y * offset
-		r_block.transform.origin.y = 10
-		base_node.add_child(r_block)
+
 
 	return base_node

@@ -6,7 +6,11 @@ var Utilities
 var world_data: Dictionary
 
 
-var player_placed := false
+var town_scene: PackedScene = load("res://Scenes/Towns/Town.tscn")
+
+
+
+# var player_placed := false
 
 func _init():
 	._init()
@@ -15,6 +19,8 @@ func _init():
 func _ready():
 	WorldData.generate_world()
 	world_data = WorldData.world
+
+	var player_spawn_points: Array = []
 
 	#TODO remove this variable
 	var debug_chunk_offset = 0
@@ -57,9 +63,16 @@ func _ready():
 					location.position.y, 
 					location.position.z + chunk_position.y
 				)
-				build_town(location.layout.buildings, location_node)
-				place_npcs(location.npc_spawn_points, location_node, location.culture)
 				add_child(location_node)
+				var town_instance = town_scene.instance()
+				town_instance.generate(location.layout)
+				location_node.add_child(town_instance)
+				player_spawn_points += get_player_spawn_points(
+					location.layout.buildings, 
+					chunk_position, 
+					location_node.global_transform.origin
+				)
+				place_npcs(location.npc_spawn_points, location_node, location.culture)
 			if location.type == Constants.LOCATION_TYPES.CITY:
 				# TODO other city things
 				location_node.transform.origin = Vector3(
@@ -67,9 +80,16 @@ func _ready():
 					location.position.y, 
 					location.position.z + chunk_position.y
 				)
-				build_town(location.layout.buildings, location_node)
-				place_npcs(location.layout.spawn_points, location_node, location.culture)
 				add_child(location_node)
+				var town_instance = town_scene.instance()
+				town_instance.generate(location.layout)
+				location_node.add_child(town_instance)
+				player_spawn_points += get_player_spawn_points(
+					location.layout.buildings, 
+					chunk_position, 
+					location_node.global_transform.origin
+				)
+				place_npcs(location.layout.spawn_points, location_node, location.culture)
 			if location.dungeon != null:
 				var offsets = Constants.HOUSE_THEMES[location.culture]["offsets"]
 				var entrance_vec = location.dungeon.entrance
@@ -91,6 +111,8 @@ func _ready():
 				var exit = entrance_scene.instance()
 				location_node.add_child(exit)
 				exit.transform.origin = Vector3(location.dungeon.entrance.x * offsets.horizontal + 4, -1000, location.dungeon.entrance.y * offsets.horizontal + 8)
+
+				dungeon.transform.origin.y = -1000
 
 				# entrance.exit = exit.get_node("ExitPosition")
 				# entrance.exit_environment = indoor_environment
@@ -117,6 +139,29 @@ func _ready():
 				obj_inst.transform.origin.x = o.location.x + chunk_position.x
 				obj_inst.transform.origin.y = o.location.y
 				obj_inst.transform.origin.z = o.location.z + chunk_position.y
+	
+
+	var player_spawn_position: Vector3 = player_spawn_points[
+		Rng.get_random_range(0, player_spawn_points.size() - 1)
+	]
+
+	var player_scene = load("res://assets/simple_fpsplayer/Player.tscn")
+	var player = player_scene.instance()
+	add_child(player)
+	player.global_transform.origin = player_spawn_position
+
+func get_player_spawn_points(layout: Array, chunk_position, location_position: Vector3) -> Array:
+	var spawn_points := []
+	for l in layout:
+		# var building_node := Spatial.new()
+		var offsets = Constants.HOUSE_THEMES[l.culture]["offsets"]
+		if l.type == Constants.HOUSE_TYPES.TRAINING_GROUND:
+			spawn_points.append(Vector3(
+				l.rect.position.x*offsets.horizontal + location_position.x, 
+				location_position.y+1, 
+				l.rect.position.y*offsets.horizontal + location_position.z
+			))
+	return spawn_points
 
 func create_splatmap(texture_data):
 	var splat_texture := ImageTexture.new()
@@ -151,60 +196,6 @@ func place_npcs(spawn_points: Array, location_node: Spatial, culture: int):
 		npc.transform.origin = Vector3(px, 0, py)
 		location_node.add_child(npc)
 
-
-
-func build_town(layout: Array, location_node: Spatial):
-	"""
-	iterate through each floor of each building and place the relevent tile based on bitmask value
-	"""
-	for l in layout:
-		var building_node := Spatial.new()
-		var grid_size = l.grid.size()
-		var offsets = Constants.HOUSE_THEMES[l.culture]["offsets"]
-		if l.type == Constants.HOUSE_TYPES.TRAINING_GROUND:
-			# TODO create proper spawn zone
-			# place spawn point in empty lot for now
-			if player_placed == false:
-				var player_scene = load("res://assets/simple_fpsplayer/Player.tscn")
-				var player = player_scene.instance()
-				building_node.add_child(player)
-				player.transform.origin = Vector3(l.rect.position.x*offsets.horizontal, player.transform.origin.y, l.rect.position.y*offsets.horizontal)
-				player_placed = true
-			
-		for f in range(grid_size):
-			var floor_layout = l.grid[f]
-			var culture = l.culture
-			var level = f
-			var level_key = level
-			if f >= l.grid.size() -1:
-				level_key = "roof"
-
-			var tile_data = Constants.HOUSE_THEMES[culture][level_key]
-
-			var floor_node = place_floor(floor_layout, tile_data, level, offsets)
-
-			building_node.add_child(floor_node)
-
-		location_node.add_child(building_node)
-
-
-func place_floor(floor_layout: Dictionary, tile_data: Dictionary, level, offsets) -> Spatial:
-	var node: Spatial = Spatial.new()
-	for k in floor_layout.keys():
-		var mask = floor_layout[k]
-		var vec = Utilities.key_as_vec(k)
-		var tile = tile_data[mask]
-		if tile.has("scene"):
-			var tile_inst = tile.scene.instance()
-			tile_inst.rotate(Vector3.UP, deg2rad(tile.rotation))
-			tile_inst.transform.origin = Vector3(
-				vec.x * offsets.horizontal, 
-				level * offsets.vertical, 
-				vec.y * offsets.horizontal
-			)
-			node.add_child(tile_inst)
-
-	return node
 
 func apply_heights_to_mesh(
 	mesh: PlaneMesh, 

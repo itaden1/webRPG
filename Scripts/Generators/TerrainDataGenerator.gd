@@ -507,15 +507,15 @@ func generate_dungeon(possible_entrances: Dictionary, dungeon_types: Array):
 
 	var dungeon_grid: Dictionary = {}
 	dungeon_grid = bpt.graph_as_grid(tree)
-	# for x in range(0, dungeon_template.width):
-	# 	for y in range(0, dungeon_template.height):
-	# 		dungeon_grid[Utilities.vec_as_key(Vector2(x,y))] = Constants.TILE_TYPES.BLOCKED #0
+	for x in range(0, dungeon_template.width):
+		for y in range(0, dungeon_template.height):
+			dungeon_grid[Utilities.vec_as_key(Vector2(x,y))] = Constants.TILE_TYPES.BLOCKED #0
 
 	var all_leaves = bpt.get_leaf_nodes(tree, tree.keys()[0])
-	# for l in all_leaves:
-	# 	for x in range(l.position.x, l.end.x):
-	# 		for y in range(l.position.y, l.end.y):
-	# 			dungeon_grid[Utilities.vec_as_key(Vector2(x,y))] = Constants.TILE_TYPES.OPEN #1
+	for l in all_leaves:
+		for x in range(l.position.x, l.end.x):
+			for y in range(l.position.y, l.end.y):
+				dungeon_grid[Utilities.vec_as_key(Vector2(x,y))] = Constants.TILE_TYPES.OPEN #1
 
 	for l in all_leaves:
 		var corridor_grid = bpt.make_corridors(tree, l, {})
@@ -523,22 +523,25 @@ func generate_dungeon(possible_entrances: Dictionary, dungeon_types: Array):
 			if dungeon_grid[k] == Constants.TILE_TYPES.BLOCKED:
 				dungeon_grid[k] = corridor_grid[k]
 
-	var exit_vec: Vector2
+	var new_grid := {}
+
 	var possible_exits := []
 	for n in dungeon_grid.keys():
 		var vec = Utilities.key_as_vec(n)
 		if vec.x == 0 or vec.y == 0:
 			if dungeon_grid[n] == Constants.TILE_TYPES.OPEN:
 				possible_exits.append(vec)
-		dungeon_grid[n] = Utilities.get_four_bit_bitmask_from_grid(dungeon_grid, vec)
+		var mask: int = Utilities.get_four_bit_bitmask_from_grid(dungeon_grid, vec)
+		if dungeon_grid[n] == Constants.TILE_TYPES.OPEN and mask < 15:
+			new_grid[n] = mask
 
-	exit_vec = possible_exits[Rng.get_random_range(0, possible_exits.size()-1)]
-	dungeon_grid[Utilities.vec_as_key(exit_vec)] = Constants.TILE_TYPES.EXIT# 2
+	# exit_vec = possible_exits[Rng.get_random_range(0, possible_exits.size()-1)]
+	# dungeon_grid[Utilities.vec_as_key(exit_vec)] = Constants.TILE_TYPES.EXIT# 2
 	var entry = possible_entrances.keys()[Rng.get_random_range(0, possible_entrances.keys().size()-1)]
 	
 	
 	return {
-		layout=dungeon_grid,
+		layout=new_grid,
 		entrance=Utilities.key_as_vec(entry)
 	}
 
