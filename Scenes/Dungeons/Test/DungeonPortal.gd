@@ -1,21 +1,24 @@
 extends Spatial
 
+onready var portal: StaticBody = get_node("Portal")
+
 var exit: Position3D
 var exit_environment: Environment
 
 var root_dungeon_node: Node
 var dungeon_generator_node: Node
 
-func interact(interactor: Spatial):
-	if root_dungeon_node.has_method("bake_navigation_mesh"):
-		dungeon_generator_node.add_dungeon_to_world()
-		root_dungeon_node.navmesh = NavigationMesh.new()
-		root_dungeon_node.bake_navigation_mesh(false)
+var dungeon: Spatial
+var interactor: Spatial
 
-	else:
-		dungeon_generator_node.remove_dungeon()
+func interact(_interactor: Spatial):
+	interactor = _interactor
+	add_child(dungeon)
+	var _a: int = dungeon.connect("generation_complete", self, "_on_dungeon_generated")
+	dungeon.add_dungeon_to_world()
 
-	interactor.global_transform.origin = exit.global_transform.origin
-	interactor.rotation.y = exit.rotation.y
-	#get_tree().root.get_node("World/WorldEnvironment").environment = exit_environment
+func _on_dungeon_generated(exit_node: Spatial):
+	interactor.global_transform.origin = exit_node.global_transform.origin
+	interactor.rotation.y = exit_node.rotation.y
+
 	GameEvents.emit_signal("player_entered_dungeon", interactor, dungeon_generator_node)

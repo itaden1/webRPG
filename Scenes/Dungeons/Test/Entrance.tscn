@@ -1,11 +1,16 @@
-[gd_scene load_steps=30 format=2]
+[gd_scene load_steps=33 format=2]
 
 [ext_resource path="res://Scenes/Dungeons/Test/StoneSlabFloor.material" type="Material" id=1]
 [ext_resource path="res://Scenes/Dungeons/Test/DungeonBricks.material" type="Material" id=2]
 [ext_resource path="res://Scenes/Dungeons/Test/GreenStone.material" type="Material" id=3]
 [ext_resource path="res://Scenes/Dungeons/Test/PillarBrick.material" type="Material" id=4]
-[ext_resource path="res://Scenes/Dungeons/DungeonPortal.tscn" type="PackedScene" id=5]
+[ext_resource path="res://Scenes/Dungeons/Test/DungeonPortal.gd" type="Script" id=5]
 [ext_resource path="res://Scenes/Dungeons/Test/DarkStone.material" type="Material" id=6]
+[ext_resource path="res://Scenes/Dungeons/Test/Door.tscn" type="PackedScene" id=7]
+[ext_resource path="res://Scenes/Dungeons/Test/Portal.gd" type="Script" id=8]
+
+[sub_resource type="BoxShape" id=25]
+extents = Vector3( 1.51567, 3.08666, 1 )
 
 [sub_resource type="ArrayMesh" id=1]
 resource_name = "Entrance_Cube008"
@@ -269,10 +274,22 @@ surfaces/0 = {
 data = PoolVector3Array( 4.8365, -0.2748, 1, -4.8365, 0.2748, 1, 4.8365, 0.2748, 1, 4.8365, -0.2748, 1, -4.8365, -0.2748, 1, -4.8365, 0.2748, 1, 4.8365, -0.4088, 0.866, 4.8365, -0.2748, -1, 4.8365, -0.4088, -0.866, 4.8365, -0.2748, -1, 4.8365, 0.4088, -0.866, 4.8365, 0.2748, -1, 4.8365, 0.4088, -0.866, 4.8365, 0.2748, 1, 4.8365, 0.4088, 0.866, 4.8365, 0.2748, 1, 4.8365, -0.4088, 0.866, 4.8365, -0.2748, 1, 4.8365, -0.4088, 0.866, 4.8365, 0.4088, -0.866, 4.8365, -0.2748, -1, 4.8365, 0.4088, -0.866, 4.8365, -0.4088, 0.866, 4.8365, 0.2748, 1, 4.8365, 0.4088, -0.866, -4.8365, 0.4088, 0.866, -4.8365, 0.4088, -0.866, 4.8365, 0.4088, -0.866, 4.8365, 0.4088, 0.866, -4.8365, 0.4088, 0.866, -4.8365, -0.4088, -0.866, -4.8365, -0.2748, 1, -4.8365, -0.4088, 0.866, -4.8365, -0.2748, 1, -4.8365, 0.4088, 0.866, -4.8365, 0.2748, 1, -4.8365, 0.4088, 0.866, -4.8365, 0.2748, -1, -4.8365, 0.4088, -0.866, -4.8365, 0.2748, -1, -4.8365, -0.4088, -0.866, -4.8365, -0.2748, -1, -4.8365, -0.4088, -0.866, -4.8365, 0.4088, 0.866, -4.8365, -0.2748, 1, -4.8365, 0.4088, 0.866, -4.8365, -0.4088, -0.866, -4.8365, 0.2748, -1, -4.8365, -0.2748, -1, 4.8365, 0.2748, -1, -4.8365, 0.2748, -1, -4.8365, -0.2748, -1, 4.8365, -0.2748, -1, 4.8365, 0.2748, -1, 4.8365, -0.4088, -0.866, -4.8365, -0.2748, -1, -4.8365, -0.4088, -0.866, 4.8365, -0.4088, -0.866, 4.8365, -0.2748, -1, -4.8365, -0.2748, -1, -4.8365, 0.4088, -0.866, 4.8365, 0.2748, -1, 4.8365, 0.4088, -0.866, -4.8365, 0.4088, -0.866, -4.8365, 0.2748, -1, 4.8365, 0.2748, -1, -4.8365, -0.4088, 0.866, 4.8365, -0.2748, 1, 4.8365, -0.4088, 0.866, -4.8365, -0.4088, 0.866, -4.8365, -0.2748, 1, 4.8365, -0.2748, 1, 4.8365, 0.4088, 0.866, -4.8365, 0.2748, 1, -4.8365, 0.4088, 0.866, 4.8365, 0.4088, 0.866, 4.8365, 0.2748, 1, -4.8365, 0.2748, 1, -4.8365, -0.4088, -0.866, 4.8365, -0.4088, 0.866, 4.8365, -0.4088, -0.866, -4.8365, -0.4088, -0.866, -4.8365, -0.4088, 0.866, 4.8365, -0.4088, 0.866 )
 
 [node name="Entrance" type="Spatial"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0877466, 0, 0.268299 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0877466, 0, 0.22057 )
+script = ExtResource( 5 )
+
+[node name="Portal" type="StaticBody" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.738991 )
+script = ExtResource( 8 )
+
+[node name="CollisionShape" type="CollisionShape" parent="Portal"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.06423, -1.55268 )
+shape = SubResource( 25 )
+
+[node name="Door1" parent="." instance=ExtResource( 7 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.843534 )
 
 [node name="Pillar001" type="MeshInstance" parent="."]
-transform = Transform( 1.2185, 0, -0.417638, 0, 1.28809, 0, 0.417638, 0, 1.2185, 10.3606, 1.28018, 14.7283 )
+transform = Transform( 1.2185, 0, -0.417638, 0, 1.28809, 0, 0.417638, 0, 1.2185, 10.3606, 1.28018, 7.68053 )
 mesh = SubResource( 1 )
 
 [node name="StaticBody" type="StaticBody" parent="Pillar001"]
@@ -281,7 +298,7 @@ mesh = SubResource( 1 )
 shape = SubResource( 13 )
 
 [node name="BrokenPillar" type="MeshInstance" parent="."]
-transform = Transform( 1.14491, 0, 0.590222, 0, 1.28809, 0, -0.590222, 0, 1.14491, -8.73541, 0.576083, 13.8141 )
+transform = Transform( 1.14491, 0, 0.590222, 0, 1.28809, 0, -0.590222, 0, 1.14491, -8.73541, 0.576083, 6.76633 )
 mesh = SubResource( 2 )
 
 [node name="StaticBody" type="StaticBody" parent="BrokenPillar"]
@@ -290,7 +307,7 @@ mesh = SubResource( 2 )
 shape = SubResource( 14 )
 
 [node name="StoneSlab" type="MeshInstance" parent="."]
-transform = Transform( 0.69753, 0, -1.0416, 0, 1.25358, 0, 1.0416, 0, 0.69753, 8.06829, 10.1604, 10.8958 )
+transform = Transform( 0.69753, 0, -1.0416, 0, 1.25358, 0, 1.0416, 0, 0.69753, 8.06829, 10.1604, 3.84803 )
 mesh = SubResource( 3 )
 
 [node name="StaticBody" type="StaticBody" parent="StoneSlab"]
@@ -299,6 +316,7 @@ mesh = SubResource( 3 )
 shape = SubResource( 15 )
 
 [node name="DungeonDoor" type="MeshInstance" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -7.04777 )
 mesh = SubResource( 5 )
 
 [node name="StaticBody" type="StaticBody" parent="DungeonDoor"]
@@ -307,7 +325,7 @@ mesh = SubResource( 5 )
 shape = SubResource( 16 )
 
 [node name="DungeonFloor010" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, 0.996284, 0.0861256, 0, -0.0861256, 0.996284, 0, 9.55588, 0 )
+transform = Transform( 1, 0, 0, 0, 0.996284, 0.0861256, 0, -0.0861256, 0.996284, 0, 9.55588, -7.04777 )
 mesh = SubResource( 6 )
 
 [node name="StaticBody" type="StaticBody" parent="DungeonFloor010"]
@@ -316,7 +334,7 @@ mesh = SubResource( 6 )
 shape = SubResource( 17 )
 
 [node name="Icosphere" type="MeshInstance" parent="."]
-transform = Transform( 1.48784, 0, -4.52956, 0, 4.76766, 0, 4.52956, 0, 1.48784, -5.09962, 7.65881, -0.747906 )
+transform = Transform( 1.48784, 0, -4.52956, 0, 4.76766, 0, 4.52956, 0, 1.48784, -5.09962, 7.65881, -7.79568 )
 mesh = SubResource( 7 )
 
 [node name="StaticBody" type="StaticBody" parent="Icosphere"]
@@ -325,7 +343,7 @@ mesh = SubResource( 7 )
 shape = SubResource( 18 )
 
 [node name="Icosphere001" type="MeshInstance" parent="."]
-transform = Transform( 3.0764, 0, 3.64229, 0, 4.76766, 0, -3.64229, 0, 3.0764, -7.37003, 5.22679, -7.27727 )
+transform = Transform( 3.0764, 0, 3.64229, 0, 4.76766, 0, -3.64229, 0, 3.0764, -7.37003, 5.22679, -14.325 )
 mesh = SubResource( 7 )
 
 [node name="StaticBody" type="StaticBody" parent="Icosphere001"]
@@ -334,7 +352,7 @@ mesh = SubResource( 7 )
 shape = SubResource( 19 )
 
 [node name="Icosphere002" type="MeshInstance" parent="."]
-transform = Transform( 0.00794137, -5.09288, -3.43887, 3.52547, -2.81289, 4.17397, -5.03332, -1.97826, 2.91814, 1.9483, 5.74036, -7.42837 )
+transform = Transform( 0.00794137, -5.09288, -3.43887, 3.52547, -2.81289, 4.17397, -5.03332, -1.97826, 2.91814, 1.9483, 5.74036, -14.4761 )
 mesh = SubResource( 8 )
 
 [node name="StaticBody" type="StaticBody" parent="Icosphere002"]
@@ -343,7 +361,7 @@ mesh = SubResource( 8 )
 shape = SubResource( 20 )
 
 [node name="Icosphere003" type="MeshInstance" parent="."]
-transform = Transform( -2.47219, -5.40666, -1.55552, 3.52547, -2.81289, 4.17397, -4.38436, 0.786775, 4.2334, -6.75045, 0, -11.6304 )
+transform = Transform( -2.47219, -5.40666, -1.55552, 3.52547, -2.81289, 4.17397, -4.38436, 0.786775, 4.2334, -6.75045, 0, -18.6782 )
 mesh = SubResource( 9 )
 
 [node name="StaticBody" type="StaticBody" parent="Icosphere003"]
@@ -352,7 +370,7 @@ mesh = SubResource( 9 )
 shape = SubResource( 21 )
 
 [node name="Icosphere004" type="MeshInstance" parent="."]
-transform = Transform( -4.52646, 0.456858, 4.13108, 3.52548, -2.81289, 4.17397, 2.20126, 5.44447, 1.80983, 5.99942, 2.10304, -4.5769 )
+transform = Transform( -4.52646, 0.456858, 4.13108, 3.52548, -2.81289, 4.17397, 2.20126, 5.44447, 1.80983, 5.99942, 2.10304, -11.6247 )
 mesh = SubResource( 10 )
 
 [node name="StaticBody" type="StaticBody" parent="Icosphere004"]
@@ -361,7 +379,7 @@ mesh = SubResource( 10 )
 shape = SubResource( 22 )
 
 [node name="StoneSlab001" type="MeshInstance" parent="."]
-transform = Transform( 1.25271, -0.00870655, 0.0458755, 0.0108921, 1.25211, -0.0597944, -0.0454063, 0.0601515, 1.25132, 0, 10.7105, 5.88218 )
+transform = Transform( 1.25271, -0.00870655, 0.0458755, 0.0108921, 1.25211, -0.0597944, -0.0454063, 0.0601515, 1.25132, 0, 10.7105, -1.16559 )
 mesh = SubResource( 11 )
 
 [node name="StaticBody" type="StaticBody" parent="StoneSlab001"]
@@ -370,13 +388,10 @@ mesh = SubResource( 11 )
 shape = SubResource( 23 )
 
 [node name="StoneSlab002" type="MeshInstance" parent="."]
-transform = Transform( 0.667417, -0.472258, 0.950262, 0.589795, 1.09831, 0.131593, -0.882137, 0.377025, 0.806942, -11.2641, 0, 8.36112 )
+transform = Transform( 0.667417, -0.472258, 0.950262, 0.589795, 1.09831, 0.131593, -0.882137, 0.377025, 0.806942, -11.2641, 0, 1.31335 )
 mesh = SubResource( 12 )
 
 [node name="StaticBody" type="StaticBody" parent="StoneSlab002"]
 
 [node name="CollisionShape" type="CollisionShape" parent="StoneSlab002/StaticBody"]
 shape = SubResource( 24 )
-
-[node name="DungeonPortal" parent="." instance=ExtResource( 5 )]
-transform = Transform( -0.999916, 0, -0.0129674, 0, 1, 0, 0.0129674, 0, -0.999916, 3.12802, 0, 9.59947 )

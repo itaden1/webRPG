@@ -535,14 +535,15 @@ func generate_dungeon(possible_entrances: Dictionary, dungeon_types: Array):
 		if dungeon_grid[n] == Constants.TILE_TYPES.OPEN and mask < 15:
 			new_grid[n] = mask
 
-	# exit_vec = possible_exits[Rng.get_random_range(0, possible_exits.size()-1)]
+	var exit_vec: Vector2 = possible_exits[Rng.get_random_range(0, possible_exits.size()-1)]
 	# dungeon_grid[Utilities.vec_as_key(exit_vec)] = Constants.TILE_TYPES.EXIT# 2
 	var entry = possible_entrances.keys()[Rng.get_random_range(0, possible_entrances.keys().size()-1)]
 	
 	
 	return {
 		layout=new_grid,
-		entrance=Utilities.key_as_vec(entry)
+		entrance=Utilities.key_as_vec(entry),
+		exit=exit_vec
 	}
 
 func place_npcs(grid: Dictionary, number_of_npcs: int) -> Array:

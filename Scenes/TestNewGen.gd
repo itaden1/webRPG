@@ -33,14 +33,16 @@ func _ready():
 		plane_mesh.subdivide_width = world_data.chunk_divisions.y
 		plane_mesh.size = world_data.chunk_size
 		var terrain_mesh = apply_heights_to_mesh(plane_mesh, chunk.mesh_data)
-		var mesh_inst =MeshInstance.new()
+		var mesh_inst = MeshInstance.new()
 		mesh_inst.mesh = terrain_mesh
 		mesh_inst.material_override = Constants.REGION_MATERIALS[chunk.region_type].duplicate()
 
 		mesh_inst.material_override.set_shader_param("splatmap", create_splatmap(chunk.texture_data))
 		mesh_inst.create_trimesh_collision()
 
-		add_child(mesh_inst)
+		var navigation_node: NavigationMeshInstance = get_node("NavigationMeshInstance")
+		navigation_node.add_child(mesh_inst)
+
 		mesh_inst.global_transform.origin = Vector3(chunk.position.x+debug_chunk_offset, 0, chunk.position.y+debug_chunk_offset)
 		for location in chunk.locations:
 			var colors = {
@@ -105,29 +107,13 @@ func _ready():
 
 				var dungeon_scene = load("res://Scenes/Dungeons/Dungeon.tscn")
 				var dungeon = dungeon_scene.instance()
-				dungeon.layout = location.dungeon.layout
+				dungeon.data = location.dungeon
 				dungeon.offset = offsets.horizontal
 
-				var exit = entrance_scene.instance()
-				location_node.add_child(exit)
-				exit.transform.origin = Vector3(location.dungeon.entrance.x * offsets.horizontal + 4, -1000, location.dungeon.entrance.y * offsets.horizontal + 8)
+				# add dungeon to entrance so it can be rendered upon interaction
+				entrance.dungeon=dungeon
 
-				dungeon.transform.origin.y = -1000
 
-				# entrance.exit = exit.get_node("ExitPosition")
-				# entrance.exit_environment = indoor_environment
-				# dungeon_exit.exit_environment = outdoor_environment
-				# exit.exit = entrance.get_node("ExitPosition")
-
-				var exit_portal = exit.get_node("DungeonPortal")
-				var entrance_portal = entrance.get_node("DungeonPortal")
-				entrance_portal.exit = exit_portal.get_node("ExitPosition")
-				exit_portal.exit = entrance_portal.get_node("ExitPosition")
-				entrance_portal.root_dungeon_node = dungeon.get_node("Navigation/NavigationMeshInstance")
-				entrance_portal.dungeon_generator_node = dungeon
-
-				location_node.add_child(dungeon)
-				# dungeon.build_dungeon(location.dungeon.layout, offsets.horizontal)
 
 
 		for o in chunk.objects:
@@ -135,12 +121,13 @@ func _ready():
 			if idx != null:
 				var obj = Constants.BIOME_OBJECTS[o.biome][idx].obj		
 				var obj_inst = obj.instance()
-				add_child(obj_inst)
+				navigation_node.add_child(obj_inst)
 				obj_inst.transform.origin.x = o.location.x + chunk_position.x
 				obj_inst.transform.origin.y = o.location.y
 				obj_inst.transform.origin.z = o.location.z + chunk_position.y
 	
 
+	print("{{))++}}", player_spawn_points.size())
 	var player_spawn_position: Vector3 = player_spawn_points[
 		Rng.get_random_range(0, player_spawn_points.size() - 1)
 	]

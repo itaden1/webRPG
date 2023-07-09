@@ -59,7 +59,7 @@ func _ready():
 func generate_world():
 	var generator = terrain_generator.new()
 	world = generator.build_world(
-		Vector2(15000, 15000),
+		Vector2(10000, 10000),
 		Vector2(1000, 1000),
 		Vector2(16, 16),
 		20,
