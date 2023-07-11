@@ -2,23 +2,34 @@ extends Spatial
 
 onready var portal: StaticBody = get_node("Portal")
 
-var exit: Position3D
+onready var exit: Position3D = get_node("Portal/Position3D")
 var exit_environment: Environment
 
-var root_dungeon_node: Node
-var dungeon_generator_node: Node
-
-var dungeon: Spatial
 var interactor: Spatial
+onready var dungeon = get_node_or_null("Dungeon")
+
+# The portal this door is connected to
+var other_portal: Spatial
+
+var is_overworld_portal := false
 
 func interact(_interactor: Spatial):
 	interactor = _interactor
-	add_child(dungeon)
-	var _a: int = dungeon.connect("generation_complete", self, "_on_dungeon_generated")
-	dungeon.add_dungeon_to_world()
+	if dungeon != null:
+		if !dungeon.is_connected("generation_complete", self, "_on_dungeon_generated"):
+			var _a: int = dungeon.connect("generation_complete", self, "_on_dungeon_generated")
+		dungeon.add_dungeon_to_world()
+
+	elif other_portal.is_overworld_portal == true:
+		interactor.global_transform.origin = other_portal.exit.global_transform.origin
+		interactor.rotation.y = other_portal.exit.rotation.y
+
+
 
 func _on_dungeon_generated(exit_node: Spatial):
-	interactor.global_transform.origin = exit_node.global_transform.origin
-	interactor.rotation.y = exit_node.rotation.y
+	exit_node.other_portal = self
+	other_portal = exit_node
 
-	GameEvents.emit_signal("player_entered_dungeon", interactor, dungeon_generator_node)
+	interactor.global_transform.origin = other_portal.exit.global_transform.origin
+	interactor.rotation.y = other_portal.exit.rotation.y
+	GameEvents.emit_signal("player_entered_dungeon", interactor, dungeon)

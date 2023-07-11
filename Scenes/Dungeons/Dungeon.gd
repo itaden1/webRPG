@@ -30,6 +30,7 @@ var spawn_scene = preload("res://Scenes/Enemies/Spawner.tscn")
 
 onready var navmesh_node: NavigationMeshInstance = get_node("NavigationMeshInstance")
 
+var generated := false
 
 func _init():
 	._init()
@@ -41,6 +42,7 @@ func _ready():
 
 func add_dungeon_to_world():
 	var node: Spatial = build_dungeon()
+	node.name = "DungeonContent"
 	transform.origin.y = dungeon_world_location_y
 	navmesh_node.add_child(node)
 	navmesh_node.bake_navigation_mesh(false)
@@ -52,7 +54,12 @@ func add_dungeon_to_world():
 		data.exit.y * offset
 	)
 	node.add_child(exit)
+	generated = true
 	emit_signal("generation_complete", exit)
+
+func remove_dungeon_from_world():
+	generated = false
+	get_node("DungeonContent").queue_free()
 
 func get_block(mask: int, style: int, level: int):
 	var level_style = Constants.DUNGEON_THEMES[style]
@@ -72,17 +79,15 @@ func build_dungeon() -> Spatial:
 	var base_node = Spatial.new()
 
 	for r in data.layout.keys():
-		# if grid[r] == 1:
 
 		var vec = Utilities.key_as_vec(r)
 		var f_block = floor_block.instance()
 		f_block.transform.origin.x = vec.x * offset
 		f_block.transform.origin.z = vec.y * offset
 		base_node.add_child(f_block)
-		# var mask = Utilities.get_four_bit_bitmask_from_grid(grid, vec)
-
 
 		# roof
+		# TODO: re model so roof / floor is a part of tile
 		var r_block = floor_block.instance()
 		r_block.transform.origin.x = vec.x * offset
 		r_block.transform.origin.z = vec.y * offset

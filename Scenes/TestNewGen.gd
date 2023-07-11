@@ -101,7 +101,7 @@ func _ready():
 				var py = (entrance_vec.y * offsets.horizontal) 
 				entrance.transform.origin.x = px
 				entrance.transform.origin.z = py
-				location_node.add_child(entrance)
+				entrance.is_overworld_portal = true
 
 				
 
@@ -111,7 +111,8 @@ func _ready():
 				dungeon.offset = offsets.horizontal
 
 				# add dungeon to entrance so it can be rendered upon interaction
-				entrance.dungeon=dungeon
+				entrance.add_child(dungeon)
+				location_node.add_child(entrance)
 
 
 

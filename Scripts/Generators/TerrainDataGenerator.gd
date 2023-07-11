@@ -536,14 +536,23 @@ func generate_dungeon(possible_entrances: Dictionary, dungeon_types: Array):
 			new_grid[n] = mask
 
 	var exit_vec: Vector2 = possible_exits[Rng.get_random_range(0, possible_exits.size()-1)]
-	# dungeon_grid[Utilities.vec_as_key(exit_vec)] = Constants.TILE_TYPES.EXIT# 2
 	var entry = possible_entrances.keys()[Rng.get_random_range(0, possible_entrances.keys().size()-1)]
 	
+	var possible_spawns: Array = new_grid.keys()
+	possible_spawns.shuffle()
+	var spawn_points: Array = []
+	var amount_of_enemies = Rng.get_random_range(7, 20)
+	for i in range(amount_of_enemies):
+		if i < possible_spawns.size():
+			spawn_points.append(Utilities.key_as_vec(possible_spawns[i]))
+		else:
+			break
 	
 	return {
 		layout=new_grid,
 		entrance=Utilities.key_as_vec(entry),
-		exit=exit_vec
+		exit=exit_vec,
+		spawn_points=spawn_points
 	}
 
 func place_npcs(grid: Dictionary, number_of_npcs: int) -> Array:

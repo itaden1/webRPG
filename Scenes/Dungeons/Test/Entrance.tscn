@@ -285,6 +285,9 @@ script = ExtResource( 8 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.06423, -1.55268 )
 shape = SubResource( 25 )
 
+[node name="Position3D" type="Position3D" parent="Portal"]
+transform = Transform( -0.99448, 0, 0.104928, 0, 1, 0, -0.104928, 0, -0.99448, 0, 1.19637, 1.46886 )
+
 [node name="Door1" parent="." instance=ExtResource( 7 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.843534 )
 
